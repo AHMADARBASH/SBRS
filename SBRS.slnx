@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SBRS.Application/SBRS.Application.csproj" />
+  <Project Path="SBRS.Domain/SBRS.Domain.csproj" />
+  <Project Path="SBRS.Infrastructure/SBRS.Infrastructure.csproj" />
+  <Project Path="SBRS/SBRS.csproj" Id="c74bf1ec-d810-47b8-939a-b42e1a806e1d" />
+</Solution>

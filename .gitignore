@@ -1,0 +1,25 @@
+﻿# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Publish output
+PublishScripts/
+*.pubxml
+*.pubxml.user
+
+# NuGet
+*.nupkg
+packages/
+
+# Secrets and local config
+appsettings.Development.json
+secrets.json
+*.env
+
+# Logs
+*.log
