@@ -7,11 +7,9 @@ namespace SBRS.Domain.Interfaces
 {
     public interface IOrganizationRepository
     {
-        Task<IEnumerable<OrganizationEntity>> GetOrganizations();
-        Task<OrganizationEntity> GetOrganizationById(Guid id);
-        Task<OrganizationEntity> AddOrganization(OrganizationEntity organization);
-        Task<OrganizationEntity> UpdateOrganization(OrganizationEntity organization);
-        Task<bool> DeleteOrganization(Guid organizationId); 
-
+        Task<OrganizationEntity?> GetByIdAsync(Guid id, CancellationToken ct = default);
+        Task<List<OrganizationEntity>> GetAllAsync(bool includeInactive, CancellationToken ct = default);
+        Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct = default);
+        Task AddAsync(OrganizationEntity organization, CancellationToken ct = default);
     }
 }
