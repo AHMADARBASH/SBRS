@@ -23,4 +23,8 @@
     <ProjectReference Include="..\SBRS.Domain\SBRS.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Geography\" />
+  </ItemGroup>
+
 </Project>
