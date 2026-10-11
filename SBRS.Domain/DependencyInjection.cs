@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SBRS.Domain
 {
-    public static class DI
+    public static class DependencyInjection
     {
         public static IServiceCollection AddDomainDI(this IServiceCollection services)
         {

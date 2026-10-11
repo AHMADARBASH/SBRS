@@ -6,7 +6,7 @@ using SBRS.Application.Features.Organizations.Mappings;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 
-namespace SBRS.Application.Features.Organizations.Commands.UpdateOrganization;
+namespace SBRS.Application.Features.Organizations.Commands;
 
 public record UpdateOrganizationCommand(Guid Id, string ArName, string EnName, string Code)
     : IRequest<OrganizationDto>;

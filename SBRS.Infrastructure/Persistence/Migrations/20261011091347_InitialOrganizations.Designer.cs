@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SBRS.Infrastructure.Data;
+using SBRS.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace SBRS.Infrastructure.Migrations
+namespace SBRS.Infrastructure.Persistence.Migrations
 {
-    [DbContext(typeof(SBRSDbContext))]
-    [Migration("20261007110804_dbinit")]
-    partial class dbinit
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20261011091347_InitialOrganizations")]
+    partial class InitialOrganizations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,15 +33,34 @@ namespace SBRS.Infrastructure.Migrations
 
                     b.Property<string>("ArName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EnName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organizations");
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Organizations", (string)null);
                 });
 #pragma warning restore 612, 618
         }
