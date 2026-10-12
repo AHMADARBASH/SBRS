@@ -1,5 +1,6 @@
 ﻿using SBRS.Application;
 using SBRS.Infrastructure;
+using SBRS.Middleware;
 
 namespace SBRS
 {
@@ -9,6 +10,8 @@ namespace SBRS
         {
             services.AddApplicationDI()
                     .AddInfrastructureDI(configuration);
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
             return services;
         }
     }

@@ -18,6 +18,7 @@ public static class DependencyInjection
         // same scoped AppDbContext instance for the repository and the unit of work
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IGeographyRepository, GeographyRepository>();
 
         return services;
     }

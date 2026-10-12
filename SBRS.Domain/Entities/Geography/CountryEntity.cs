@@ -1,7 +1,7 @@
 ﻿using SBRS.Domain.Common;
 
-public class Country : LookupEntity
+public class CountryEntity : LookupEntity
 {
-    private Country() { }
-    public Country(string arName, string enName, string code) : base(arName, enName, code) { }
+    private CountryEntity() { }
+    public CountryEntity(string arName, string enName, string code) : base(arName, enName, code) { }
 }

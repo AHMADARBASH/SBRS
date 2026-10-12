@@ -2,12 +2,19 @@
 using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
+using System.Diagnostics.Metrics;
+using System.Net;
 
 namespace SBRS.Infrastructure.Persistence
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) :DbContext(options), IUnitOfWork
     {
         public DbSet<OrganizationEntity> Organizations => Set<OrganizationEntity>();
+        public DbSet<CountryEntity> Countries => Set<CountryEntity>();
+        public DbSet<CityEntity> Cities => Set<CityEntity>();
+        public DbSet<RegionEntity> Regions => Set<RegionEntity>();
+        public DbSet<DistrictEntity> Districts => Set<DistrictEntity>();
+        public DbSet<AreaEntity> Areas => Set<AreaEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
