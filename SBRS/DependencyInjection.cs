@@ -1,6 +1,8 @@
 ﻿using SBRS.Application;
+using SBRS.Application.Common.Interfaces;
 using SBRS.Infrastructure;
 using SBRS.Middleware;
+using SBRS.Services;
 
 namespace SBRS
 {
@@ -12,6 +14,8 @@ namespace SBRS
                     .AddInfrastructureDI(configuration);
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUser, CurrentUser>();
             return services;
         }
     }

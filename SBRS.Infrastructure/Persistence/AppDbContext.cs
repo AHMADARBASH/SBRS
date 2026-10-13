@@ -1,13 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using SBRS.Application.Common.Interfaces;
 using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
+using SBRS.Infrastructure.Identity;
 using System.Diagnostics.Metrics;
 using System.Net;
 
 namespace SBRS.Infrastructure.Persistence
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) :DbContext(options), IUnitOfWork
+    public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser)
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options), IUnitOfWork
     {
         public DbSet<OrganizationEntity> Organizations => Set<OrganizationEntity>();
         public DbSet<CountryEntity> Countries => Set<CountryEntity>();
@@ -16,8 +21,13 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<DistrictEntity> Districts => Set<DistrictEntity>();
         public DbSet<AreaEntity> Areas => Set<AreaEntity>();
 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-            => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        }
 
         public override Task<int> SaveChangesAsync(CancellationToken ct = default)
         {

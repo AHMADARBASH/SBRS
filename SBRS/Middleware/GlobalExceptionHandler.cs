@@ -36,6 +36,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 status = StatusCodes.Status400BadRequest;
                 title = "Business rule violated";
                 break;
+            case UnauthorizedException:
+                status = StatusCodes.Status401Unauthorized;
+                title = "Unauthorized";
+                break;
             default:
                 logger.LogError(exception, "Unhandled exception");
                 status = StatusCodes.Status500InternalServerError;
