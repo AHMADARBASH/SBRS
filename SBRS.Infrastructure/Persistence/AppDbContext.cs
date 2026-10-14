@@ -6,8 +6,7 @@ using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 using SBRS.Infrastructure.Identity;
-using System.Diagnostics.Metrics;
-using System.Net;
+
 
 namespace SBRS.Infrastructure.Persistence
 {
@@ -20,6 +19,7 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<RegionEntity> Regions => Set<RegionEntity>();
         public DbSet<DistrictEntity> Districts => Set<DistrictEntity>();
         public DbSet<AreaEntity> Areas => Set<AreaEntity>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
 
 
