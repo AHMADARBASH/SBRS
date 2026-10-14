@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SBRS.Application.Features.Geography.DTOs;
@@ -8,6 +9,7 @@ namespace SBRS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GeographyController(ISender sender) : ControllerBase
     {
         [HttpGet("Countries")]
