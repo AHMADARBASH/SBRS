@@ -10,7 +10,7 @@ using SBRS.Infrastructure.Identity;
 
 namespace SBRS.Infrastructure.Persistence
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser)
+    public class AppDbContext(DbContextOptions<AppDbContext> options)
     : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options), IUnitOfWork
     {
         public DbSet<OrganizationEntity> Organizations => Set<OrganizationEntity>();
@@ -20,6 +20,7 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<DistrictEntity> Districts => Set<DistrictEntity>();
         public DbSet<AreaEntity> Areas => Set<AreaEntity>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<BranchEntity> Branches => Set<BranchEntity>();
 
 
 
