@@ -39,11 +39,11 @@ public class OrganizationsController(ISender sender) : ControllerBase
         Guid id, UpdateOrganizationRequest body, CancellationToken ct)
         => Ok(await sender.Send(new UpdateOrganizationCommand(id, body.ArName, body.EnName, body.Code), ct));
 
-    [Authorize(Policy = Policies.SystemAdminOnly)]
-    [HttpPost("deactivate/{id:guid}")]
-    public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
-    {
-        await sender.Send(new DeactivateOrganizationCommand(id), ct);
-        return NoContent();
-    }
+    //[Authorize(Policy = Policies.SystemAdminOnly)]
+    //[HttpPost("deactivate/{id:guid}")]
+    //public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
+    //{
+    //    await sender.Send(new DeactivateOrganizationCommand(id), ct);
+    //    return NoContent();
+    //}
 }

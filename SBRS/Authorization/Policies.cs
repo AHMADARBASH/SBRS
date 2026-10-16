@@ -8,6 +8,8 @@ public static class Policies
     public const string SystemAdminOnly = "SystemAdminOnly";
     public const string OrganizationLevel = "OrganizationLevel";   // SystemAdmin + OrganizationAdmin
 
+    public const string branchLevel = "BranchLevel"; // SystemAdmin + OrganizationAdmin + BranchAdmin
+
     public static void Configure(AuthorizationOptions options)
     {
         // Safe default: every endpoint needs a logged-in user unless it says [AllowAnonymous]
@@ -19,6 +21,9 @@ public static class Policies
 
         options.AddPolicy(OrganizationLevel, p => p.RequireRole(
             Roles.SystemAdmin, Roles.OrganizationAdmin));
+
+        options.AddPolicy(branchLevel, p => p.RequireRole(
+            Roles.SystemAdmin, Roles.OrganizationAdmin, Roles.BranchAdmin));
 
         // More policies are added as modules are built, for example:
         // ManageUsers, ManageClinics, ManageMedicines, EnterPatientData, ViewReports
