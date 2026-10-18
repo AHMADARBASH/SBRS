@@ -1,4 +1,5 @@
-﻿using SBRS.Application.Common.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SBRS.Application.Common.Interfaces;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 using System;
@@ -22,29 +23,29 @@ namespace SBRS.Infrastructure.Persistence.Repositories
             return db.Branches.Where(b => b.organizationId == organizationId);
         }
 
+        public async Task<List<BranchEntity>> GetAllAsync(CancellationToken ct = default)
+        {
+            return await Scoped().AsNoTracking().ToListAsync(ct);
+        }
+
+        public async Task<BranchEntity?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        {
+            var branch = Scoped().Where(b => b.Id == id);
+            return await branch.FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<List<BranchEntity>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default)
+        {
+            var branch = Scoped().Where(b => b.organizationId == organizationId);
+            return await branch.ToListAsync(ct);
+        }
+
         public async Task AddAsync(BranchEntity branch, CancellationToken ct = default)
         {
             await db.Branches.AddAsync(branch,ct);
         }
 
-        public Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task<List<BranchEntity>> GetAllAsync(CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<BranchEntity?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<BranchEntity>> GetByOrganizationIdAsync(Guid organizationId, CancellationToken ct = default)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

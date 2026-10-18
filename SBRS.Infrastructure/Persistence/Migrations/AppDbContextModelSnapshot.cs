@@ -17,7 +17,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -370,6 +370,49 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("Regions", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("organizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("organizationId");
+
+                    b.ToTable("Branches", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.OrganizationEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -637,6 +680,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.OrganizationEntity", null)
+                        .WithMany()
+                        .HasForeignKey("organizationId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 

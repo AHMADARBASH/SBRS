@@ -7,13 +7,13 @@ using SBRS.Domain.Interfaces;
 
 namespace SBRS.Application.Features.Branches.Queries.GetBranchesByOrganization;
 
-public record GetBranchesByOrganizationQuery(Guid OrganizationId) : IRequest<List<BranchDto>>;
+public record GetBranchesByOrganizationIdQuery(Guid OrganizationId) : IRequest<List<BranchDto>>;
 
 
-public class GetBranchesByOrganizationQueryHandler(IBranchRepository branches)
-    : IRequestHandler<GetBranchesByOrganizationQuery, List<BranchDto>>
+public class GetBranchesByOrganizationIdQueryHandler(IBranchRepository branches)
+    : IRequestHandler<GetBranchesByOrganizationIdQuery, List<BranchDto>>
 {
-    public async Task<List<BranchDto>> Handle(GetBranchesByOrganizationQuery request, CancellationToken ct)
+    public async Task<List<BranchDto>> Handle(GetBranchesByOrganizationIdQuery request, CancellationToken ct)
     {
         var entities = await branches.GetByOrganizationIdAsync(request.OrganizationId, ct);
         return entities.Select(e => e.ToDto()).ToList();

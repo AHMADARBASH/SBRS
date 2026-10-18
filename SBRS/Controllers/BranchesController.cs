@@ -4,10 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SBRS.Application.Features.Branches.Commands;
 using SBRS.Application.Features.Branches.Queries;
-using SBRS.Application.Features.Organizations.Commands;
-using SBRS.Application.Features.Organizations.Commands.DeactivateOrganization;
-using SBRS.Application.Features.Organizations.Queries.GetOrganizationById;
-using SBRS.Application.Features.Organizations.Queries.GetOrganizations;
+using SBRS.Application.Features.Branches.Queries.GetBranchesByOrganization;
 using SBRS.Authorization;
 using SBRS.Contracts.Branches;
 using SBRS.Contracts.Organizations;
@@ -29,6 +26,12 @@ namespace SBRS.Controllers
         [HttpGet("GetById/{id:guid}")]
         public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => Ok(await sender.Send(new GetBranchByIdQuery(id), ct));
+
+
+        [Authorize]
+        [HttpGet("GetByOrganizationId/{organizationId:guid}")]
+        public async Task<IActionResult> GetByOrganizationId([FromRoute] Guid organizationId, CancellationToken ct)
+        => Ok(await sender.Send(new GetBranchesByOrganizationIdQuery(organizationId), ct));
 
         [Authorize(Policy = Policies.OrganizationLevel)]
         [HttpPost("Add")]
