@@ -16,9 +16,8 @@ public class OrganizationsController(ISender sender) : ControllerBase
 {
     [Authorize]
     [HttpGet("GetAll")]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] bool includeInactive, CancellationToken ct)
-        => Ok(await sender.Send(new GetOrganizationsQuery(includeInactive), ct));
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+        => Ok(await sender.Send(new GetOrganizationsQuery(), ct));
    
     [Authorize]
     [HttpGet("GetById/{id:guid}")]

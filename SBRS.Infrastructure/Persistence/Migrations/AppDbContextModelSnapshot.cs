@@ -370,6 +370,51 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("Regions", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.AddressEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("AreaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AreaId", "ArName")
+                        .IsUnique();
+
+                    b.HasIndex("AreaId", "EnName")
+                        .IsUnique();
+
+                    b.ToTable("Addresses", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -411,6 +456,60 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasIndex("organizationId");
 
                     b.ToTable("Branches", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AddressId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Facilities", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.OrganizationEntity", b =>
@@ -683,6 +782,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.AddressEntity", b =>
+                {
+                    b.HasOne("AreaEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
                 {
                     b.HasOne("SBRS.Domain.Entities.OrganizationEntity", null)
@@ -692,8 +800,32 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.AddressEntity", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SBRS.Domain.Entities.BranchEntity", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+
+                    b.Navigation("Branch");
+                });
+
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
                 {
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SBRS.Domain.Entities.OrganizationEntity", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId")

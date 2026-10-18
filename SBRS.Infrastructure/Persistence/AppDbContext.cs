@@ -6,6 +6,7 @@ using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 using SBRS.Infrastructure.Identity;
+using System.Net;
 
 
 namespace SBRS.Infrastructure.Persistence
@@ -21,7 +22,8 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<AreaEntity> Areas => Set<AreaEntity>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<BranchEntity> Branches => Set<BranchEntity>();
-
+        public DbSet<FacilityEntity> Facilities => Set<FacilityEntity>();
+        public DbSet<AddressEntity> Addresses => Set<AddressEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -20,5 +20,8 @@ namespace SBRS.Infrastructure.Persistence.Repositories
 
         public async Task<List<AreaEntity>> GetAreasByDistrictAsync(Guid districtId, CancellationToken ct = default)
             => await db.Areas.AsNoTracking().Where(a => a.DistrictId == districtId).OrderBy(a => a.EnName).ToListAsync(ct);
+
+        public Task<AreaEntity?> GetAreaByIdAsync(Guid id, CancellationToken ct = default)
+         => db.Areas.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
     }
 }

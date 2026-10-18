@@ -28,6 +28,11 @@ namespace SBRS.Infrastructure.Persistence.Configurations
               .HasForeignKey(x => x.OrganizationId)
               .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne<FacilityEntity>()
+            .WithMany()
+            .HasForeignKey(x => x.FacilityId)
+            .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasIndex(x => x.OrganizationId);
             builder.HasIndex(x => x.FacilityId);
         }
