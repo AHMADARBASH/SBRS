@@ -24,6 +24,7 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<BranchEntity> Branches => Set<BranchEntity>();
         public DbSet<FacilityEntity> Facilities => Set<FacilityEntity>();
         public DbSet<AddressEntity> Addresses => Set<AddressEntity>();
+        public DbSet<FacilityTypeEntity> FacilityTypes => Set<FacilityTypeEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IFacilityRepository, FacilityRepository>();
         services.AddScoped<IAddressRepository, AddressRepository>();
         services.AddScoped<IUserAdminService, UserAdminService>();
+        services.AddScoped<IFacilityTypeRepository, FacilityTypeRepository>();
 
 
         return services;

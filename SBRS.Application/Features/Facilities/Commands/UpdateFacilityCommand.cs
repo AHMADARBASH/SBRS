@@ -10,7 +10,7 @@ using System.Net;
 
 namespace SBRS.Application.Features.Facilities.Commands;
 
-public record UpdateFacilityCommand(Guid Id, Guid AddressId, string ArName, string EnName, string Code)
+public record UpdateFacilityCommand(Guid Id, Guid AddressId,Guid typeId, string ArName, string EnName, string Code)
     : IRequest<FacilityDto>;
 
 public class UpdateFacilityCommandValidator : AbstractValidator<UpdateFacilityCommand>
@@ -21,6 +21,7 @@ public class UpdateFacilityCommandValidator : AbstractValidator<UpdateFacilityCo
         RuleFor(x => x.AddressId).NotEmpty();
         RuleFor(x => x.ArName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.EnName).NotEmpty().MaximumLength(200);
+        RuleFor(x=>x.typeId).NotEmpty();
         RuleFor(x => x.Code).NotEmpty().MaximumLength(50);
     }
 }
@@ -48,7 +49,7 @@ public class UpdateFacilityCommandHandler(
         if (await facilities.CodeExistsAsync(code, request.Id, ct))
             throw new ConflictException($"A facility with code '{code}' already exists.");
 
-        entity.Update(request.ArName, request.EnName, code, address.Id);
+        entity.Update(request.ArName, request.EnName, code, address.Id, request.typeId);
         await unitOfWork.SaveChangesAsync(ct);
 
         return entity.ToDto();

@@ -28,7 +28,7 @@ public class FacilitiesController(ISender sender) : ControllerBase
     [HttpPost("AddFacility")]
     public async Task<ActionResult<FacilityDto>> Add(AddFacilityRequest body, CancellationToken ct)
     {
-        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.addressId, body.ArName, body.EnName, body.Code), ct);
+        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.addressId,body.typeId, body.ArName, body.EnName, body.Code), ct);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 
@@ -36,7 +36,7 @@ public class FacilitiesController(ISender sender) : ControllerBase
     [HttpPut("UpdateFacility/{id:guid}")]
     public async Task<ActionResult<FacilityDto>> Update(
         Guid id, UpdateFacilityRequest body, CancellationToken ct)
-        => Ok(await sender.Send(new UpdateFacilityCommand(id,body.addressId, body.ArName, body.EnName, body.Code), ct));
+        => Ok(await sender.Send(new UpdateFacilityCommand(id,body.addressId,body.typeId, body.ArName, body.EnName, body.Code), ct));
 
     [Authorize(Policy = Policies.OrganizationLevel)]
     [HttpPost("deactivateFacility/{id:guid}")]

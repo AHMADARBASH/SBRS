@@ -8,5 +8,6 @@ public record FacilityDto(
     string EnName,
     string Code,
     bool IsActive,
+    Guid typeId,
     DateTime CreatedAt,
     DateTime? UpdatedAt);

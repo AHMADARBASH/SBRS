@@ -9,6 +9,8 @@ public class FacilityEntity : BaseEntity
     public BranchEntity Branch { get; private set; } = default!;
     public Guid AddressId { get; private set; }
     public AddressEntity Address { get; private set; } = default!;
+    public Guid TypeId { get; private set; }
+    public FacilityTypeEntity FacilityType { get; private set; } = default!;
     public string ArName { get; private set; } = default!;
     public string EnName { get; private set; } = default!;
     public string Code { get; private set; } = default!;
@@ -16,16 +18,17 @@ public class FacilityEntity : BaseEntity
 
     private FacilityEntity() { }   // EF Core
 
-    public FacilityEntity(Guid branchId, Guid addressId, string arName, string enName, string code)
+    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId, string arName, string enName, string code)
     {
         BranchId = branchId;
         AddressId = addressId;
         ArName = arName.Trim();
         EnName = enName.Trim();
         Code = code.Trim();
+        TypeId = typeId;
     }
 
-    public void Update(string arName, string enName, string code, Guid addressId)
+    public void Update(string arName, string enName, string code, Guid addressId, Guid typeId)
     {
         if (!IsActive)
             throw new DomainException("A deactivated facility cannot be updated.");
@@ -34,6 +37,7 @@ public class FacilityEntity : BaseEntity
         ArName = arName.Trim();
         EnName = enName.Trim();
         Code = code.Trim();
+        TypeId = typeId;
     }
 
     public void Deactivate()
