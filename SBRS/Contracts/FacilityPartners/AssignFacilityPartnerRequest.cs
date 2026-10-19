@@ -3,5 +3,5 @@
 public sealed record AssignFacilityPartnerRequest(
     Guid FacilityId,
     Guid PartnerId,
-    string ProjectCode,
+    string? ProjectCode,
     DateOnly StartDate);

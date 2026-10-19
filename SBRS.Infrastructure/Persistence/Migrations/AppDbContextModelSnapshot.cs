@@ -545,8 +545,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("ProjectCode")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");

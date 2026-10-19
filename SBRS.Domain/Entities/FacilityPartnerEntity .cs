@@ -11,7 +11,7 @@ public class FacilityPartnerEntity : BaseEntity
     public PartnerEntity Partner { get; private set; } = default!;
     public DateOnly StartDate { get; private set; }
     public DateOnly? EndDate { get; private set; }
-    public string? ProjectCode { get; private set; } = default!;
+    public string? ProjectCode { get; private set; } = string.Empty;
 
     public bool IsCurrent => EndDate is null;
 
@@ -19,15 +19,13 @@ public class FacilityPartnerEntity : BaseEntity
 
     public FacilityPartnerEntity(FacilityEntity facility, PartnerEntity partner, DateOnly startDate, string projectCode)
     {
-        if (string.IsNullOrWhiteSpace(projectCode))
-            throw new DomainException("Project code is required.");
 
         Facility = facility;
         FacilityId = facility.Id;
         Partner = partner;
         PartnerId = partner.Id;
         StartDate = startDate;
-        ProjectCode = projectCode.Trim();
+        ProjectCode = projectCode.Trim() ?? string.Empty;
     }
 
     public void Close(DateOnly endDate)

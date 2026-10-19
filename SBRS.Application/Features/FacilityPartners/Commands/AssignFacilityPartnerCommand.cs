@@ -12,7 +12,7 @@ namespace SBRS.Application.Features.FacilityPartners.Commands;
 public sealed record AssignFacilityPartnerCommand(
     Guid FacilityId,
     Guid PartnerId,
-    string ProjectCode,
+    string? ProjectCode,
     DateOnly StartDate) : IRequest<FacilityPartnerDto>;
 
 public sealed class AssignFacilityPartnerCommandValidator : AbstractValidator<AssignFacilityPartnerCommand>
@@ -21,7 +21,7 @@ public sealed class AssignFacilityPartnerCommandValidator : AbstractValidator<As
     {
         RuleFor(x => x.FacilityId).NotEmpty();
         RuleFor(x => x.PartnerId).NotEmpty();
-        RuleFor(x => x.ProjectCode).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.ProjectCode).MaximumLength(50);
         RuleFor(x => x.StartDate).NotEmpty();
     }
 }

@@ -11,7 +11,7 @@ public class FacilityPartnerConfiguration : IEntityTypeConfiguration<FacilityPar
         builder.ToTable("FacilitiesPartners");
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.ProjectCode).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.ProjectCode).IsRequired().HasMaxLength(50).HasDefaultValue("");
         builder.Property(x => x.StartDate).IsRequired();
         builder.Property(x => x.EndDate);
         builder.Property(x => x.CreatedAt).IsRequired();
