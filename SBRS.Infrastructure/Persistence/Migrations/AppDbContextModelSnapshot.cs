@@ -494,6 +494,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TypeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -512,9 +515,55 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
+                    b.HasIndex("PartnerId");
+
                     b.HasIndex("TypeId");
 
                     b.ToTable("Facilities", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityPartnerEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProjectCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.HasIndex("PartnerId");
+
+                    b.ToTable("FacilitiesPartners", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityTypeEntity", b =>
@@ -600,6 +649,47 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Organizations", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.PartnerEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Partners", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
@@ -860,6 +950,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SBRS.Domain.Entities.PartnerEntity", "Partner")
+                        .WithMany()
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SBRS.Domain.Entities.FacilityTypeEntity", "FacilityType")
                         .WithMany()
                         .HasForeignKey("TypeId")
@@ -871,6 +967,27 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.Navigation("Branch");
 
                     b.Navigation("FacilityType");
+
+                    b.Navigation("Partner");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityPartnerEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", "Facility")
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SBRS.Domain.Entities.PartnerEntity", "Partner")
+                        .WithMany()
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Facility");
+
+                    b.Navigation("Partner");
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>

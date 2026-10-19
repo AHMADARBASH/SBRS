@@ -11,6 +11,8 @@ public class FacilityEntity : BaseEntity
     public AddressEntity Address { get; private set; } = default!;
     public Guid TypeId { get; private set; }
     public FacilityTypeEntity FacilityType { get; private set; } = default!;
+    public Guid PartnerId { get; private set; }
+    public PartnerEntity Partner { get; private set; } = default!;
     public string ArName { get; private set; } = default!;
     public string EnName { get; private set; } = default!;
     public string Code { get; private set; } = default!;
@@ -18,7 +20,7 @@ public class FacilityEntity : BaseEntity
 
     private FacilityEntity() { }   // EF Core
 
-    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId, string arName, string enName, string code)
+    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId,Guid partnerId, string arName, string enName, string code)
     {
         BranchId = branchId;
         AddressId = addressId;
@@ -26,6 +28,7 @@ public class FacilityEntity : BaseEntity
         EnName = enName.Trim();
         Code = code.Trim();
         TypeId = typeId;
+        PartnerId = partnerId;
     }
 
     public void Update(string arName, string enName, string code, Guid addressId, Guid typeId)
@@ -46,5 +49,13 @@ public class FacilityEntity : BaseEntity
             throw new DomainException("The facility is already deactivated.");
 
         IsActive = false;
+    }
+
+    public void ChangePartner(Guid partnerId)
+    {
+        if (!IsActive)
+            throw new DomainException("A deactivated facility cannot change its partner.");
+
+        PartnerId = partnerId;
     }
 }

@@ -28,7 +28,7 @@ public class FacilitiesController(ISender sender) : ControllerBase
     [HttpPost("AddFacility")]
     public async Task<ActionResult<FacilityDto>> Add(AddFacilityRequest body, CancellationToken ct)
     {
-        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.addressId,body.typeId, body.ArName, body.EnName, body.Code), ct);
+        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.addressId,body.typeId,body.partnerId,body.ProjectCode,body.StartDate, body.ArName, body.EnName, body.Code), ct);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 

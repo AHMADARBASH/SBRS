@@ -19,6 +19,7 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
         builder.Property(x => x.IsActive).IsRequired();
         builder.Property(f => f.TypeId).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
+        builder.Property(x => x.PartnerId).IsRequired();
 
         builder.HasOne(x => x.Branch)
                .WithMany()
@@ -35,9 +36,15 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
                 .HasForeignKey(x => x.TypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(x => x.Partner)
+                .WithMany()
+                .HasForeignKey(x => x.PartnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.BranchId);
         builder.HasIndex(x => x.AddressId);
         builder.HasIndex(f => f.TypeId);
+        builder.HasIndex(x => x.PartnerId);
     }
 }
