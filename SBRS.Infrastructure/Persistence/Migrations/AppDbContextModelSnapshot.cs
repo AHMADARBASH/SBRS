@@ -370,6 +370,42 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("Regions", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.AccommodationTypeEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnName")
+                        .IsUnique();
+
+                    b.ToTable("AccommodationTypes", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.AddressEntity", b =>
                 {
                     b.Property<Guid>("Id")

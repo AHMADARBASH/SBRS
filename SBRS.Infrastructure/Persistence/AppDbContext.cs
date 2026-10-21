@@ -27,6 +27,7 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<FacilityTypeEntity> FacilityTypes => Set<FacilityTypeEntity>();
         public DbSet<NationalityEntity> Nationalities => Set<NationalityEntity>();
         public DbSet<IdentityTypeEntity> IdentityTypes => Set<IdentityTypeEntity>();
+        public DbSet<AccommodationTypeEntity> AccommodationTypes => Set<AccommodationTypeEntity>();
         public DbSet<PartnerEntity> Partners => Set<PartnerEntity>();
         public DbSet<FacilityPartnerEntity> FacilitiesPartners => Set<FacilityPartnerEntity>();
 
