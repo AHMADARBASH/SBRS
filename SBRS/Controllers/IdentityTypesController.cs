@@ -23,7 +23,7 @@ public class IdentityTypesController(ISender sender) : ControllerBase
     [Authorize(Policy = Policies.SystemAdminOnly)]
     public async Task<ActionResult<IdentityTypeDto>> Add(AddIdentityTypeRequest r, CancellationToken ct)
     {
-        var identityType = await sender.Send(new AddIdentityTypeCommand(r.ArName, r.EnName), ct);
+        var identityType = await sender.Send(new AddIdentityTypeCommand(r.ArName, r.EnName, r.Code), ct);
         return StatusCode(StatusCodes.Status201Created, identityType);
     }
 
@@ -31,5 +31,5 @@ public class IdentityTypesController(ISender sender) : ControllerBase
     [Route("Update")]
     [Authorize(Policy = Policies.SystemAdminOnly)]
     public async Task<ActionResult<IdentityTypeDto>> Update(UpdateIdentityTypeRequest r, CancellationToken ct) =>
-        Ok(await sender.Send(new UpdateIdentityTypeCommand(r.Id, r.ArName, r.EnName), ct));
+        Ok(await sender.Send(new UpdateIdentityTypeCommand(r.Id, r.ArName, r.EnName, r.Code), ct));
 }

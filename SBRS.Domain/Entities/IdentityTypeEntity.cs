@@ -7,22 +7,24 @@ public class IdentityTypeEntity : BaseEntity
 {
     private IdentityTypeEntity() { }   // EF
 
-    public IdentityTypeEntity(string arName, string enName)
+    public IdentityTypeEntity(string arName, string enName, string code)
     {
-        Set(arName, enName);
+        Set(arName, enName, code);
     }
 
     public string ArName { get; private set; } = default!;
     public string EnName { get; private set; } = default!;
+    public string Code { get; private set; } = default!;
 
-    public void Update(string arName, string enName) => Set(arName, enName);
+    public void Update(string arName, string enName, string code) => Set(arName, enName, code);
 
-    private void Set(string arName, string enName)
+    private void Set(string arName, string enName, string code)
     {
-        if (string.IsNullOrWhiteSpace(arName) || string.IsNullOrWhiteSpace(enName))
-            throw new DomainException("Arabic name and English name are required.");
+        if (string.IsNullOrWhiteSpace(arName) || string.IsNullOrWhiteSpace(enName) || string.IsNullOrWhiteSpace(code))
+            throw new DomainException("Arabic name, English name and code are required.");
 
         ArName = arName.Trim();
         EnName = enName.Trim();
+        Code = code.Trim();
     }
 }

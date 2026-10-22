@@ -11,11 +11,14 @@ public class IdentityTypeRepository(AppDbContext db) : IIdentityTypeRepository
 
     public async Task<IReadOnlyList<IdentityTypeEntity>> GetAllAsync(CancellationToken ct) =>
         await db.IdentityTypes.AsNoTracking()
-            .OrderBy(i => i.EnName)
+            .OrderBy(i => i.Code)
             .ToListAsync(ct);
 
     public Task<bool> EnNameExistsAsync(string enName, Guid? excludeId, CancellationToken ct) =>
         db.IdentityTypes.AnyAsync(i => i.EnName == enName && (excludeId == null || i.Id != excludeId), ct);
+
+    public Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct) =>
+        db.IdentityTypes.AnyAsync(i => i.Code == code && (excludeId == null || i.Id != excludeId), ct);
 
     public Task AddAsync(IdentityTypeEntity identityType, CancellationToken ct)
     {

@@ -1,3 +1,3 @@
 namespace SBRS.Contracts.IdentityTypes;
 
-public sealed record UpdateIdentityTypeRequest(Guid Id, string ArName, string EnName);
+public sealed record UpdateIdentityTypeRequest(Guid Id, string ArName, string EnName, string Code);
