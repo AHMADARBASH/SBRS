@@ -16,7 +16,7 @@ public sealed class AddIdentityTypeCommandValidator : AbstractValidator<AddIdent
     {
         RuleFor(x => x.ArName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.EnName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Code).NotEmpty().MaximumLength(10);
+        RuleFor(x => x.Code).NotEmpty().MaximumLength(30);
     }
 }
 
