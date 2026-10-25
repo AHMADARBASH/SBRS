@@ -18,8 +18,7 @@ public class BeneficiariesController(ISender sender) : ControllerBase
     [Route("Search")]
     [Authorize(Policy = Policies.SearchBeneficiaries)]
     public async Task<ActionResult<BeneficiarySearchResultDto>> Search(SearchBeneficiaryRequest request, CancellationToken ct) =>
-        Ok(await sender.Send(new SearchBeneficiaryQuery(request.FirstName, request.FatherName,
-            request.LastName, request.MotherName, request.BirthDate, request.IsBirthDateEstimated), ct));
+        Ok(await sender.Send(new SearchBeneficiaryQuery(request.FullCode, request.FirstName, request.LastName), ct));
 
     [HttpPost]
     [Route("Register")]

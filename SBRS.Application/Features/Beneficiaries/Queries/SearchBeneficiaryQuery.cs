@@ -1,71 +1,65 @@
 using FluentValidation;
 using MediatR;
-using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Mappings;
-using SBRS.Application.Features.Beneficiaries.Services;
 using SBRS.Domain.Common;
-using SBRS.Domain.Constants;
+using SBRS.Domain.Enums;
+using SBRS.Domain.Interfaces;
 
 namespace SBRS.Application.Features.Beneficiaries.Queries;
 
-public sealed record SearchBeneficiaryQuery(
-    string FirstName,
-    string FatherName,
-    string LastName,
-    string MotherName,
-    DateOnly BirthDate,
-    bool IsBirthDateEstimated) : IRequest<BeneficiarySearchResultDto>;
+public sealed record SearchBeneficiaryQuery(string? FullCode, string? FirstName, string? LastName)
+    : IRequest<BeneficiarySearchResultDto>;
 
 public sealed class SearchBeneficiaryQueryValidator : AbstractValidator<SearchBeneficiaryQuery>
 {
     public SearchBeneficiaryQueryValidator()
     {
-        // Privacy rule: the cross-facility search needs all five identity fields.
-        RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required.")
-            .MaximumLength(100)
-            .Must(n => ArabicTextNormalizer.Normalize(n) != string.Empty)
-            .WithMessage("First name must contain at least one meaningful character.");
+        RuleFor(x => x.FullCode).MaximumLength(50);
+        RuleFor(x => x.FirstName).MaximumLength(100);
+        RuleFor(x => x.LastName).MaximumLength(100);
 
-        RuleFor(x => x.FatherName)
-            .NotEmpty().WithMessage("Father name is required.")
-            .MaximumLength(100)
-            .Must(n => ArabicTextNormalizer.Normalize(n) != string.Empty)
-            .WithMessage("Father name must contain at least one meaningful character.");
-
-        RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required.")
-            .MaximumLength(100)
-            .Must(n => ArabicTextNormalizer.Normalize(n) != string.Empty)
-            .WithMessage("Last name must contain at least one meaningful character.");
-
-        RuleFor(x => x.MotherName)
-            .NotEmpty().WithMessage("Mother name is required.")
-            .MaximumLength(100)
-            .Must(n => ArabicTextNormalizer.Normalize(n) != string.Empty)
-            .WithMessage("Mother name must contain at least one meaningful character.");
-
+        // Either the FullCode, or both names with at least 2 meaningful characters each.
         RuleFor(x => x).Must(x =>
-        {
-            var resolved = BeneficiaryBirthDate.Resolve(x.BirthDate, x.IsBirthDateEstimated);
-            return resolved.Year >= 1900 && resolved <= DateOnly.FromDateTime(DateTime.UtcNow);
-        }).WithMessage("Birth date is invalid.");
+                !string.IsNullOrWhiteSpace(x.FullCode) ||
+                (HasName(x.FirstName) && HasName(x.LastName)))
+            .WithMessage("Provide the full code, or both first name and last name (at least 2 characters each).");
     }
+
+    private static bool HasName(string? value) => ArabicTextNormalizer.Normalize(value).Length >= 2;
 }
 
-public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryMatchService matchService, ICurrentUser currentUser)
+public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository repository)
     : IRequestHandler<SearchBeneficiaryQuery, BeneficiarySearchResultDto>
 {
-    public async Task<BeneficiarySearchResultDto> Handle(SearchBeneficiaryQuery q, CancellationToken ct)
+    private const int MaxResults = 20;
+
+    public async Task<BeneficiarySearchResultDto> Handle(SearchBeneficiaryQuery request,
+        CancellationToken cancellationToken)
     {
-        var birthDate = BeneficiaryBirthDate.Resolve(q.BirthDate, q.IsBirthDateEstimated);
-        var key = BeneficiaryIdentityKey.From(q.FirstName, q.FatherName, q.LastName, q.MotherName, birthDate);
+        if (!string.IsNullOrWhiteSpace(request.FullCode))
+        {
+            var found = await repository.GetByFullCodeAsync(request.FullCode.Trim(), cancellationToken);
 
-        var result = await matchService.FindAsync(key, q.IsBirthDateEstimated, null, ct);
+            // A merged duplicate leads to the person it was merged into.
+            if (found is { MatchReviewStatus: BeneficiaryMatchReviewStatus.MergedIntoExisting } &&
+                found.MergedIntoBeneficiaryId is { } survivorId)
+            {
+                found = await repository.GetByIdAsync(survivorId, cancellationToken);
+            }
 
-        // Data entry only learns whether a possible match exists; the facility admin handles the cases.
-        var canSeeDetails = currentUser.Role != Roles.DataEntry;
-        return result.ToDto(canSeeDetails);
+            return found is null || found.MatchReviewStatus == BeneficiaryMatchReviewStatus.MergedIntoExisting
+                ? new BeneficiarySearchResultDto(Array.Empty<BeneficiarySearchItemDto>(), false)
+                : new BeneficiarySearchResultDto(new[] { found.ToSearchItemDto() }, false);
+        }
+
+        var firstName = ArabicTextNormalizer.Normalize(request.FirstName);
+        var lastName = ArabicTextNormalizer.Normalize(request.LastName);
+
+        var matches = await repository.SearchByNameAsync(firstName, lastName, MaxResults + 1, cancellationToken);
+
+        return new BeneficiarySearchResultDto(
+            matches.Take(MaxResults).Select(b => b.ToSearchItemDto()).ToList(),
+            matches.Count > MaxResults);
     }
 }

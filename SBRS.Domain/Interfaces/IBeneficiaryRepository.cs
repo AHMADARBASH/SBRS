@@ -24,7 +24,17 @@ public interface IBeneficiaryRepository
     Task<int> GetNextCodeAsync(CancellationToken cancellationToken);
 
     /// <summary>Active beneficiaries waiting for a match review, oldest first. facilityId null = all facilities.</summary>
-    Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken ct);
+
+    /// <summary>Exact FullCode lookup (unique). Returns null when not found.</summary>
+    Task<BeneficiaryEntity?> GetByFullCodeAsync(string fullCode, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Starts-with search on the normalized first and last name, merged duplicates excluded,
+    /// ordered by last name, first name, birth date. The caller passes take = limit + 1 to detect "has more".
+    /// </summary>
+    Task<IReadOnlyList<BeneficiaryEntity>> SearchByNameAsync(string normalizedFirstName,
+        string normalizedLastName, int take, CancellationToken cancellationToken);
 
     Task AddAsync(BeneficiaryEntity beneficiary, CancellationToken cancellationToken);
 }

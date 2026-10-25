@@ -21,10 +21,9 @@ public static class BeneficiaryMappings
             m.Score,
             m.Reasons);
 
-    public static BeneficiarySearchResultDto ToDto(this BeneficiaryMatchSearchResult result, bool includeMatches) =>
-        new(result.Status,
-            result.Matches.Count,
-            includeMatches ? result.Matches.Select(m => m.ToDto()).ToList() : Array.Empty<BeneficiaryMatchDto>());
+    public static BeneficiarySearchItemDto ToSearchItemDto(this BeneficiaryEntity b) =>
+        new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName,
+            b.BirthDate, b.IsBirthDateEstimated, b.Gender);
 
     public static PendingBeneficiaryDto ToPendingDto(this BeneficiaryEntity b) =>
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,

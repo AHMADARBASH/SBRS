@@ -578,6 +578,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("NormalizedLastName", "BirthDate");
 
+                    b.HasIndex("NormalizedLastName", "NormalizedFirstName");
+
                     b.HasIndex("RegistrationFacilityId", "MatchReviewStatus");
 
                     b.ToTable("Beneficiaries", (string)null);

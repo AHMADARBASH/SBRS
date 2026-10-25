@@ -29,6 +29,7 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.FullCode).IsUnique();
         builder.HasIndex(x => new { x.NormalizedLastName, x.BirthDate }); // probable-match search
+        builder.HasIndex(x => new { x.NormalizedLastName, x.NormalizedFirstName }); // name search
         builder.HasIndex(x => new { x.RegistrationFacilityId, x.MatchReviewStatus }); // pending list
 
         builder.HasOne<FacilityEntity>().WithMany()

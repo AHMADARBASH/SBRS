@@ -57,4 +57,19 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
                         (facilityId == null || x.RegistrationFacilityId == facilityId))
             .OrderBy(x => x.CreatedAt)
             .ToListAsync(ct);
+
+    public Task<BeneficiaryEntity?> GetByFullCodeAsync(string fullCode, CancellationToken ct) =>
+        db.Beneficiaries.AsNoTracking().FirstOrDefaultAsync(x => x.FullCode == fullCode, ct);
+
+    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchByNameAsync(string normalizedFirstName,
+        string normalizedLastName, int take, CancellationToken ct) =>
+        await db.Beneficiaries.AsNoTracking()
+            .Where(x => x.MatchReviewStatus != BeneficiaryMatchReviewStatus.MergedIntoExisting &&
+                        x.NormalizedLastName.StartsWith(normalizedLastName) &&
+                        x.NormalizedFirstName.StartsWith(normalizedFirstName))
+            .OrderBy(x => x.NormalizedLastName)
+            .ThenBy(x => x.NormalizedFirstName)
+            .ThenBy(x => x.BirthDate)
+            .Take(take)
+            .ToListAsync(ct);
 }
