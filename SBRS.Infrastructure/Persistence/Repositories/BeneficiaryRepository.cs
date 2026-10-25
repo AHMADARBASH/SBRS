@@ -72,4 +72,22 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
             .ThenBy(x => x.BirthDate)
             .Take(take)
             .ToListAsync(ct);
+
+    public async Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
+        Guid facilityId, int page, int pageSize, CancellationToken ct)
+    {
+        var query = db.Beneficiaries.AsNoTracking()
+            .Where(x => x.RegistrationFacilityId == facilityId && x.IsActive);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var items = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenBy(x => x.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return (items, totalCount);
+    }
 }

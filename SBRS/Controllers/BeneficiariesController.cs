@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SBRS.Application.Common.Models;
 using SBRS.Application.Features.Beneficiaries.Commands;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Queries;
@@ -27,6 +28,13 @@ public class BeneficiariesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new RegisterBeneficiaryCommand(request.FirstName, request.FatherName,
             request.LastName, request.MotherName, request.BirthDate, request.IsBirthDateEstimated,
             request.Gender, request.EnrollmentDate, request.AreaId), ct));
+
+    [HttpGet]
+    [Route("GetAll")]
+    [Authorize(Policy = Policies.ViewFacilityBeneficiaries)]
+    public async Task<ActionResult<PagedResult<BeneficiaryListItemDto>>> GetAll(
+        [FromQuery] int page = 1, [FromQuery] Guid? facilityId = null, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetBeneficiariesQuery(page, facilityId), ct));
 
     [HttpGet]
     [Route("PendingReview")]

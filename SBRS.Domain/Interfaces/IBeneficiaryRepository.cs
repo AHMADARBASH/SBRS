@@ -36,5 +36,12 @@ public interface IBeneficiaryRepository
     Task<IReadOnlyList<BeneficiaryEntity>> SearchByNameAsync(string normalizedFirstName,
         string normalizedLastName, int take, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Active beneficiaries registered at the facility, newest first (CreatedAt descending, then Id).
+    /// page is 1-based. Returns the page items and the total number of matching rows.
+    /// </summary>
+    Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
+        Guid facilityId, int page, int pageSize, CancellationToken cancellationToken);
+
     Task AddAsync(BeneficiaryEntity beneficiary, CancellationToken cancellationToken);
 }

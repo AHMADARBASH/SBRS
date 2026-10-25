@@ -28,4 +28,8 @@ public static class BeneficiaryMappings
     public static PendingBeneficiaryDto ToPendingDto(this BeneficiaryEntity b) =>
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,
             b.BirthDate, b.IsBirthDateEstimated, b.Gender, b.EnrollmentDate, b.CreatedAt);
+
+    public static BeneficiaryListItemDto ToListItemDto(this BeneficiaryEntity b) =>
+        new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,
+            b.BirthDate, b.IsBirthDateEstimated, b.Gender, b.EnrollmentDate, b.AreaId, b.MatchReviewStatus);
 }

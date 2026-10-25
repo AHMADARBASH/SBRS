@@ -15,6 +15,7 @@ public static class Policies
     public const string RegisterBeneficiaries = "RegisterBeneficiaries"; // DataEntry only (SystemAdmin has no facility)
     public const string SearchBeneficiaries = "SearchBeneficiaries";     // DataEntry, FacilityAdmin, SystemAdmin
     public const string ReviewBeneficiaryMatches = "ReviewBeneficiaryMatches"; // FacilityAdmin, SystemAdmin
+    public const string ViewFacilityBeneficiaries = "ViewFacilityBeneficiaries"; // DataEntry, FacilityAdmin, SystemAdmin
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -42,6 +43,9 @@ public static class Policies
 
         options.AddPolicy(ReviewBeneficiaryMatches, p => p.RequireRole(
             Roles.FacilityAdmin, Roles.SystemAdmin));
+
+        options.AddPolicy(ViewFacilityBeneficiaries, p => p.RequireRole(
+            Roles.DataEntry, Roles.FacilityAdmin, Roles.SystemAdmin));
 
         // More policies are added as modules are built, for example:
         // ManageUsers, ManageClinics, ManageMedicines, EnterPatientData, ViewReports
