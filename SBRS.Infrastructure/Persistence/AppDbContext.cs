@@ -32,11 +32,13 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<EducationTypeEntity> EducationTypes => Set<EducationTypeEntity>();
         public DbSet<PartnerEntity> Partners => Set<PartnerEntity>();
         public DbSet<FacilityPartnerEntity> FacilitiesPartners => Set<FacilityPartnerEntity>();
+        public DbSet<BeneficiaryEntity> Beneficiaries => Set<BeneficiaryEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.HasSequence<int>("BeneficiaryCodeSeq").StartsAt(1).IncrementsBy(1);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
 

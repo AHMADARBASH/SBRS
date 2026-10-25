@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Domain.Exceptions;
 
@@ -35,6 +37,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             case DomainException:
                 status = StatusCodes.Status400BadRequest;
                 title = "Business rule violated";
+                break;
+            case DbUpdateException { InnerException: SqlException sql } when sql.Number is 2601 or 2627:
+                // Unique index race (e.g. two simultaneous registrations of the same person).
+                status = StatusCodes.Status409Conflict;
+                title = "This record was just created by someone else. Search again and retry.";
                 break;
             case UnauthorizedException:
                 status = StatusCodes.Status401Unauthorized;

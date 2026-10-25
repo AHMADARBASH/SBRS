@@ -22,6 +22,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("BeneficiaryCodeSeq");
+
             modelBuilder.Entity("AreaEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -449,6 +451,136 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Addresses", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Disambiguator")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DistinctReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("EnrollmentDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("FatherName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FullCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("Gender")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsBirthDateEstimated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("MatchKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<byte>("MatchReviewStatus")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid?>("MergedIntoBeneficiaryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MotherName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NormalizedFatherName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NormalizedFirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NormalizedLastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NormalizedMotherName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("RegistrationFacilityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("FullCode")
+                        .IsUnique();
+
+                    b.HasIndex("MergedIntoBeneficiaryId");
+
+                    b.HasIndex("MatchKey", "Disambiguator")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedLastName", "BirthDate");
+
+                    b.HasIndex("RegistrationFacilityId", "MatchReviewStatus");
+
+                    b.ToTable("Beneficiaries", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
@@ -1113,6 +1245,20 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasOne("AreaEntity", null)
                         .WithMany()
                         .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("MergedIntoBeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RegistrationFacilityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

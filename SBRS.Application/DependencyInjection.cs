@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SBRS.Application.Common.Behaviors;
+using SBRS.Application.Features.Beneficiaries.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,7 @@ namespace SBRS.Application
                 cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+            services.AddScoped<IBeneficiaryMatchService, BeneficiaryMatchService>();
             return services;
         }
     }
