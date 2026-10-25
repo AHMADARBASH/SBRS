@@ -20,7 +20,8 @@ public sealed record RegisterBeneficiaryCommand(
     DateOnly BirthDate,
     bool IsBirthDateEstimated,
     bool Gender,
-    DateOnly EnrollmentDate) : IRequest<RegisterBeneficiaryResultDto>;
+    DateOnly EnrollmentDate,
+    Guid AreaId) : IRequest<RegisterBeneficiaryResultDto>;
 
 public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<RegisterBeneficiaryCommand>
 {
@@ -44,12 +45,15 @@ public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<Regi
         RuleFor(x => x.EnrollmentDate)
             .Must(d => d <= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)))
             .WithMessage("Enrollment date cannot be in the future.");
+
+        RuleFor(x => x.AreaId).NotEmpty();
     }
 }
 
 public sealed class RegisterBeneficiaryCommandHandler(
     IBeneficiaryRepository beneficiaries,
     IFacilityRepository facilities,
+    IGeographyRepository geography,
     IBeneficiaryMatchService matchService,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork) : IRequestHandler<RegisterBeneficiaryCommand, RegisterBeneficiaryResultDto>
@@ -64,6 +68,10 @@ public sealed class RegisterBeneficiaryCommandHandler(
         var facility = await facilities.GetByIdAsync(facilityId, cancellationToken)
             ?? throw new NotFoundException(nameof(FacilityEntity), facilityId);
         if (!facility.IsActive) throw new DomainException("The facility is not active.");
+
+        // The area must exist. It carries the city implicitly; the request never contains the city.
+        var area = await geography.GetAreaByIdAsync(request.AreaId, cancellationToken)
+            ?? throw new DomainException("The selected area does not exist.");
 
         var birthDate = BeneficiaryBirthDate.Resolve(request.BirthDate, request.IsBirthDateEstimated);
         var key = BeneficiaryIdentityKey.From(request.FirstName, request.FatherName, request.LastName,
@@ -84,7 +92,7 @@ public sealed class RegisterBeneficiaryCommandHandler(
 
         var beneficiary = new BeneficiaryEntity(
             request.FirstName, request.FatherName, request.LastName, request.MotherName,
-            birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate,
+            birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate, request.AreaId,
             code, fullCode, facilityId, disambiguator, reviewStatus);
 
         await beneficiaries.AddAsync(beneficiary, cancellationToken);

@@ -7,6 +7,8 @@
         Task<List<RegionEntity>> GetRegionsByCityAsync(Guid cityId, CancellationToken ct = default);
         Task<List<DistrictEntity>> GetDistrictsByRegionAsync(Guid regionId, CancellationToken ct = default);
         Task<List<AreaEntity>> GetAreasByDistrictAsync(Guid districtId, CancellationToken ct = default);
+        Task<List<AreaEntity>> GetAreasByCityAsync(Guid cityId, CancellationToken ct = default);
+        Task<CityEntity?> GetCityByIdAsync(Guid id, CancellationToken ct = default);
         Task<AreaEntity?> GetAreaByIdAsync(Guid id, CancellationToken ct = default);
     }
 }

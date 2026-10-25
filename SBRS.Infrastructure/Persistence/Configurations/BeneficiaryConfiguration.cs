@@ -32,6 +32,11 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
         builder.HasIndex(x => new { x.NormalizedLastName, x.NormalizedFirstName }); // name search
         builder.HasIndex(x => new { x.RegistrationFacilityId, x.MatchReviewStatus }); // pending list
 
+        builder.HasOne<AreaEntity>().WithMany()
+            .HasForeignKey(x => x.AreaId)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.AreaId); // reports and filters by area
+
         builder.HasOne<FacilityEntity>().WithMany()
             .HasForeignKey(x => x.RegistrationFacilityId)
             .OnDelete(DeleteBehavior.Restrict);

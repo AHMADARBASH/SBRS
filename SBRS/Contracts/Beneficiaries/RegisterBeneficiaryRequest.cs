@@ -12,4 +12,5 @@ public sealed record RegisterBeneficiaryRequest(
 
     /// <summary>true (1) = Male, false (0) = Female.</summary>
     bool Gender,
-    DateOnly EnrollmentDate);
+    DateOnly EnrollmentDate,
+    Guid AreaId);

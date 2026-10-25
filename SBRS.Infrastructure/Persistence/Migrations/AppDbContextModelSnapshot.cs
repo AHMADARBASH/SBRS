@@ -35,6 +35,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<Guid>("CityId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -61,6 +64,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CityId", "ArName");
 
                     b.HasIndex("DistrictId", "Code")
                         .IsUnique();
@@ -459,6 +464,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("AreaId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateOnly>("BirthDate")
                         .HasColumnType("date");
 
@@ -564,6 +572,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AreaId");
 
                     b.HasIndex("Code")
                         .IsUnique();
@@ -1157,6 +1167,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("AreaEntity", b =>
                 {
+                    b.HasOne("CityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DistrictEntity", null)
                         .WithMany()
                         .HasForeignKey("DistrictId")
@@ -1253,6 +1269,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
                 {
+                    b.HasOne("AreaEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
                         .WithMany()
                         .HasForeignKey("MergedIntoBeneficiaryId")

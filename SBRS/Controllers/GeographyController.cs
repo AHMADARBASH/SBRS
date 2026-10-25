@@ -28,6 +28,11 @@ namespace SBRS.Controllers
        Guid cityId, [FromQuery] bool includeInactive, CancellationToken ct)
        => Ok(await sender.Send(new GetRegionsByCityQuery(cityId), ct));
 
+        [HttpGet("cities/{cityId:guid}/areas")]
+        public async Task<ActionResult<List<AreaDto>>> GetAreasByCity(
+            Guid cityId, CancellationToken ct)
+            => Ok(await sender.Send(new GetAreasByCityQuery(cityId), ct));
+
         [HttpGet("regions/{regionId:guid}/districts")]
         public async Task<ActionResult<List<DistrictDto>>> GetDistricts(
             Guid regionId, [FromQuery] bool includeInactive, CancellationToken ct)

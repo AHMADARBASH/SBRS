@@ -26,7 +26,7 @@ public class BeneficiariesController(ISender sender) : ControllerBase
     public async Task<ActionResult<RegisterBeneficiaryResultDto>> Register(RegisterBeneficiaryRequest request, CancellationToken ct) =>
         Ok(await sender.Send(new RegisterBeneficiaryCommand(request.FirstName, request.FatherName,
             request.LastName, request.MotherName, request.BirthDate, request.IsBirthDateEstimated,
-            request.Gender, request.EnrollmentDate), ct));
+            request.Gender, request.EnrollmentDate, request.AreaId), ct));
 
     [HttpGet]
     [Route("PendingReview")]

@@ -51,6 +51,9 @@ public class AreaConfiguration : LookupConfiguration<AreaEntity>
     {
         b.ToTable("Areas");
         b.HasOne<DistrictEntity>().WithMany().HasForeignKey(x => x.DistrictId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<CityEntity>().WithMany().HasForeignKey(x => x.CityId).OnDelete(DeleteBehavior.Restrict);
+
         b.HasIndex(x => new { x.DistrictId, x.Code }).IsUnique();
+        b.HasIndex(x => new { x.CityId, x.ArName }); // list areas of a city, ordered by name
     }
 }
