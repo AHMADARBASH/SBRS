@@ -5,9 +5,11 @@ using SBRS.Application;
 using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Common.Settings;
 using SBRS.Authorization;
+using SBRS.Cookies;
 using SBRS.Infrastructure;
 using SBRS.Middleware;
 using SBRS.Services;
+using SBRS.Swagger;
 using System.Text;
 
 namespace SBRS
@@ -22,6 +24,11 @@ namespace SBRS
             services.AddProblemDetails();
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IClientTypeResolver, ClientTypeResolver>();
+
+            // HttpOnly refresh-token cookie for web clients (section "RefreshCookie", all values optional)
+            services.Configure<RefreshCookieSettings>(configuration.GetSection(RefreshCookieSettings.SectionName));
+            services.AddScoped<IRefreshCookieService, RefreshCookieService>();
             var jwt = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
              ?? throw new InvalidOperationException("The 'Jwt' settings section is missing.");
 
@@ -63,6 +70,8 @@ namespace SBRS
                 {
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 });
+
+                options.OperationFilter<ClientTypeHeaderFilter>();
             });
 
             return services;

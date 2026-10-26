@@ -6,7 +6,7 @@ namespace SBRS.Application.Features.Auth.DTOs;
 
 public record LoginResultDto(
     string Token,
-    string RefreshToken,
+    string? RefreshToken,        // omitted (null) for web clients; the token is in an HttpOnly cookie instead
     DateTime ExpiresAt,          // expiry of the access token
     Guid UserId,
     string UserName,

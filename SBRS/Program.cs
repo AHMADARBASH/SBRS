@@ -11,6 +11,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAppDI(builder.Configuration);
 
+// CORS: origins come from configuration; never AllowAnyOrigin together with credentials.
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+    .AllowAnyHeader()        // includes X-Client-Type (forces the preflight) and Authorization
+    .AllowAnyMethod()
+    .AllowCredentials()));   // required so browsers keep the refresh cookie; only with a configured origin list
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -36,6 +43,9 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
+
+// after routing (useRouting runs implicitly), before authentication/authorization
+app.UseCors();
 
 app.UseAuthentication();  
 
