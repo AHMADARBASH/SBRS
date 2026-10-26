@@ -33,6 +33,7 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<PartnerEntity> Partners => Set<PartnerEntity>();
         public DbSet<FacilityPartnerEntity> FacilitiesPartners => Set<FacilityPartnerEntity>();
         public DbSet<BeneficiaryEntity> Beneficiaries => Set<BeneficiaryEntity>();
+        public DbSet<BeneficiaryIdentityEntity> BeneficiaryIdentities => Set<BeneficiaryIdentityEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

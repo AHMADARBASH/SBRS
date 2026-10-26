@@ -3,6 +3,7 @@ using MediatR;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Mappings;
 using SBRS.Domain.Common;
+using SBRS.Domain.Entities;
 using SBRS.Domain.Enums;
 using SBRS.Domain.Interfaces;
 
@@ -29,7 +30,8 @@ public sealed class SearchBeneficiaryQueryValidator : AbstractValidator<SearchBe
     private static bool HasName(string? value) => ArabicTextNormalizer.Normalize(value).Length >= 2;
 }
 
-public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository repository)
+public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository repository,
+    IBeneficiaryIdentityRepository identityRepository)
     : IRequestHandler<SearchBeneficiaryQuery, BeneficiarySearchResultDto>
 {
     private const int MaxResults = 20;
@@ -37,9 +39,11 @@ public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository reposit
     public async Task<BeneficiarySearchResultDto> Handle(SearchBeneficiaryQuery request,
         CancellationToken cancellationToken)
     {
+        BeneficiaryEntity? found = null;
+
         if (!string.IsNullOrWhiteSpace(request.FullCode))
         {
-            var found = await repository.GetByFullCodeAsync(request.FullCode.Trim(), cancellationToken);
+            found = await repository.GetByFullCodeAsync(request.FullCode.Trim(), cancellationToken);
 
             // A merged duplicate leads to the person it was merged into.
             if (found is { MatchReviewStatus: BeneficiaryMatchReviewStatus.MergedIntoExisting } &&
@@ -48,9 +52,11 @@ public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository reposit
                 found = await repository.GetByIdAsync(survivorId, cancellationToken);
             }
 
-            return found is null || found.MatchReviewStatus == BeneficiaryMatchReviewStatus.MergedIntoExisting
-                ? new BeneficiarySearchResultDto(Array.Empty<BeneficiarySearchItemDto>(), false)
-                : new BeneficiarySearchResultDto(new[] { found.ToSearchItemDto() }, false);
+            if (found is null || found.MatchReviewStatus == BeneficiaryMatchReviewStatus.MergedIntoExisting)
+                return new BeneficiarySearchResultDto(Array.Empty<BeneficiarySearchItemDto>(), false);
+
+            var identity = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(new[] { found.Id }, cancellationToken);
+            return new BeneficiarySearchResultDto(new[] { found.ToSearchItemDto(identity.RequireIdentity(found)) }, false);
         }
 
         var firstName = ArabicTextNormalizer.Normalize(request.FirstName);
@@ -58,8 +64,12 @@ public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository reposit
 
         var matches = await repository.SearchByNameAsync(firstName, lastName, MaxResults + 1, cancellationToken);
 
+        // one extra query for the whole page; the search shows the identity type but never the value
+        var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
+            matches.Select(b => b.Id).ToList(), cancellationToken);
+
         return new BeneficiarySearchResultDto(
-            matches.Take(MaxResults).Select(b => b.ToSearchItemDto()).ToList(),
+            matches.Take(MaxResults).Select(b => b.ToSearchItemDto(identities.RequireIdentity(b))).ToList(),
             matches.Count > MaxResults);
     }
 }

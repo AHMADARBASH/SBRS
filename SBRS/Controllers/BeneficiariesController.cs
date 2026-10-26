@@ -27,7 +27,8 @@ public class BeneficiariesController(ISender sender) : ControllerBase
     public async Task<ActionResult<RegisterBeneficiaryResultDto>> Register(RegisterBeneficiaryRequest request, CancellationToken ct) =>
         Ok(await sender.Send(new RegisterBeneficiaryCommand(request.FirstName, request.FatherName,
             request.LastName, request.MotherName, request.BirthDate, request.IsBirthDateEstimated,
-            request.Gender, request.EnrollmentDate, request.AreaId), ct));
+            request.Gender, request.EnrollmentDate, request.AreaId,
+            request.IdentityTypeId, request.IdentityValue), ct));
 
     [HttpGet]
     [Route("GetAll")]
@@ -41,6 +42,11 @@ public class BeneficiariesController(ISender sender) : ControllerBase
     [Authorize(Policy = Policies.ReviewBeneficiaryMatches)]
     public async Task<ActionResult<IReadOnlyList<PendingBeneficiaryDto>>> PendingReview(CancellationToken ct) =>
         Ok(await sender.Send(new GetPendingBeneficiariesQuery(), ct));
+
+    [HttpGet("{id:guid}/Identities")]
+    [Authorize(Policy = Policies.ViewFacilityBeneficiaries)]
+    public async Task<ActionResult<IReadOnlyList<BeneficiaryIdentityDto>>> Identities(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetBeneficiaryIdentitiesQuery(id), ct));
 
     [HttpGet("{id:guid}/MatchCandidates")]
     [Authorize(Policy = Policies.ReviewBeneficiaryMatches)]

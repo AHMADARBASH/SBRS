@@ -15,4 +15,5 @@ public sealed record PendingBeneficiaryDto(
     /// <summary>true (1) = Male, false (0) = Female.</summary>
     bool Gender,
     DateOnly EnrollmentDate,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    BeneficiaryIdentityDto Identity);

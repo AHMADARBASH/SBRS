@@ -12,4 +12,7 @@ public sealed record BeneficiarySearchItemDto(
     bool IsBirthDateEstimated,
 
     /// <summary>true (1) = Male, false (0) = Female.</summary>
-    bool Gender);
+    bool Gender,
+
+    /// <summary>The type of the beneficiary's identity; the value is not shown (cross-facility search).</summary>
+    string IdentityTypeCode);

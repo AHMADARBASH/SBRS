@@ -21,7 +21,8 @@ public sealed class GetBeneficiariesQueryValidator : AbstractValidator<GetBenefi
     }
 }
 
-public sealed class GetBeneficiariesQueryHandler(IBeneficiaryRepository repository, ICurrentUser currentUser)
+public sealed class GetBeneficiariesQueryHandler(
+    IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository, ICurrentUser currentUser)
     : IRequestHandler<GetBeneficiariesQuery, PagedResult<BeneficiaryListItemDto>>
 {
     private const int PageSize = 30;
@@ -45,7 +46,12 @@ public sealed class GetBeneficiariesQueryHandler(IBeneficiaryRepository reposito
         var (items, totalCount) = await repository.GetPagedByFacilityAsync(
             facilityId, request.Page, PageSize, cancellationToken);
 
+        // one extra query for the whole page
+        var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
+            items.Select(b => b.Id).ToList(), cancellationToken);
+
         return new PagedResult<BeneficiaryListItemDto>(
-            items.Select(b => b.ToListItemDto()).ToList(), request.Page, PageSize, totalCount);
+            items.Select(b => b.ToListItemDto(identities.RequireIdentity(b))).ToList(),
+            request.Page, PageSize, totalCount);
     }
 }

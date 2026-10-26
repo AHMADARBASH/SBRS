@@ -597,6 +597,45 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("Beneficiaries", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryIdentityEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdentityTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeneficiaryId", "IdentityTypeId")
+                        .IsUnique();
+
+                    b.HasIndex("IdentityTypeId", "Value");
+
+                    b.ToTable("BeneficiaryIdentities", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -895,6 +934,11 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ValueRegex")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -1287,6 +1331,23 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasForeignKey("RegistrationFacilityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryIdentityEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SBRS.Domain.Entities.IdentityTypeEntity", "IdentityType")
+                        .WithMany()
+                        .HasForeignKey("IdentityTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("IdentityType");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>

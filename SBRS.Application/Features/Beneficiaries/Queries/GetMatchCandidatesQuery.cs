@@ -15,7 +15,8 @@ namespace SBRS.Application.Features.Beneficiaries.Queries;
 public sealed record GetMatchCandidatesQuery(Guid Id) : IRequest<IReadOnlyList<BeneficiaryMatchDto>>;
 
 public sealed class GetMatchCandidatesQueryHandler(
-    IBeneficiaryRepository repository, IBeneficiaryMatchService matchService, ICurrentUser currentUser)
+    IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository,
+    IBeneficiaryMatchService matchService, ICurrentUser currentUser)
     : IRequestHandler<GetMatchCandidatesQuery, IReadOnlyList<BeneficiaryMatchDto>>
 {
     public async Task<IReadOnlyList<BeneficiaryMatchDto>> Handle(GetMatchCandidatesQuery request,
@@ -35,6 +36,11 @@ public sealed class GetMatchCandidatesQueryHandler(
             beneficiary.LastName, beneficiary.MotherName, beneficiary.BirthDate);
 
         var result = await matchService.FindAsync(key, beneficiary.IsBirthDateEstimated, beneficiary.Id, cancellationToken);
-        return result.Matches.Select(m => m.ToDto()).ToList();
+
+        // The facility admin sees the identity of each candidate to decide "same person".
+        var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
+            result.Matches.Select(m => m.Beneficiary.Id).ToList(), cancellationToken);
+
+        return result.Matches.Select(m => m.ToDto(identities.RequireIdentity(m.Beneficiary))).ToList();
     }
 }

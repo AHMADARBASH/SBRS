@@ -10,7 +10,8 @@ namespace SBRS.Application.Features.Beneficiaries.Queries;
 
 public sealed record GetPendingBeneficiariesQuery : IRequest<IReadOnlyList<PendingBeneficiaryDto>>;
 
-public sealed class GetPendingBeneficiariesQueryHandler(IBeneficiaryRepository repository, ICurrentUser currentUser)
+public sealed class GetPendingBeneficiariesQueryHandler(
+    IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository, ICurrentUser currentUser)
     : IRequestHandler<GetPendingBeneficiariesQuery, IReadOnlyList<PendingBeneficiaryDto>>
 {
     public async Task<IReadOnlyList<PendingBeneficiaryDto>> Handle(GetPendingBeneficiariesQuery request,
@@ -21,6 +22,11 @@ public sealed class GetPendingBeneficiariesQueryHandler(IBeneficiaryRepository r
             : currentUser.FacilityId ?? throw new ForbiddenException("No facility is assigned to this user.");
 
         var pending = await repository.GetPendingReviewAsync(facilityId, cancellationToken);
-        return pending.Select(b => b.ToPendingDto()).ToList();
+
+        // one extra query for the whole list
+        var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
+            pending.Select(b => b.Id).ToList(), cancellationToken);
+
+        return pending.Select(b => b.ToPendingDto(identities.RequireIdentity(b))).ToList();
     }
 }

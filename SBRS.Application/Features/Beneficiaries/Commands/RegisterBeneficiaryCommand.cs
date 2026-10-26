@@ -21,7 +21,9 @@ public sealed record RegisterBeneficiaryCommand(
     bool IsBirthDateEstimated,
     bool Gender,
     DateOnly EnrollmentDate,
-    Guid AreaId) : IRequest<RegisterBeneficiaryResultDto>;
+    Guid AreaId,
+    Guid IdentityTypeId,
+    string? IdentityValue) : IRequest<RegisterBeneficiaryResultDto>;
 
 public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<RegisterBeneficiaryCommand>
 {
@@ -47,6 +49,9 @@ public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<Regi
             .WithMessage("Enrollment date cannot be in the future.");
 
         RuleFor(x => x.AreaId).NotEmpty();
+
+        RuleFor(x => x.IdentityTypeId).NotEmpty();
+        RuleFor(x => x.IdentityValue).MaximumLength(30);   // the regex of the type does the real validation
     }
 }
 
@@ -54,6 +59,8 @@ public sealed class RegisterBeneficiaryCommandHandler(
     IBeneficiaryRepository beneficiaries,
     IFacilityRepository facilities,
     IGeographyRepository geography,
+    IIdentityTypeRepository identityTypes,
+    IBeneficiaryIdentityRepository identities,
     IBeneficiaryMatchService matchService,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork) : IRequestHandler<RegisterBeneficiaryCommand, RegisterBeneficiaryResultDto>
@@ -72,6 +79,14 @@ public sealed class RegisterBeneficiaryCommandHandler(
         // The area must exist. It carries the city implicitly; the request never contains the city.
         var area = await geography.GetAreaByIdAsync(request.AreaId, cancellationToken)
             ?? throw new DomainException("The selected area does not exist.");
+
+        // The identity is validated early so the user gets the error before scoring anything.
+        var identityType = await identityTypes.GetByIdAsync(request.IdentityTypeId, cancellationToken)
+            ?? throw new DomainException("The selected identity type does not exist.");
+
+        var identityValue = IdentityValueNormalizer.Normalize(request.IdentityValue);
+        if (!identityType.IsValidValue(identityValue))
+            throw new DomainException($"The identity value is not valid for the identity type {identityType.Code}.");
 
         var birthDate = BeneficiaryBirthDate.Resolve(request.BirthDate, request.IsBirthDateEstimated);
         var key = BeneficiaryIdentityKey.From(request.FirstName, request.FatherName, request.LastName,
@@ -96,6 +111,11 @@ public sealed class RegisterBeneficiaryCommandHandler(
             code, fullCode, facilityId, disambiguator, reviewStatus);
 
         await beneficiaries.AddAsync(beneficiary, cancellationToken);
+
+        // saved in the same SaveChangesAsync call as the beneficiary (the id is assigned on AddAsync)
+        var identity = new BeneficiaryIdentityEntity(beneficiary.Id, identityType, identityValue);
+        await identities.AddAsync(identity, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new RegisterBeneficiaryResultDto(beneficiary.Id, code, fullCode, reviewStatus);

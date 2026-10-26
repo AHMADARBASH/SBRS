@@ -16,4 +16,5 @@ public sealed record BeneficiaryMatchDto(
     bool Gender,
     BeneficiaryMatchStatus Status,
     int Score,
-    BeneficiaryMatchReasons Reasons);
+    BeneficiaryMatchReasons Reasons,
+    BeneficiaryIdentityDto Identity);

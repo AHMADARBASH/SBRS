@@ -1,3 +1,3 @@
 namespace SBRS.Application.Features.IdentityTypes.DTOs;
 
-public sealed record IdentityTypeDto(Guid Id, string ArName, string EnName, string Code);
+public sealed record IdentityTypeDto(Guid Id, string ArName, string EnName, string Code, string ValueRegex);

@@ -16,4 +16,5 @@ public sealed record BeneficiaryListItemDto(
     bool Gender,
     DateOnly EnrollmentDate,
     Guid AreaId,
-    BeneficiaryMatchReviewStatus MatchReviewStatus);
+    BeneficiaryMatchReviewStatus MatchReviewStatus,
+    BeneficiaryIdentityDto Identity);
