@@ -39,8 +39,9 @@ namespace SBRS.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.HasSequence<int>("BeneficiaryCodeSeq").StartsAt(1).IncrementsBy(1);
+            modelBuilder.HasSequence<long>("beneficiary_code_seq").StartsAt(1).IncrementsBy(1);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            modelBuilder.HasPostgresExtension("citext");
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken ct = default)

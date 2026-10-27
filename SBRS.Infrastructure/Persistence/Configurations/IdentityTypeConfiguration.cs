@@ -8,7 +8,6 @@ public class IdentityTypeConfiguration : IEntityTypeConfiguration<IdentityTypeEn
 {
     public void Configure(EntityTypeBuilder<IdentityTypeEntity> builder)
     {
-        builder.ToTable("IdentityTypes");
         builder.HasKey(i => i.Id);
 
         builder.Property(i => i.ArName).IsRequired().HasMaxLength(100);

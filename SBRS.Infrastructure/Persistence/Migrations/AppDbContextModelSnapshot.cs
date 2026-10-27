@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SBRS.Infrastructure.Persistence;
 
 #nullable disable
@@ -18,214 +18,264 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.13")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.HasSequence<int>("BeneficiaryCodeSeq");
+            modelBuilder.HasSequence("beneficiary_code_seq");
 
             modelBuilder.Entity("AreaEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<Guid>("CityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("city_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<Guid>("DistrictId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("district_id");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_areas");
 
-                    b.HasIndex("CityId", "ArName");
+                    b.HasIndex("CityId", "ArName")
+                        .HasDatabaseName("ix_areas_city_id_ar_name");
 
                     b.HasIndex("DistrictId", "Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_areas_district_id_code");
 
-                    b.ToTable("Areas", (string)null);
+                    b.ToTable("areas", (string)null);
                 });
 
             modelBuilder.Entity("CityEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<Guid>("CountryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("country_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_cities");
 
                     b.HasIndex("CountryId", "Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_cities_country_id_code");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("cities", (string)null);
                 });
 
             modelBuilder.Entity("CountryEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_countries");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_countries_code");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("countries", (string)null);
                 });
 
             modelBuilder.Entity("DistrictEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<Guid>("RegionId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("region_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_districts");
 
                     b.HasIndex("RegionId", "Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_districts_region_id_code");
 
-                    b.ToTable("Districts", (string)null);
+                    b.ToTable("districts", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_roles");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -234,22 +284,28 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_type");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_value");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_role_claims");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_asp_net_role_claims_role_id");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
@@ -258,22 +314,28 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_type");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("claim_value");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_user_claims");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_asp_net_user_claims_user_id");
 
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
@@ -281,20 +343,26 @@ namespace SBRS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text")
+                        .HasColumnName("login_provider");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text")
+                        .HasColumnName("provider_key");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("provider_display_name");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("LoginProvider", "ProviderKey");
+                    b.HasKey("LoginProvider", "ProviderKey")
+                        .HasName("pk_asp_net_user_logins");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_asp_net_user_logins_user_id");
 
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
@@ -302,14 +370,18 @@ namespace SBRS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.HasKey("UserId", "RoleId")
+                        .HasName("pk_asp_net_user_roles");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_asp_net_user_roles_role_id");
 
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
@@ -317,18 +389,23 @@ namespace SBRS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text")
+                        .HasColumnName("login_provider");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("value");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+                    b.HasKey("UserId", "LoginProvider", "Name")
+                        .HasName("pk_asp_net_user_tokens");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
@@ -337,835 +414,1056 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<Guid>("CityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("city_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_regions");
 
                     b.HasIndex("CityId", "Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_regions_city_id_code");
 
-                    b.ToTable("Regions", (string)null);
+                    b.ToTable("regions", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.AccommodationTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_accommodation_types");
 
                     b.HasIndex("EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_accommodation_types_en_name");
 
-                    b.ToTable("AccommodationTypes", (string)null);
+                    b.ToTable("accommodation_types", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.AddressEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("ar_name");
 
                     b.Property<Guid>("AreaId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("area_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("en_name");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_addresses");
 
                     b.HasIndex("AreaId", "ArName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_addresses_area_id_ar_name");
 
                     b.HasIndex("AreaId", "EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_addresses_area_id_en_name");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("addresses", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("AreaId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("area_id");
 
                     b.Property<DateOnly>("BirthDate")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("birth_date");
 
-                    b.Property<int>("Code")
-                        .HasColumnType("int");
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("citext")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<int>("Disambiguator")
-                        .HasColumnType("int");
+                        .HasColumnType("integer")
+                        .HasColumnName("disambiguator");
 
                     b.Property<string>("DistinctReason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("distinct_reason");
 
                     b.Property<DateOnly>("EnrollmentDate")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("enrollment_date");
 
                     b.Property<string>("FatherName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("father_name");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("FullCode")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("citext")
+                        .HasColumnName("full_code");
 
                     b.Property<bool>("Gender")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("gender");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsBirthDateEstimated")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_birth_date_estimated");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
 
                     b.Property<string>("MatchKey")
                         .IsRequired()
                         .HasMaxLength(64)
                         .IsUnicode(false)
-                        .HasColumnType("char(64)")
+                        .HasColumnType("character(64)")
+                        .HasColumnName("match_key")
                         .IsFixedLength();
 
                     b.Property<byte>("MatchReviewStatus")
-                        .HasColumnType("tinyint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("match_review_status");
 
                     b.Property<Guid?>("MergedIntoBeneficiaryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("merged_into_beneficiary_id");
 
                     b.Property<string>("MotherName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("mother_name");
 
                     b.Property<string>("NormalizedFatherName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("normalized_father_name");
 
                     b.Property<string>("NormalizedFirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("normalized_first_name");
 
                     b.Property<string>("NormalizedLastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("normalized_last_name");
 
                     b.Property<string>("NormalizedMotherName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("normalized_mother_name");
 
                     b.Property<Guid>("RegistrationFacilityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("registration_facility_id");
 
                     b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_at");
 
                     b.Property<Guid?>("ReviewedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reviewed_by");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiaries");
 
-                    b.HasIndex("AreaId");
+                    b.HasIndex("AreaId")
+                        .HasDatabaseName("ix_beneficiaries_area_id");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiaries_code");
 
                     b.HasIndex("FullCode")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiaries_full_code");
 
-                    b.HasIndex("MergedIntoBeneficiaryId");
+                    b.HasIndex("MergedIntoBeneficiaryId")
+                        .HasDatabaseName("ix_beneficiaries_merged_into_beneficiary_id");
 
                     b.HasIndex("MatchKey", "Disambiguator")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiaries_match_key_disambiguator");
 
-                    b.HasIndex("NormalizedLastName", "BirthDate");
+                    b.HasIndex("NormalizedLastName", "BirthDate")
+                        .HasDatabaseName("ix_beneficiaries_normalized_last_name_birth_date");
 
-                    b.HasIndex("NormalizedLastName", "NormalizedFirstName");
+                    b.HasIndex("NormalizedLastName", "NormalizedFirstName")
+                        .HasDatabaseName("ix_beneficiaries_normalized_last_name_normalized_first_name");
 
-                    b.HasIndex("RegistrationFacilityId", "CreatedAt");
+                    b.HasIndex("RegistrationFacilityId", "CreatedAt")
+                        .HasDatabaseName("ix_beneficiaries_registration_facility_id_created_at");
 
-                    b.HasIndex("RegistrationFacilityId", "MatchReviewStatus");
+                    b.HasIndex("RegistrationFacilityId", "MatchReviewStatus")
+                        .HasDatabaseName("ix_beneficiaries_registration_facility_id_match_review_status");
 
-                    b.ToTable("Beneficiaries", (string)null);
+                    b.ToTable("beneficiaries", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryIdentityEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BeneficiaryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<Guid>("IdentityTypeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("identity_type_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("value");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_identities");
 
                     b.HasIndex("BeneficiaryId", "IdentityTypeId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_identities_beneficiary_id_identity_type_id");
 
-                    b.HasIndex("IdentityTypeId", "Value");
+                    b.HasIndex("IdentityTypeId", "Value")
+                        .HasDatabaseName("ix_beneficiary_identities_identity_type_id_value");
 
-                    b.ToTable("BeneficiaryIdentities", (string)null);
+                    b.ToTable("beneficiary_identities", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
                     b.Property<Guid>("organizationId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_branches");
 
-                    b.HasIndex("organizationId");
+                    b.HasIndex("organizationId")
+                        .HasDatabaseName("ix_branches_organization_id");
 
-                    b.ToTable("Branches", (string)null);
+                    b.ToTable("branches", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.DisabilityTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_disability_types");
 
                     b.HasIndex("EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_disability_types_en_name");
 
-                    b.ToTable("DisabilityTypes", (string)null);
+                    b.ToTable("disability_types", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.EducationTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_education_types");
 
                     b.HasIndex("EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_education_types_en_name");
 
-                    b.ToTable("EducationTypes", (string)null);
+                    b.ToTable("education_types", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("AddressId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("address_id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<Guid>("BranchId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("branch_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("citext")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<Guid>("PartnerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("partner_id");
 
                     b.Property<Guid>("TypeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("type_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_facilities");
 
-                    b.HasIndex("AddressId");
+                    b.HasIndex("AddressId")
+                        .HasDatabaseName("ix_facilities_address_id");
 
-                    b.HasIndex("BranchId");
+                    b.HasIndex("BranchId")
+                        .HasDatabaseName("ix_facilities_branch_id");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_facilities_code");
 
-                    b.HasIndex("PartnerId");
+                    b.HasIndex("PartnerId")
+                        .HasDatabaseName("ix_facilities_partner_id");
 
-                    b.HasIndex("TypeId");
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("ix_facilities_type_id");
 
-                    b.ToTable("Facilities", (string)null);
+                    b.ToTable("facilities", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityPartnerEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
 
                     b.Property<Guid>("FacilityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
 
                     b.Property<Guid>("PartnerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("partner_id");
 
                     b.Property<string>("ProjectCode")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("");
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("")
+                        .HasColumnName("project_code");
 
                     b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_facilities_partners");
 
-                    b.HasIndex("FacilityId");
+                    b.HasIndex("FacilityId")
+                        .HasDatabaseName("ix_facilities_partners_facility_id");
 
-                    b.HasIndex("PartnerId");
+                    b.HasIndex("PartnerId")
+                        .HasDatabaseName("ix_facilities_partners_partner_id");
 
-                    b.ToTable("FacilitiesPartners", (string)null);
+                    b.ToTable("facilities_partners", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_facility_types");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_facility_types_code");
 
-                    b.ToTable("FacilityTypes", (string)null);
+                    b.ToTable("facility_types", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.IdentityTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
                     b.Property<string>("ValueRegex")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("value_regex");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_identity_types");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_identity_types_code");
 
                     b.HasIndex("EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_identity_types_en_name");
 
-                    b.ToTable("IdentityTypes", (string)null);
+                    b.ToTable("identity_types", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.NationalityEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_nationalities");
 
                     b.HasIndex("EnName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_nationalities_en_name");
 
-                    b.ToTable("Nationalities", (string)null);
+                    b.ToTable("nationalities", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.OrganizationEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("en_name");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_organizations");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_organizations_code");
 
-                    b.ToTable("Organizations", (string)null);
+                    b.ToTable("organizations", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.PartnerEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_partners");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_partners_code");
 
-                    b.ToTable("Partners", (string)null);
+                    b.ToTable("partners", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer")
+                        .HasColumnName("access_failed_count");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("concurrency_stamp");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_confirmed");
 
                     b.Property<Guid?>("FacilityId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("first_name");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsMobile")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_mobile");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("last_name");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("lockout_enabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lockout_end");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_email");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("normalized_user_name");
 
                     b.Property<Guid?>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_number_confirmed");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text")
+                        .HasColumnName("security_stamp");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean")
+                        .HasColumnName("two_factor_enabled");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("user_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_users");
 
-                    b.HasIndex("FacilityId");
+                    b.HasIndex("FacilityId")
+                        .HasDatabaseName("ix_asp_net_users_facility_id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("OrganizationId");
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_asp_net_users_organization_id");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -1174,41 +1472,53 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("family_id");
 
                     b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_hash");
 
                     b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_refresh_tokens");
 
-                    b.HasIndex("FamilyId");
+                    b.HasIndex("FamilyId")
+                        .HasDatabaseName("ix_refresh_tokens_family_id");
 
                     b.HasIndex("TokenHash")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_refresh_tokens_token_hash");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_refresh_tokens_user_id");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("refresh_tokens", (string)null);
                 });
 
             modelBuilder.Entity("AreaEntity", b =>
@@ -1217,13 +1527,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_areas_cities_city_id");
 
                     b.HasOne("DistrictEntity", null)
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_areas_districts_district_id");
                 });
 
             modelBuilder.Entity("CityEntity", b =>
@@ -1232,7 +1544,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_cities_countries_country_id");
                 });
 
             modelBuilder.Entity("DistrictEntity", b =>
@@ -1241,7 +1554,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_districts_regions_region_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1250,7 +1564,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_role_claims_asp_net_roles_role_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
@@ -1259,7 +1574,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_user_claims_asp_net_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
@@ -1268,7 +1584,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_user_logins_asp_net_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
@@ -1277,13 +1594,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_user_roles_asp_net_roles_role_id");
 
                     b.HasOne("SBRS.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_user_roles_asp_net_users_user_id");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -1292,7 +1611,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
                 });
 
             modelBuilder.Entity("RegionEntity", b =>
@@ -1301,7 +1621,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_regions_cities_city_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.AddressEntity", b =>
@@ -1310,7 +1631,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AreaId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_addresses_areas_area_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
@@ -1319,18 +1641,21 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AreaId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiaries_areas_area_id");
 
                     b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
                         .WithMany()
                         .HasForeignKey("MergedIntoBeneficiaryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_beneficiaries_beneficiaries_merged_into_beneficiary_id");
 
                     b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
                         .WithMany()
                         .HasForeignKey("RegistrationFacilityId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiaries_facilities_registration_facility_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryIdentityEntity", b =>
@@ -1339,13 +1664,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("BeneficiaryId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_identities_beneficiaries_beneficiary_id");
 
                     b.HasOne("SBRS.Domain.Entities.IdentityTypeEntity", "IdentityType")
                         .WithMany()
                         .HasForeignKey("IdentityTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_identities_identity_types_identity_type_id");
 
                     b.Navigation("IdentityType");
                 });
@@ -1356,7 +1683,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("organizationId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_branches_organizations_organization_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
@@ -1365,25 +1693,29 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AddressId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_addresses_address_id");
 
                     b.HasOne("SBRS.Domain.Entities.BranchEntity", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_branches_branch_id");
 
                     b.HasOne("SBRS.Domain.Entities.PartnerEntity", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_partners_partner_id");
 
                     b.HasOne("SBRS.Domain.Entities.FacilityTypeEntity", "FacilityType")
                         .WithMany()
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_facility_types_type_id");
 
                     b.Navigation("Address");
 
@@ -1400,13 +1732,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("FacilityId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_partners_facilities_facility_id");
 
                     b.HasOne("SBRS.Domain.Entities.PartnerEntity", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_facilities_partners_partners_partner_id");
 
                     b.Navigation("Facility");
 
@@ -1418,12 +1752,14 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
                         .WithMany()
                         .HasForeignKey("FacilityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_asp_net_users_facilities_facility_id");
 
                     b.HasOne("SBRS.Domain.Entities.OrganizationEntity", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_asp_net_users_organizations_organization_id");
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.RefreshToken", b =>
@@ -1432,7 +1768,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_tokens_asp_net_users_user_id");
                 });
 #pragma warning restore 612, 618
         }

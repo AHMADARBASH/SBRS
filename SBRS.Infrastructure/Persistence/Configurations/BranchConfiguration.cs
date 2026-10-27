@@ -11,8 +11,6 @@ namespace SBRS.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<BranchEntity> builder)
         {
-            builder.ToTable("Branches");
-
             builder.HasKey(b => b.Id);
 
             builder.Property(b => b.organizationId)
