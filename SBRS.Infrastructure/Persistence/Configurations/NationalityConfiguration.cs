@@ -8,7 +8,6 @@ public class NationalityConfiguration : IEntityTypeConfiguration<NationalityEnti
 {
     public void Configure(EntityTypeBuilder<NationalityEntity> builder)
     {
-        builder.ToTable("Nationalities");
         builder.HasKey(n => n.Id);
 
         builder.Property(n => n.ArName).IsRequired().HasMaxLength(100);

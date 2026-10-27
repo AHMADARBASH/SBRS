@@ -17,7 +17,11 @@ public static class DependencyInjection
         this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+     options
+         .UseNpgsql(
+             configuration.GetConnectionString("DefaultConnection"),
+             npgsql => npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName))
+         .UseSnakeCaseNamingConvention());
 
         // same scoped AppDbContext instance for the repository and the unit of work
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());

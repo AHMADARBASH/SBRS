@@ -8,8 +8,6 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
 {
     public void Configure(EntityTypeBuilder<BeneficiaryEntity> builder)
     {
-        builder.ToTable("Beneficiaries");
-
         builder.Property(x => x.FirstName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.FatherName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.LastName).IsRequired().HasMaxLength(100);
@@ -23,7 +21,9 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
         builder.Property(x => x.NormalizedMotherName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.MatchKey).IsRequired().HasMaxLength(64).IsFixedLength().IsUnicode(false);
         builder.Property(x => x.DistinctReason).HasMaxLength(500);
-        builder.Property(x => x.FullCode).IsRequired().HasMaxLength(50);
+        builder.Property(x=>x.Code).IsRequired().HasColumnType("citext");
+        builder.Property(x => x.FullCode).IsRequired().HasMaxLength(50).HasColumnType("citext");
+        builder.Property(x=> x.Gender).IsRequired();
 
         builder.HasIndex(x => new { x.MatchKey, x.Disambiguator }).IsUnique();
         builder.HasIndex(x => x.Code).IsUnique();

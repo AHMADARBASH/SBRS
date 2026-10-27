@@ -46,10 +46,13 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
     public async Task AddAsync(BeneficiaryEntity beneficiary, CancellationToken ct) =>
         await db.Beneficiaries.AddAsync(beneficiary, ct);
 
-    public async Task<int> GetNextCodeAsync(CancellationToken ct) =>
-        await db.Database
-            .SqlQuery<int>($"SELECT NEXT VALUE FOR dbo.BeneficiaryCodeSeq AS [Value]")
+    public async Task<int> GetNextCodeAsync(CancellationToken ct)
+    {
+        var next = await db.Database
+            .SqlQuery<long>($"SELECT nextval('beneficiary_code_seq') AS \"Value\"")
             .SingleAsync(ct);
+        return int.Parse(next.ToString());
+    }
 
     public async Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken ct) =>
         await db.Beneficiaries.AsNoTracking()

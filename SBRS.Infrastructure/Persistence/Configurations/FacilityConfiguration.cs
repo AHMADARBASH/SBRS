@@ -8,13 +8,11 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
 {
     public void Configure(EntityTypeBuilder<FacilityEntity> builder)
     {
-        builder.ToTable("Facilities");
-
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.ArName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.EnName).IsRequired().HasMaxLength(100);
-        builder.Property(x => x.Code).IsRequired().HasMaxLength(10);
+        builder.Property(x => x.Code).IsRequired().HasMaxLength(10).HasColumnType("citext");
         builder.Property(x => x.AddressId).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
         builder.Property(f => f.TypeId).IsRequired();

@@ -8,7 +8,6 @@ public class FacilityPartnerConfiguration : IEntityTypeConfiguration<FacilityPar
 {
     public void Configure(EntityTypeBuilder<FacilityPartnerEntity> builder)
     {
-        builder.ToTable("FacilitiesPartners");
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.ProjectCode).IsRequired().HasMaxLength(50).HasDefaultValue("");

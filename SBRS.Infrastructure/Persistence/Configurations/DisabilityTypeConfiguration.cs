@@ -8,7 +8,6 @@ public class DisabilityTypeConfiguration : IEntityTypeConfiguration<DisabilityTy
 {
     public void Configure(EntityTypeBuilder<DisabilityTypeEntity> builder)
     {
-        builder.ToTable("DisabilityTypes");
         builder.HasKey(d => d.Id);
 
         builder.Property(d => d.ArName).IsRequired().HasMaxLength(100);

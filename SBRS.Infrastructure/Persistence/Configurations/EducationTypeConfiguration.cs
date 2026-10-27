@@ -8,7 +8,6 @@ public class EducationTypeConfiguration : IEntityTypeConfiguration<EducationType
 {
     public void Configure(EntityTypeBuilder<EducationTypeEntity> builder)
     {
-        builder.ToTable("EducationTypes");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.ArName).IsRequired().HasMaxLength(100);

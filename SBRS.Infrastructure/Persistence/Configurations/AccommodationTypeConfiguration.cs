@@ -8,7 +8,6 @@ public class AccommodationTypeConfiguration : IEntityTypeConfiguration<Accommoda
 {
     public void Configure(EntityTypeBuilder<AccommodationTypeEntity> builder)
     {
-        builder.ToTable("AccommodationTypes");
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.ArName).IsRequired().HasMaxLength(100);

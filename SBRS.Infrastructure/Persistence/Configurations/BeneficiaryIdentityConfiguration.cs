@@ -8,8 +8,6 @@ public class BeneficiaryIdentityConfiguration : IEntityTypeConfiguration<Benefic
 {
     public void Configure(EntityTypeBuilder<BeneficiaryIdentityEntity> builder)
     {
-        builder.ToTable("BeneficiaryIdentities");
-
         // Empty string is a valid value (UNREGISTERED), so the column is NOT NULL but may be "".
         builder.Property(x => x.Value).IsRequired().HasMaxLength(30);
 

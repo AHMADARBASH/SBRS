@@ -8,7 +8,6 @@ public class FacilityTypeConfiguration : IEntityTypeConfiguration<FacilityTypeEn
 {
     public void Configure(EntityTypeBuilder<FacilityTypeEntity> builder)
     {
-        builder.ToTable("FacilityTypes");
         builder.HasKey(t => t.Id);
 
         builder.Property(t => t.ArName).IsRequired().HasMaxLength(100);

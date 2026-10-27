@@ -9,8 +9,6 @@ public class AddressConfiguration : IEntityTypeConfiguration<AddressEntity>
 {
     public void Configure(EntityTypeBuilder<AddressEntity> builder)
     {
-        builder.ToTable("Addresses");
-
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.ArName).IsRequired().HasMaxLength(200);
