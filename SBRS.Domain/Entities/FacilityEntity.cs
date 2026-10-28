@@ -22,6 +22,12 @@ public class FacilityEntity : BaseEntity
 
     public FacilityEntity(Guid branchId, Guid addressId, Guid typeId,Guid partnerId, string arName, string enName, string code)
     {
+        if (branchId == Guid.Empty) throw new DomainException("Branch is required.");
+        if (addressId == Guid.Empty) throw new DomainException("Address is required.");
+        if (typeId == Guid.Empty) throw new DomainException("Facility type is required.");
+        if (partnerId == Guid.Empty) throw new DomainException("Partner is required.");
+        if (string.IsNullOrWhiteSpace(code)) throw new DomainException("Facility code is required.");
+
         BranchId = branchId;
         AddressId = addressId;
         ArName = arName.Trim();
@@ -31,7 +37,12 @@ public class FacilityEntity : BaseEntity
         PartnerId = partnerId;
     }
 
-    public void Update(string arName, string enName, string code, Guid addressId, Guid typeId)
+    /// <summary>
+    /// The code is generated at creation and is immutable: it is never recomputed
+    /// when the facility is edited, even if its type, address or city changes,
+    /// because beneficiary FullCodes are built from it.
+    /// </summary>
+    public void Update(string arName, string enName, Guid addressId, Guid typeId)
     {
         if (!IsActive)
             throw new DomainException("A deactivated facility cannot be updated.");
@@ -39,7 +50,6 @@ public class FacilityEntity : BaseEntity
         AddressId = addressId;
         ArName = arName.Trim();
         EnName = enName.Trim();
-        Code = code.Trim();
         TypeId = typeId;
     }
 

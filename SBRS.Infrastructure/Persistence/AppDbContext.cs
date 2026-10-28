@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
 using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
@@ -44,7 +46,7 @@ namespace SBRS.Infrastructure.Persistence
             modelBuilder.HasPostgresExtension("citext");
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken ct = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
             var now = DateTime.UtcNow;
 
@@ -56,7 +58,16 @@ namespace SBRS.Infrastructure.Persistence
                     entry.Property(e => e.UpdatedAt).CurrentValue = now;
             }
 
-            return base.SaveChangesAsync(ct);
+            try
+            {
+                return await base.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException ex) when (ex.GetBaseException() is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+            {
+                // translate the provider-specific unique violation so the Application layer
+                // can catch UniqueViolationException without referencing Npgsql
+                throw new UniqueViolationException("A database unique constraint was violated.", ex);
+            }
         }
     }
 }

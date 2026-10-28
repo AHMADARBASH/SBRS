@@ -21,4 +21,7 @@ public class FacilityPartnerRepository(AppDbContext db) : IFacilityPartnerReposi
         db.FacilitiesPartners.Add(entry);
         return Task.CompletedTask;
     }
+
+    public void RemoveStaged(FacilityPartnerEntity entry)
+        => db.Entry(entry).State = EntityState.Detached;
 }

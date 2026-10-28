@@ -1,3 +1,4 @@
 ﻿namespace SBRS.Contracts.Facilities;
 
-public record UpdateFacilityRequest(string ArName, string EnName, string Code,Guid addressId,Guid typeId);
+// No Code: the facility code is immutable and cannot be changed.
+public record UpdateFacilityRequest(string ArName, string EnName, Guid addressId, Guid typeId);

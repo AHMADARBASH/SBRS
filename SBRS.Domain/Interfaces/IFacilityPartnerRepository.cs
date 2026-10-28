@@ -11,4 +11,7 @@ public interface IFacilityPartnerRepository
     Task<IReadOnlyList<FacilityPartnerEntity>> GetByFacilityAsync(Guid facilityId, CancellationToken ct);
 
     Task AddAsync(FacilityPartnerEntity entry, CancellationToken ct);
+
+    /// <summary>Removes an unsaved (staged) row from the unit of work; used by the code-generation retry.</summary>
+    void RemoveStaged(FacilityPartnerEntity entry);
 }

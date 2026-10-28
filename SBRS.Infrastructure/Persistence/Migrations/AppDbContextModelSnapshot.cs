@@ -100,6 +100,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("ar_name");
 
+                    b.Property<string>("C_Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("c_code");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -134,6 +140,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_cities");
+
+                    b.HasIndex("C_Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cities_c_code");
 
                     b.HasIndex("CountryId", "Code")
                         .IsUnique()
@@ -963,7 +973,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(10)
+                        .HasMaxLength(50)
                         .HasColumnType("citext")
                         .HasColumnName("code");
 
