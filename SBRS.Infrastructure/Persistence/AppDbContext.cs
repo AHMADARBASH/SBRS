@@ -41,10 +41,18 @@ namespace SBRS.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.HasSequence<long>("beneficiary_code_seq").StartsAt(1).IncrementsBy(1);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
             modelBuilder.HasPostgresExtension("citext");
         }
+
+        public Task BeginTransactionAsync(CancellationToken ct = default)
+            => Database.BeginTransactionAsync(ct);
+
+        public Task CommitAsync(CancellationToken ct = default)
+            => Database.CommitTransactionAsync(ct);
+
+        public Task RollbackAsync(CancellationToken ct = default)
+            => Database.RollbackTransactionAsync(ct);
 
         public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {

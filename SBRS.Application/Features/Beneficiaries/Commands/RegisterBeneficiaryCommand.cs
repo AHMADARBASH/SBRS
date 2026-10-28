@@ -102,22 +102,40 @@ public sealed class RegisterBeneficiaryCommandHandler(
             ? await beneficiaries.GetNextDisambiguatorAsync(key.MatchKey, cancellationToken)
             : 0;
 
-        var code = await beneficiaries.GetNextCodeAsync(cancellationToken);
-        var fullCode = $"{facility.Code}-{code}";   // FullCode = FacilityCode-Code, no zero padding
+        // ---- everything above can reject the registration without consuming a number ----
+        // ---- below, a short locked transaction assigns the per-facility code ----
+        // Registrations in the same facility run one at a time: the facility row lock serializes
+        // them, then next = max Code (including deactivated rows) + 1. A number is only consumed
+        // when the beneficiary and its identity are really saved; any failure rolls everything
+        // back, releasing the number.
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await beneficiaries.LockRegistrationFacilityAsync(facilityId, cancellationToken);
 
-        var beneficiary = new BeneficiaryEntity(
-            request.FirstName, request.FatherName, request.LastName, request.MotherName,
-            birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate, request.AreaId,
-            code, fullCode, facilityId, disambiguator, reviewStatus);
+            var code = await beneficiaries.GetMaxCodeForFacilityAsync(facilityId, cancellationToken) + 1;
+            var fullCode = BeneficiaryFullCodeBuilder.Build(facility.Code, code);
 
-        await beneficiaries.AddAsync(beneficiary, cancellationToken);
+            var beneficiary = new BeneficiaryEntity(
+                request.FirstName, request.FatherName, request.LastName, request.MotherName,
+                birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate, request.AreaId,
+                code, fullCode, facilityId, disambiguator, reviewStatus);
 
-        // saved in the same SaveChangesAsync call as the beneficiary (the id is assigned on AddAsync)
-        var identity = new BeneficiaryIdentityEntity(beneficiary.Id, identityType, identityValue);
-        await identities.AddAsync(identity, cancellationToken);
+            await beneficiaries.AddAsync(beneficiary, cancellationToken);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+            // saved in the same SaveChangesAsync call as the beneficiary (the id is assigned on AddAsync)
+            var identity = new BeneficiaryIdentityEntity(beneficiary.Id, identityType, identityValue);
+            await identities.AddAsync(identity, cancellationToken);
 
-        return new RegisterBeneficiaryResultDto(beneficiary.Id, code, fullCode, reviewStatus);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
+
+            return new RegisterBeneficiaryResultDto(beneficiary.Id, code, fullCode, reviewStatus);
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 }

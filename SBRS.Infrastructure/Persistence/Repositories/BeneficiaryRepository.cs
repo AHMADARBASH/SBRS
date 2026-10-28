@@ -46,13 +46,26 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
     public async Task AddAsync(BeneficiaryEntity beneficiary, CancellationToken ct) =>
         await db.Beneficiaries.AddAsync(beneficiary, ct);
 
-    public async Task<int> GetNextCodeAsync(CancellationToken ct)
+    /// <summary>
+    /// Highest Code used at the given facility, or 0 when none exists yet.
+    /// Includes deactivated rows: beneficiaries are never hard-deleted (deactivate instead),
+    /// so the max Code is permanent and no number is ever reused; a hard delete would allow
+    /// code reuse, which must not happen because codes may already be printed or shared.
+    /// Call within the facility row lock (LockRegistrationFacilityAsync) to be race-safe.
+    /// </summary>
+    public async Task<int> GetMaxCodeForFacilityAsync(Guid facilityId, CancellationToken ct)
     {
-        var next = await db.Database
-            .SqlQuery<long>($"SELECT nextval('beneficiary_code_seq') AS \"Value\"")
-            .SingleAsync(ct);
-        return int.Parse(next.ToString());
+        var max = await db.Beneficiaries.IgnoreQueryFilters()
+            .Where(x => x.RegistrationFacilityId == facilityId)
+            .Select(x => (int?)x.Code)
+            .MaxAsync(ct);
+
+        return max.HasValue ? max.Value : 0;
     }
+
+    public Task LockRegistrationFacilityAsync(Guid facilityId, CancellationToken ct) =>
+        db.Database.ExecuteSqlAsync(
+            $"SELECT 1 FROM facilities WHERE id = {facilityId} FOR UPDATE", ct);
 
     public async Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken ct) =>
         await db.Beneficiaries.AsNoTracking()

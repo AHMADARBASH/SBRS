@@ -23,8 +23,6 @@ namespace SBRS.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "citext");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.HasSequence("beneficiary_code_seq");
-
             modelBuilder.Entity("AreaEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -592,9 +590,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("birth_date");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("citext")
+                    b.Property<int>("Code")
+                        .HasColumnType("integer")
                         .HasColumnName("code");
 
                     b.Property<DateTime>("CreatedAt")
@@ -726,10 +723,6 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasIndex("AreaId")
                         .HasDatabaseName("ix_beneficiaries_area_id");
 
-                    b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_beneficiaries_code");
-
                     b.HasIndex("FullCode")
                         .IsUnique()
                         .HasDatabaseName("ix_beneficiaries_full_code");
@@ -746,6 +739,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("NormalizedLastName", "NormalizedFirstName")
                         .HasDatabaseName("ix_beneficiaries_normalized_last_name_normalized_first_name");
+
+                    b.HasIndex("RegistrationFacilityId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiaries_registration_facility_id_code");
 
                     b.HasIndex("RegistrationFacilityId", "CreatedAt")
                         .HasDatabaseName("ix_beneficiaries_registration_facility_id_created_at");

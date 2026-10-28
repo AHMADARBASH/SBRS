@@ -20,8 +20,18 @@ public interface IBeneficiaryRepository
     /// <summary>Highest Disambiguator for this MatchKey plus one (0 when the key is unused).</summary>
     Task<int> GetNextDisambiguatorAsync(string matchKey, CancellationToken ct);
 
-    /// <summary>Next value of the database sequence used for Beneficiary.Code (starts at 1).</summary>
-    Task<int> GetNextCodeAsync(CancellationToken cancellationToken);
+    /// <summary>
+    /// Places a row lock (SELECT ... FOR UPDATE) on the facility so registrations of that
+    /// facility are serialized: the per-facility code sequence cannot race between saves.
+    /// </summary>
+    Task LockRegistrationFacilityAsync(Guid facilityId, CancellationToken ct);
+
+    /// <summary>
+    /// Highest Code among the beneficiaries registered at the given facility, or 0 when none.
+    /// Beneficiaries are never hard-deleted (they are deactivated instead), so the max Code
+    /// is always available and a number is never reused; a hard delete would allow code reuse.
+    /// </summary>
+    Task<int> GetMaxCodeForFacilityAsync(Guid facilityId, CancellationToken ct);
 
     /// <summary>Active beneficiaries waiting for a match review, oldest first. facilityId null = all facilities.</summary>
     Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken ct);

@@ -21,13 +21,14 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
         builder.Property(x => x.NormalizedMotherName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.MatchKey).IsRequired().HasMaxLength(64).IsFixedLength().IsUnicode(false);
         builder.Property(x => x.DistinctReason).HasMaxLength(500);
-        builder.Property(x=>x.Code).IsRequired().HasColumnType("citext");
+        builder.Property(x => x.Code).IsRequired();   // int column; NOT database-generated (no identity/sequence)
         builder.Property(x => x.FullCode).IsRequired().HasMaxLength(50).HasColumnType("citext");
         builder.Property(x=> x.Gender).IsRequired();
 
         builder.HasIndex(x => new { x.MatchKey, x.Disambiguator }).IsUnique();
-        builder.HasIndex(x => x.Code).IsUnique();
-        builder.HasIndex(x => x.FullCode).IsUnique();
+        // the number is per facility: the same Code may exist in different facilities
+        builder.HasIndex(x => new { x.RegistrationFacilityId, x.Code }).IsUnique();
+        builder.HasIndex(x => x.FullCode).IsUnique();   // unique across the whole system
         builder.HasIndex(x => new { x.NormalizedLastName, x.BirthDate }); // probable-match search
         builder.HasIndex(x => new { x.NormalizedLastName, x.NormalizedFirstName }); // name search
         builder.HasIndex(x => new { x.RegistrationFacilityId, x.MatchReviewStatus }); // pending list
