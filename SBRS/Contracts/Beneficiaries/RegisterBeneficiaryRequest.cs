@@ -14,5 +14,6 @@ public sealed record RegisterBeneficiaryRequest(
     bool Gender,
     DateOnly EnrollmentDate,
     Guid AreaId,
+    Guid NationalityId,
     Guid IdentityTypeId,
     string? IdentityValue);

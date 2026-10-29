@@ -27,7 +27,7 @@ public class BeneficiariesController(ISender sender) : ControllerBase
     public async Task<ActionResult<RegisterBeneficiaryResultDto>> Register(RegisterBeneficiaryRequest request, CancellationToken ct) =>
         Ok(await sender.Send(new RegisterBeneficiaryCommand(request.FirstName, request.FatherName,
             request.LastName, request.MotherName, request.BirthDate, request.IsBirthDateEstimated,
-            request.Gender, request.EnrollmentDate, request.AreaId,
+            request.Gender, request.EnrollmentDate, request.AreaId, request.NationalityId,
             request.IdentityTypeId, request.IdentityValue), ct));
 
     [HttpGet]

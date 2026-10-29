@@ -673,6 +673,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("mother_name");
 
+                    b.Property<Guid>("NationalityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("nationality_id");
+
                     b.Property<string>("NormalizedFatherName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -729,6 +733,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("MergedIntoBeneficiaryId")
                         .HasDatabaseName("ix_beneficiaries_merged_into_beneficiary_id");
+
+                    b.HasIndex("NationalityId")
+                        .HasDatabaseName("ix_beneficiaries_nationality_id");
 
                     b.HasIndex("MatchKey", "Disambiguator")
                         .IsUnique()
@@ -1656,6 +1663,13 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasForeignKey("MergedIntoBeneficiaryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_beneficiaries_beneficiaries_merged_into_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.NationalityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("NationalityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiaries_nationalities_nationality_id");
 
                     b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
                         .WithMany()

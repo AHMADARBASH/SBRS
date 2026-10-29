@@ -17,6 +17,7 @@ public class BeneficiaryEntity : BaseEntity
     public bool Gender { get; private set; }
     public DateOnly EnrollmentDate { get; private set; }
     public Guid AreaId { get; private set; }
+    public Guid NationalityId { get; private set; }
 
     // Derived matching columns (never set from outside)
     public string NormalizedFirstName { get; private set; } = default!;
@@ -42,13 +43,14 @@ public class BeneficiaryEntity : BaseEntity
 
     public BeneficiaryEntity(string firstName, string fatherName, string lastName, string motherName,
         DateOnly birthDate, bool isBirthDateEstimated, bool gender, DateOnly enrollmentDate, Guid areaId,
-        int code, string fullCode, Guid registrationFacilityId,
+        Guid nationalityId, int code, string fullCode, Guid registrationFacilityId,
         int disambiguator, BeneficiaryMatchReviewStatus matchReviewStatus)
     {
         if (code <= 0) throw new DomainException("Code must be positive.");
         if (string.IsNullOrWhiteSpace(fullCode)) throw new DomainException("Full code is required.");
         if (registrationFacilityId == Guid.Empty) throw new DomainException("Registration facility is required.");
         if (areaId == Guid.Empty) throw new DomainException("Area is required.");
+        if (nationalityId == Guid.Empty) throw new DomainException("Nationality is required.");
         if (disambiguator < 0) throw new DomainException("Disambiguator cannot be negative.");
         if (matchReviewStatus is not (BeneficiaryMatchReviewStatus.NoMatchFound or BeneficiaryMatchReviewStatus.PendingReview))
             throw new DomainException("A new beneficiary must start as NoMatchFound or PendingReview.");
@@ -59,6 +61,7 @@ public class BeneficiaryEntity : BaseEntity
 
         EnrollmentDate = enrollmentDate;
         AreaId = areaId;
+        NationalityId = nationalityId;
         Code = code;
         FullCode = fullCode.Trim();
         RegistrationFacilityId = registrationFacilityId;

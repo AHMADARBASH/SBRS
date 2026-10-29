@@ -22,6 +22,7 @@ public sealed record RegisterBeneficiaryCommand(
     bool Gender,
     DateOnly EnrollmentDate,
     Guid AreaId,
+    Guid NationalityId,
     Guid IdentityTypeId,
     string? IdentityValue) : IRequest<RegisterBeneficiaryResultDto>;
 
@@ -49,6 +50,7 @@ public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<Regi
             .WithMessage("Enrollment date cannot be in the future.");
 
         RuleFor(x => x.AreaId).NotEmpty();
+        RuleFor(x => x.NationalityId).NotEmpty();
 
         RuleFor(x => x.IdentityTypeId).NotEmpty();
         RuleFor(x => x.IdentityValue).MaximumLength(30);   // the regex of the type does the real validation
@@ -60,6 +62,7 @@ public sealed class RegisterBeneficiaryCommandHandler(
     IFacilityRepository facilities,
     IGeographyRepository geography,
     IIdentityTypeRepository identityTypes,
+    INationalityRepository nationalities,
     IBeneficiaryIdentityRepository identities,
     IBeneficiaryMatchService matchService,
     ICurrentUser currentUser,
@@ -79,6 +82,10 @@ public sealed class RegisterBeneficiaryCommandHandler(
         // The area must exist. It carries the city implicitly; the request never contains the city.
         var area = await geography.GetAreaByIdAsync(request.AreaId, cancellationToken)
             ?? throw new DomainException("The selected area does not exist.");
+
+        // The nationality must exist; it is stored on the beneficiary itself, not on the (future) profile.
+        _ = await nationalities.GetByIdAsync(request.NationalityId, cancellationToken)
+            ?? throw new DomainException("The selected nationality does not exist.");
 
         // The identity is validated early so the user gets the error before scoring anything.
         var identityType = await identityTypes.GetByIdAsync(request.IdentityTypeId, cancellationToken)
@@ -118,7 +125,8 @@ public sealed class RegisterBeneficiaryCommandHandler(
 
             var beneficiary = new BeneficiaryEntity(
                 request.FirstName, request.FatherName, request.LastName, request.MotherName,
-                birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate, request.AreaId,
+                birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate,
+                request.AreaId, request.NationalityId,
                 code, fullCode, facilityId, disambiguator, reviewStatus);
 
             await beneficiaries.AddAsync(beneficiary, cancellationToken);
