@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SBRS.Application.Features.Users.Commands;
 using SBRS.Application.Features.Users.DTOs;
+using SBRS.Application.Features.Users.Queries;
 using SBRS.Authorization;
 using SBRS.Contracts.Users;
 
@@ -13,6 +14,11 @@ namespace SBRS.Controllers;
 [Authorize(Policy = Policies.SystemAdminOnly)]
 public class UsersController(ISender sender) : ControllerBase
 {
+    // which role to use when creating a user (and which ids that role expects)
+    [HttpGet("Roles")]
+    public async Task<ActionResult<IReadOnlyList<RoleDto>>> Roles(CancellationToken ct) =>
+        Ok(await sender.Send(new GetRolesQuery(), ct));
+
     [HttpPost]
     [Route("CreateUser")]
     public async Task<ActionResult<UserDto>> Create(CreateUserRequest r, CancellationToken ct)
