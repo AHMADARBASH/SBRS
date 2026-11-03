@@ -1,0 +1,21 @@
+trigger:
+  branches:
+    include:
+      - master        # change to master if that's your branch name
+
+pool:
+  name: SBRS-Pool   # must match your agent pool name exactly
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      rsync -av --delete \
+        --exclude '.git' \
+        --exclude '.env' \
+        --exclude 'node_modules' \
+        --exclude 'venv' \
+        --exclude 'uploads' \
+        $(Build.SourcesDirectory)/ /var/www/sbrs/SBRS/
+    displayName: Deploy files to /var/www/sbrs/SBRS
