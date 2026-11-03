@@ -1,21 +1,33 @@
 trigger:
   branches:
     include:
-      - master        # change to master if that's your branch name
+      - master
 
 pool:
-  name: SBRS-Pool   # must match your agent pool name exactly
+  name: SBRS-Pool
+
+variables:
+  projectPath: 'SBRS/SBRS.csproj'      # path to your .csproj inside the repo
+  deployPath: '/var/www/sbrs/SBRS'
+  publishDir: '$(Build.ArtifactStagingDirectory)/publish'
 
 steps:
   - checkout: self
     clean: true
 
+  - script: dotnet publish $(projectPath) -c Release -o $(publishDir)
+    displayName: Build & publish
+
   - script: |
       rsync -av --delete \
-        --exclude '.git' \
-        --exclude '.env' \
-        --exclude 'node_modules' \
-        --exclude 'venv' \
-        --exclude 'uploads' \
-        $(Build.SourcesDirectory)/ /var/www/sbrs/SBRS/
-    displayName: Deploy files to /var/www/sbrs/SBRS
+        --exclude 'appsettings.Production.json' \
+        --exclude 'wwwroot/uploads' \
+        --exclude 'logs' \
+        $(publishDir)/ $(deployPath)/
+    displayName: Deploy to $(deployPath)
+
+  - script: sudo /usr/bin/systemctl restart sbrs
+    displayName: Restart SBRS
+
+  - script: sleep 5 && systemctl is-active sbrs
+    displayName: Check service is running

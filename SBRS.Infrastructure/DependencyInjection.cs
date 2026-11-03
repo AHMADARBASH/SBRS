@@ -16,10 +16,14 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureDI(
         this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection is not configured.");
+
         services.AddDbContext<AppDbContext>(options =>
      options
          .UseNpgsql(
-             configuration.GetConnectionString("DefaultConnection"),
+             connectionString,
              npgsql => npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName))
          .UseSnakeCaseNamingConvention());
 
