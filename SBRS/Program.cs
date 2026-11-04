@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using SBRS;
 using SBRS.Infrastructure.Persistence.Seed;
 
@@ -40,6 +41,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
     });
 }
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.UseExceptionHandler();
 
