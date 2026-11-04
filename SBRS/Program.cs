@@ -14,11 +14,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAppDI(builder.Configuration);
 
 // CORS: origins come from configuration; never AllowAnyOrigin together with credentials.
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
-    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
-    .AllowAnyHeader()        // includes X-Client-Type (forces the preflight) and Authorization
-    .AllowAnyMethod()
-    .AllowCredentials()));   // required so browsers keep the refresh cookie; only with a configured origin list
+var origins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+{
+    policy.AllowAnyHeader().AllowAnyMethod();
+
+    if (origins.Length == 0 || origins.Contains("*"))
+        policy.SetIsOriginAllowed(_ => true).AllowCredentials();
+    else
+        policy.WithOrigins(origins).AllowCredentials();
+}));  // required so browsers keep the refresh cookie; only with a configured origin list
 
 var app = builder.Build();
 
