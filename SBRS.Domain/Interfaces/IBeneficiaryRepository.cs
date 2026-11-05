@@ -21,6 +21,15 @@ public interface IBeneficiaryRepository
     Task<int> GetNextDisambiguatorAsync(string matchKey, CancellationToken ct);
 
     /// <summary>
+    /// Beneficiaries holding any of the given identity type + document-number pairs
+    /// (unregistered empty values ignored). These are 100% match candidates:
+    /// used by registration and match review, excluding the record under review.
+    /// </summary>
+    Task<IReadOnlyList<BeneficiaryEntity>> GetByExactIdentityAsync(
+        IReadOnlyCollection<(Guid IdentityTypeId, string Value)> identities,
+        Guid? excludeBeneficiaryId, CancellationToken ct);
+
+    /// <summary>
     /// Places a row lock (SELECT ... FOR UPDATE) on the facility so registrations of that
     /// facility are serialized: the per-facility code sequence cannot race between saves.
     /// </summary>

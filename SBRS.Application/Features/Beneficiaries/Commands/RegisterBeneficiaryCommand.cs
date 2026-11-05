@@ -99,7 +99,9 @@ public sealed class RegisterBeneficiaryCommandHandler(
         var key = BeneficiaryIdentityKey.From(request.FirstName, request.FatherName, request.LastName,
             request.MotherName, birthDate);
 
-        var match = await matchService.FindAsync(key, request.IsBirthDateEstimated, null, cancellationToken);
+        // the registration identity participates in matching: the same document number is a 100% case
+        var match = await matchService.FindAsync(key, request.IsBirthDateEstimated, null, cancellationToken,
+            new[] { (identityType.Id, identityValue) });
 
         var reviewStatus = match.Status == BeneficiaryMatchStatus.NotFound
             ? BeneficiaryMatchReviewStatus.NoMatchFound

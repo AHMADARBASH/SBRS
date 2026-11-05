@@ -15,6 +15,14 @@ public static class BeneficiaryMatchScorer
     private const int MotherNameWeight = 25;
     private const int BirthDateWeight = 15;
 
+    /// <summary>
+    /// The same identity document (type + number) is a 100% certain match even when the five-field
+    /// key differs: names may be misspelled and birth dates estimated, but the document number belongs
+    /// to the person. A human still reviews it (PendingReview) before it is merged.
+    /// </summary>
+    public static BeneficiaryMatch EvaluateSameIdentity(BeneficiaryEntity candidate) =>
+        new(candidate, BeneficiaryMatchStatus.Exact, 100, BeneficiaryMatchReasons.SameIdentity);
+
     public static BeneficiaryMatch Evaluate(BeneficiaryIdentityKey input, bool isInputBirthDateEstimated,
         BeneficiaryEntity candidate)
     {

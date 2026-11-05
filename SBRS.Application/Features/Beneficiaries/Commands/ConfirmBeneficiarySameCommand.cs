@@ -23,8 +23,9 @@ public sealed class ConfirmBeneficiarySameCommandValidator : AbstractValidator<C
 }
 
 public sealed class ConfirmBeneficiarySameCommandHandler(
-    IBeneficiaryRepository repository, IBeneficiaryMatchService matchService,
-    ICurrentUser currentUser, IUnitOfWork unitOfWork) : IRequestHandler<ConfirmBeneficiarySameCommand>
+    IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository,
+    IBeneficiaryMatchService matchService, ICurrentUser currentUser, IUnitOfWork unitOfWork)
+    : IRequestHandler<ConfirmBeneficiarySameCommand>
 {
     public async Task Handle(ConfirmBeneficiarySameCommand request, CancellationToken cancellationToken)
     {
@@ -39,10 +40,14 @@ public sealed class ConfirmBeneficiarySameCommandHandler(
         if (beneficiary.MatchReviewStatus != BeneficiaryMatchReviewStatus.PendingReview)
             throw new DomainException("This beneficiary has no pending match review.");
 
-        // The survivor must be one of the system's own candidates for this case.
+        // The survivor must be one of the system's own candidates for this case: by the five-field
+        // key or by the same identity document (both are candidates the review can merge on).
         var key = BeneficiaryIdentityKey.From(beneficiary.FirstName, beneficiary.FatherName,
             beneficiary.LastName, beneficiary.MotherName, beneficiary.BirthDate);
-        var result = await matchService.FindAsync(key, beneficiary.IsBirthDateEstimated, beneficiary.Id, cancellationToken);
+        var ownIdentities = await identityRepository.GetByBeneficiaryIdAsync(beneficiary.Id, cancellationToken);
+
+        var result = await matchService.FindAsync(key, beneficiary.IsBirthDateEstimated, beneficiary.Id,
+            cancellationToken, ownIdentities.Select(i => (i.IdentityTypeId, i.Value)).ToList());
 
         if (!result.Matches.Any(m => m.Beneficiary.Id == request.ExistingBeneficiaryId))
             throw new DomainException("The selected beneficiary is not one of the match candidates.");

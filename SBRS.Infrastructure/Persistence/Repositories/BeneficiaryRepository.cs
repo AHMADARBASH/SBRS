@@ -43,6 +43,41 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
         return max.HasValue ? max.Value + 1 : 0;
     }
 
+    public async Task<IReadOnlyList<BeneficiaryEntity>> GetByExactIdentityAsync(
+        IReadOnlyCollection<(Guid IdentityTypeId, string Value)> identities,
+        Guid? excludeBeneficiaryId, CancellationToken ct)
+    {
+        // "" is the UNREGISTERED value: every beneficiary may hold it, so it never 100%-matches.
+        var pairs = identities.Where(i => i.Value != string.Empty).ToList();
+        if (pairs.Count == 0) return Array.Empty<BeneficiaryEntity>();
+
+        var typeIds = pairs.Select(p => p.IdentityTypeId).Distinct().ToList();
+
+        var query = db.BeneficiaryIdentities.AsNoTracking()
+            .Where(x => x.Value != string.Empty && typeIds.Contains(x.IdentityTypeId));
+
+        if (excludeBeneficiaryId is { } excluded)
+            query = query.Where(x => x.BeneficiaryId != excluded);
+
+        var rows = await query
+            .Select(x => new { x.BeneficiaryId, x.IdentityTypeId, x.Value })
+            .ToListAsync(ct);
+
+        // keep only the rows whose (type, value) pair is one of the wanted pairs
+        var wanted = pairs.ToHashSet();
+        var resultIds = rows
+            .Where(r => wanted.Contains((r.IdentityTypeId, r.Value)))
+            .Select(r => r.BeneficiaryId)
+            .Distinct()
+            .ToList();
+
+        if (resultIds.Count == 0) return Array.Empty<BeneficiaryEntity>();
+
+        return await db.Beneficiaries.AsNoTracking()
+            .Where(b => resultIds.Contains(b.Id))
+            .ToListAsync(ct);
+    }
+
     public async Task AddAsync(BeneficiaryEntity beneficiary, CancellationToken ct) =>
         await db.Beneficiaries.AddAsync(beneficiary, ct);
 

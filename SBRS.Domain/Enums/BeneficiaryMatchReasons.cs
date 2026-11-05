@@ -11,5 +11,6 @@ public enum BeneficiaryMatchReasons
     SameBirthDate = 16,
     SameBirthYear = 32,          // only when one of the dates is estimated
     SimilarSpelling = 64,        // at least one name matched by edit distance, not equality
-    SameMotherLastNameBirthDate = 128 // possible twins: first name differs
+    SameMotherLastNameBirthDate = 128, // possible twins: first name differs
+    SameIdentity = 256           // the same identity type + document number: 100% certain, key need not match
 }

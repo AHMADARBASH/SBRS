@@ -35,7 +35,11 @@ public sealed class GetMatchCandidatesQueryHandler(
         var key = BeneficiaryIdentityKey.From(beneficiary.FirstName, beneficiary.FatherName,
             beneficiary.LastName, beneficiary.MotherName, beneficiary.BirthDate);
 
-        var result = await matchService.FindAsync(key, beneficiary.IsBirthDateEstimated, beneficiary.Id, cancellationToken);
+        // the record's own identities take part in matching (same document number = 100% case)
+        var ownIdentities = await identityRepository.GetByBeneficiaryIdAsync(beneficiary.Id, cancellationToken);
+
+        var result = await matchService.FindAsync(key, beneficiary.IsBirthDateEstimated, beneficiary.Id,
+            cancellationToken, ownIdentities.Select(i => (i.IdentityTypeId, i.Value)).ToList());
 
         // The facility admin sees the identity of each candidate to decide "same person".
         var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
