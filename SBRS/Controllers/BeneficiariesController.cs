@@ -68,4 +68,13 @@ public class BeneficiariesController(ISender sender) : ControllerBase
         await sender.Send(new ConfirmBeneficiaryNotAMatchCommand(id, request.Reason), ct);
         return NoContent();
     }
+
+    // Deletes the record visually for the frontend, no hard delete: the server only sets IsActive = false.
+    [HttpDelete("{id:guid}")]
+    [Authorize(Policy = Policies.DeactivateBeneficiaries)]
+    public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new DeactivateBeneficiaryCommand(id), ct);
+        return NoContent();
+    }
 }

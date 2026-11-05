@@ -158,6 +158,7 @@ Controllers: `api/accommodation-types`, `api/disability-types`, `api/education-t
 | GET | `{id}/MatchCandidates` | SA, FA | Scored probable matches |
 | POST | `{id}/ConfirmSame` { existingBeneficiaryId } | SA, FA | Merge the duplicate into the existing record. Must be one of the server's own candidates |
 | POST | `{id}/ConfirmNotAMatch` { reason? } | SA, FA | Keep the new record as distinct |
+| DELETE | `{id}` | SA, FA, DE | Soft delete — `is_active = false`; never a hard delete (codes are never reused). Returns 204 |
 
 ---
 

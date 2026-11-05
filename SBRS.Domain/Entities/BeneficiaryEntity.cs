@@ -123,7 +123,14 @@ public class BeneficiaryEntity : BaseEntity
         ReviewedBy = reviewedBy;
     }
 
-    public void Deactivate() => IsActive = false;
+    /// <summary>Soft delete: the record stays with its codes for the audit trail; a number and FullCode are never reused.</summary>
+    public void Deactivate()
+    {
+        if (!IsActive)
+            throw new DomainException("The beneficiary is already deactivated.");
+
+        IsActive = false;
+    }
 
     private void EnsurePendingReview()
     {
