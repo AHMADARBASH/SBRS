@@ -17,7 +17,7 @@ This is the documentation hub of the SBRS (Syria Beneficiary Registration System
 
 | Area | Start file | Audience |
 |---|---|---|
-| Analysis & requirements | [01-analysis/README](01-analysis/vision-and-scope.md) | Owner, SARC management, new team members |
+| Analysis & requirements | [01-analysis/vision-and-scope.md](01-analysis/vision-and-scope.md) · [use-cases/README.md](01-analysis/use-cases/README.md) | Owner, SARC management, new team members |
 | Design & decisions | [02-design/architecture.md](02-design/architecture.md) | Backend, reviewers |
 | Integration (build screens) | [03-integration/README.md](03-integration/README.md) | Web/Frontend, mobile developers |
 | Operations | [04-operations/local-setup.md](04-operations/local-setup.md) | DevOps, backend |

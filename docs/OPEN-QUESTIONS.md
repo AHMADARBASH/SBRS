@@ -45,6 +45,7 @@ When one of these is answered, change the status below, update the affected file
 | OQ-30 | Deactivating a user currently revokes all their refresh tokens `[BUILT]`, but their access tokens stay valid up to 240 min (see OQ-05). Linked to OQ-05. | see OQ-05 | auth-guide.md |
 | OQ-31 | `RefreshTokens.ExpiresAt` is nullable ("null = never expires") but every issued token sets an expiry; plan the cleanup job for burned rows [PLANNED]. Decide retention period. | a) 30 d after revocation; b) 90 d | database-and-migrations.md |
 | OQ-32 | `AccommodationTypes`, `DisabilityTypes`, `EducationTypes` APIs exist and are SystemAdmin-managed, but nothing consumes them yet (no BeneficiaryProfile table). When are they wired? | a) with BeneficiaryProfile (OQ-23); b) leave as lookups | enums-and-lookups.md |
+| OQ-33 | BR-FAC-06 intent says "FacilityAdmin/DataEntry [manage] only their own facility", but facility Add/Update/Deactivate use the `OrganizationLevel` policy (SA + OA only) and FA/DE have no `branchId`/facility-edit rights. Who may edit a facility in practice? | a) keep OrganizationLevel and fix BR-FAC-06 wording; b) add a facility-level policy for FA | roles-and-permissions.md, business-rules.md, endpoint-reference.md |
 
 ## Odds and ends (styling/maintenance, low priority)
 
