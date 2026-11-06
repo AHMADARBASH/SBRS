@@ -10,13 +10,14 @@ Every requirement carries a status tag; `[BUILT]` = verified in code, `[PLANNED]
 | NFR-SEC-01 | Authentication via JWT bearer tokens; every endpoint (except the anonymous auth trio + swagger) requires a logged-in user through the **fallback policy** | `[BUILT]` | `Policies.Configure` |
 | NFR-SEC-02 | Refresh tokens rotate on every use, are single-use, stored SHA-256 hashed, family-revoked on reuse | `[BUILT]` | `RefreshTokenService` (ADR-005) |
 | NFR-SEC-03 | Web refresh token delivered only as HttpOnly cookie; access token never persisted client-side | `[BUILT]` (cookie) / `[ASSUMED]` (client storage discipline) | `RefreshCookieService` |
-| NFR-SEC-04 | Password policy: ≥ 8 chars with digit, upper, lower. **No symbol requirement today** (OQ-13); default Identity lockout on | `[BUILT]` / `[OPEN]` symbol | `AddInfrastructureDI` |
+| NFR-SEC-04 | Password policy: ≥ 8 chars with digit, upper, lower. **No symbol requirement today** (OQ-13). Account lockout configured in options but **not effective** — `LockoutEnabled` is never set true on users (OQ-36) | `[BUILT]` / `[OPEN]` symbol + lockout | `AddInfrastructureDI`, `UserAdminService` |
 | NFR-SEC-05 | Role-based authorization with one role per user; policies per module | `[BUILT]` | `Policies.cs` |
 | NFR-SEC-06 | Data scoping per role/facility; out-of-scope = 404 | `[BUILT]` | repositories `Scoped()` (ADR-006) |
 | NFR-SEC-07 | Deactivation / role change immediately revokes refresh tokens; access token remains valid up to 4 h (accept for now or shorten — OQ-05) | `[BUILT]` / `[OPEN]` lifetime | `UserAdminService`, `RefreshTokenService` |
 | NFR-SEC-08 | CORS: explicit origins + credentials for the cookie flow; never `AllowAnyOrigin` with credentials. Current `"*"` default behaves as allow-all-with-credentials — tighten for production (OQ-22) | `[BUILT]` / `[OPEN]` prod config | `Program.cs` |
 | NFR-SEC-09 | HTTPS everywhere; HSTS only when configured (ASP.NET defaults) | `[BUILT]` (app.UseHttpsRedirection present) / `[ASSUMED]` reverse proxy TLS | `Program.cs`, deployment docs |
 | NFR-SEC-10 | Rate limiting on sensitive search endpoints | `[PLANNED]` | — |
+| NFR-SEC-11 | JWT validation enforces lifetime with `ClockSkew = Zero` — an expired access token is rejected immediately, no grace window | `[BUILT]` | `DependencyInjection.AddAppDI` |
 
 ## 2. Privacy and data protection
 

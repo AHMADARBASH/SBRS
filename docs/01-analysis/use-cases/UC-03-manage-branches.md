@@ -17,7 +17,7 @@ At least one organization exists (UC-02). Actor: SA anywhere, OA within their ow
 
 ## Main flow
 1. OA (or SA) opens the branch list filtered by organization (`GetByOrganizationId`).
-2. Create: `organizationId`, `arName`, `enName` → `201` with DTO (code optional per current API — unique per org when given).
+2. Create: `organizationId`, `arName`, `enName` → `201` with DTO — ⚠ **the current schema has no branch `code` column at all** (see OQ-34); the intended per-organization code uniqueness is not implementable yet.
 3. Rename via `Update/{id}` (`arName`, `enName` only — the parent organization is immutable, BR-GEN-03).
 4. List endpoints are scoped: OA reads a foreign org's branches as empty/404.
 
@@ -28,7 +28,7 @@ At least one organization exists (UC-02). Actor: SA anywhere, OA within their ow
 | Situation | System behaviour |
 |---|---|
 | Unknown organizationId | `404` |
-| Duplicate (org, code) | `409` unique violation |
+| Duplicate branch code | not possible today — no code column exists (OQ-34) |
 | Update deactivated branch | `400` "A deactivated branch cannot be updated." |
 | Deactivate with active facilities | guard exists (`HasActiveFacilitiesAsync`) but **no endpoint** (OQ-16) → impossible today |
 | `GetById/{id}` response shape | returns a **single-element list** `[BUILT]` (OQ-26) |

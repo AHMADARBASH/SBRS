@@ -31,7 +31,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 
 | ID | Rule | Status | Enforced in |
 |---|---|---|---|
-| BR-BRN-01 | Branch code is unique per organization | `[CONFIRMED]` `[BUILT]` | composite unique index `(organization_id, code)` in `BranchConfiguration` |
+| BR-BRN-01 | Branch code is unique per organization | `[CONFIRMED]` ⚠ **not built** — the `branches` table has no `code` column at all | — (OQ-34) |
 | BR-BRN-02 | The HQ is a branch, not a separate entity | `[CONFIRMED]` | data-entry convention; no HQ type in code |
 | BR-BRN-03 | A branch cannot be deactivated while it has active facilities | `[ASSUMED]` `[BUILT]` (guard implemented) ⚠ but **no deactivate endpoint exists** | `IBranchRepository.HasActiveFacilitiesAsync` — never called (OQ-16) |
 | BR-BRN-04 | A deactivated branch cannot be updated, and cannot be deactivated twice | `[CONFIRMED]` `[BUILT]` | `BranchEntity.Update/Deactivate` |
@@ -70,7 +70,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | BR-USR-01 | Exactly one role per user. Roles: SystemAdmin, OrganizationAdmin, BranchAdmin, ProjectCoordinator, FacilityAdmin, DataEntry | `[CONFIRMED]` `[BUILT]` | `Roles.All`, `UserAdminService` (single `AddToRoleAsync`) |
 | BR-USR-02 | Only SystemAdmin creates, updates, deactivates users and resets passwords | `[CONFIRMED]` `[BUILT]` | controller-level `Policies.SystemAdminOnly` on Users |
 | BR-USR-03 | Scope: OrganizationAdmin needs OrganizationId; BranchAdmin needs BranchId `[PLANNED]`; FA/DE need exactly one FacilityId; ProjectCoordinator ≥ 1 assigned facility `[PLANNED]`. OrganizationId is derived by the system, never hand-picked | `[CONFIRMED]` rule `[BUILT]` for OA/FA/DE in `UserAdminService.ResolveScopeAsync`; BA/PC creation rejected with "cannot be managed yet" | `AddUserCommandValidator` + `UserAdminService` (OQ-04, OQ-28) |
-| BR-USR-04 | Login by username only (no email). Password ≥ 8 chars with digit + upper + lower (`RequireSymbol` is **not** enabled — OQ-13). Default lockout enabled | `[CONFIRMED]` rule `[BUILT]` partial (no symbol requirement) | `AddInfrastructureDI` Identity options; Identity lockout defaults |
+| BR-USR-04 | Login by username only (no email). Password ≥ 8 chars with digit + upper + lower (`RequireSymbol` is **not** enabled — OQ-13). "Default lockout enabled" ⚠ **not effective**: `LockoutEnabled` is never set true on new users, so repeated failures never lock `[BUILT gap]` | `[CONFIRMED]` rule / `[BUILT]` partial | `AddInfrastructureDI` Identity options; `UserAdminService.AddAsync` (OQ-36) |
 | BR-USR-05 | Inactive, locked-out or role-less users cannot log in or refresh | `[CONFIRMED]` `[BUILT]` | `IdentityService.ValidateCredentialsAsync`, `RefreshTokenService.RotateAsync` (user reloaded) |
 | BR-USR-06 | Deactivating a user revokes their refresh tokens | `[CONFIRMED]` `[BUILT]` | `DeactivateUserCommandHandler` → `IRefreshTokenService.RevokeAllForUserAsync` |
 | BR-USR-07 | `IsMobile` marks users who work on the mobile app; carried as the `is_mobile` claim | `[CONFIRMED]` `[BUILT]` | `TokenService.CreateToken`, `ApplicationUser.IsMobile` |

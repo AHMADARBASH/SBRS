@@ -49,7 +49,7 @@ Created by SA via `POST api/Users/CreateUser` after the base SystemAdmin exists.
 | `facadmin.h001` | FacilityAdmin | one facility | false | match review queue, facility list |
 | `dataentry.h001` | DataEntry | same facility as `facadmin.h001` | false | register, search, list |
 | `dataentry.mob` | DataEntry | one facility | **true** | mobile flows, `is_mobile` claim |
-| `locked.user` | any | — | false | lockout after repeated bad passwords `[ASSUMED: default lockout enabled]` |
+| `locked.user` | any | — | false | lockout test — ⚠ currently never locks (`LockoutEnabled` never set true, OQ-36) |
 | `inactive.user` | any | — | false | login/refresh refusal after deactivation |
 
 ## 4. Minimal viable test dataset

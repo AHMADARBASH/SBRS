@@ -46,9 +46,14 @@ When one of these is answered, change the status below, update the affected file
 | OQ-31 | `RefreshTokens.ExpiresAt` is nullable ("null = never expires") but every issued token sets an expiry; plan the cleanup job for burned rows [PLANNED]. Decide retention period. | a) 30 d after revocation; b) 90 d | database-and-migrations.md |
 | OQ-32 | `AccommodationTypes`, `DisabilityTypes`, `EducationTypes` APIs exist and are SystemAdmin-managed, but nothing consumes them yet (no BeneficiaryProfile table). When are they wired? | a) with BeneficiaryProfile (OQ-23); b) leave as lookups | enums-and-lookups.md |
 | OQ-33 | BR-FAC-06 intent says "FacilityAdmin/DataEntry [manage] only their own facility", but facility Add/Update/Deactivate use the `OrganizationLevel` policy (SA + OA only) and FA/DE have no `branchId`/facility-edit rights. Who may edit a facility in practice? | a) keep OrganizationLevel and fix BR-FAC-06 wording; b) add a facility-level policy for FA | roles-and-permissions.md, business-rules.md, endpoint-reference.md |
+| OQ-34 | BR-BRN-01 says "branch code is unique per organization", but the `branches` table has **no code column** (only names + organization). Was the code dropped on purpose, or should branches get a code (impacting any future branch-based coding)? | a) add `code` + unique (org, code) index; b) drop the rule | business-rules.md, UC-03, data-dictionary.md |
+| OQ-35 | BR-GEN-06 says all FKs use restrict, but `branches.organization_id` is configured as `DeleteBehavior.NoAction` while every other domain FK uses `Restrict`. Unify to `Restrict` or document the exception? | a) switch to Restrict; b) keep | data-dictionary.md |
+| OQ-36 | BR-USR-04 says "default lockout enabled", but `UserAdminService.AddAsync` never sets `LockoutEnabled = true` (Column defaults to false), so repeated bad passwords never lock the account. Enable lockout (set the flag at creation) or relax the rule? | a) set `LockoutEnabled = true` at creation; b) drop lockout from the rule | business-rules.md, data-dictionary-identity.md, test-strategy.md |
 
 ## Odds and ends (styling/maintenance, low priority)
 
+- `FacilityTypes` add/update validators allow 50/200-char names while EF config caps at 100/100 — DB error 500 instead of 400 on long input; align validator lengths with EF config.
+- Same class of mismatch: facility Add/Update validators allow `arName`/`enName` ≤ 200 while `facilities.ar_name`/`en_name` are `varchar(100)` — long names end in a 500, not 400.
 - `GET /api/Auth/me` returns the token snapshot of identity claims, not the DB user; acceptable, but document it as "claims reader".
 - `FacilityTypes` add/update validators allow 50/200-char names while EF config caps at 100/100 — DB error 500 instead of 400 on long input; align validator lengths with EF config.
 - `BrowserRouter`'s `UserAdminService.ResolveScopeAsync` throws `NotFoundException(nameof(OrganizationEntity), "")` with an empty key; include the id.
