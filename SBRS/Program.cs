@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SBRS;
+using SBRS.Infrastructure.Persistence;
 using SBRS.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,8 +35,26 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
-    await seeder.SeedAsync();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // Schema first: the production database is migrated by the application itself, no manual SQL.
+    if (scope.ServiceProvider.GetRequiredService<IConfiguration>()
+            .GetValue("Database:ApplyMigrationsOnStartup", true))
+    {
+        try
+        {
+            await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Database migration failed; the application cannot start safely.");
+            throw;   // a half-migrated schema is worse than downtime
+        }
+    }
+
+    // Identity bootstrap (roles + seed admin), then the idempotent reference data.
+    await scope.ServiceProvider.GetRequiredService<IdentitySeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<ReferenceDataSeeder>().SeedAsync();
 }
 
 // Configure the HTTP request pipeline.

@@ -5,7 +5,7 @@ It was generated from the actual authorization code (`SBRS/Authorization/Policie
 `[Authorize]` attributes, and the data scoping inside the query/command handlers), so it matches the
 running API — not just intentions.
 
-Generated: 2026-11-04.
+Generated: 2026-11-09.
 
 ---
 
@@ -138,13 +138,18 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 ### Lookup tables (same pattern in each controller)
 
 Controllers: `api/accommodation-types`, `api/disability-types`, `api/education-types`,
-`api/facility-types`, `api/identity-types`, `api/nationalities`, `api/partners`
+`api/facility-types`, `api/identity-types`, `api/nationalities`, `api/partners` — **and the
+profile lookups** `api/beneficiary-statuses`, `api/marital-statuses`, `api/disability-reasons`,
+`api/chronic-diseases`, `api/education-issues` (GetAll only).
 
 | Method | Path | Access |
 |---|---|---|
 | GET | `GetAll` (also `api/partners/GetAll`) | Any logged-in user |
 | POST | `Add` | **SA only** |
 | PUT | `Update` | **SA only** |
+
+The profile lookups have **no Add/Update** — they are seeded by the server (DTO shape
+`{ id, code, arName, enName }`, ordered by code).
 
 ### Beneficiaries — `api/Beneficiaries`
 
@@ -159,6 +164,8 @@ Controllers: `api/accommodation-types`, `api/disability-types`, `api/education-t
 | POST | `{id}/ConfirmSame` { existingBeneficiaryId } | SA, FA | Merge the duplicate into the existing record. Must be one of the server's own candidates |
 | POST | `{id}/ConfirmNotAMatch` { reason? } | SA, FA | Keep the new record as distinct |
 | DELETE | `{id}` | SA, FA, DE | Soft delete — `is_active = false`; never a hard delete (codes are never reused). Returns 204 |
+| GET | `GetProfile/{beneficiaryId}` | SA, FA, DE | The sensitive second step (phones, displacement, education, marital, disabilities, chronic diseases, status). Ids only — resolve names via the profile lookups. **404 when no profile was saved yet.** Same facility scoping as `{id}/Identities`. Never included in Search/GetAll/PendingReview/MatchCandidates |
+| PUT | `SaveProfile/{beneficiaryId}` | SA, FA, DE | Create (201) or **full replace** (200). Body: `{ phoneNumber1?, phoneNumber2?, isDisplaced, displacementDate?, oldAreaId?, accommodationTypeId, isDisabled, disabilities: [{disabilityTypeId, reasonId}], chronicDiseaseIds: [], beneficiaryStatusId?, currentWork?, previousWork?, educationTypeId, educationIssueId?, maritalStatusId, wivesNumber?, childrenNumber? }` — omitted `beneficiaryStatusId` defaults to `NOT_AVAILABLE`; every field must be sent on replace |
 
 ---
 

@@ -5,6 +5,9 @@ using SBRS.Application.Common.Models;
 using SBRS.Application.Features.Beneficiaries.Commands;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Queries;
+using SBRS.Application.Features.BeneficiaryProfiles.Commands;
+using SBRS.Application.Features.BeneficiaryProfiles.DTOs;
+using SBRS.Application.Features.BeneficiaryProfiles.Queries;
 using SBRS.Authorization;
 using SBRS.Contracts.Beneficiaries;
 
@@ -77,4 +80,34 @@ public class BeneficiariesController(ISender sender) : ControllerBase
         await sender.Send(new DeactivateBeneficiaryCommand(id), ct);
         return NoContent();
     }
+
+    // The sensitive profile step: 201 on create, 200 on update (full replace every time).
+    [HttpPut]
+    [Route("SaveProfile/{beneficiaryId:guid}")]
+    [Authorize(Policy = Policies.ManageBeneficiaryProfiles)]
+    public async Task<ActionResult<BeneficiaryProfileDto>> SaveProfile(
+        Guid beneficiaryId, [FromBody] SaveBeneficiaryProfileRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new SaveBeneficiaryProfileCommand(
+            beneficiaryId, request.PhoneNumber1, request.PhoneNumber2, request.IsDisplaced,
+            request.DisplacementDate, request.OldAreaId, request.AccommodationTypeId,
+            request.IsDisabled,
+            (request.Disabilities ?? [])
+                .Select(d => new SaveBeneficiaryDisabilityItem(d.DisabilityTypeId, d.ReasonId)).ToList(),
+            request.ChronicDiseaseIds, request.BeneficiaryStatusId,
+            request.CurrentWork, request.PreviousWork,
+            request.EducationTypeId, request.EducationIssueId,
+            request.MaritalStatusId, request.WivesNumber, request.ChildrenNumber), ct);
+
+        return result.Created
+            ? CreatedAtAction(nameof(GetProfile), new { beneficiaryId }, result.Profile)
+            : Ok(result.Profile);
+    }
+
+    // Same endpoint family: reads also answer 404 until a profile was saved.
+    [HttpGet]
+    [Route("GetProfile/{beneficiaryId:guid}")]
+    [Authorize(Policy = Policies.ViewFacilityBeneficiaries)]
+    public async Task<ActionResult<BeneficiaryProfileDto>> GetProfile(Guid beneficiaryId, CancellationToken ct) =>
+        Ok(await sender.Send(new GetBeneficiaryProfileQuery(beneficiaryId), ct));
 }

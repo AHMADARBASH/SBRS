@@ -36,6 +36,15 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<FacilityPartnerEntity> FacilitiesPartners => Set<FacilityPartnerEntity>();
         public DbSet<BeneficiaryEntity> Beneficiaries => Set<BeneficiaryEntity>();
         public DbSet<BeneficiaryIdentityEntity> BeneficiaryIdentities => Set<BeneficiaryIdentityEntity>();
+        // sensitive profile step: not reachable through any search/list feature
+        public DbSet<BeneficiaryProfileEntity> BeneficiaryProfiles => Set<BeneficiaryProfileEntity>();
+        public DbSet<BeneficiaryDisabilityEntity> BeneficiaryDisabilities => Set<BeneficiaryDisabilityEntity>();
+        public DbSet<BeneficiaryChronicDiseaseEntity> BeneficiaryChronicDiseases => Set<BeneficiaryChronicDiseaseEntity>();
+        public DbSet<BeneficiaryStatusEntity> BeneficiaryStatuses => Set<BeneficiaryStatusEntity>();
+        public DbSet<MaritalStatusEntity> MaritalStatuses => Set<MaritalStatusEntity>();
+        public DbSet<DisabilityReasonEntity> DisabilityReasons => Set<DisabilityReasonEntity>();
+        public DbSet<ChronicDiseaseEntity> ChronicDiseases => Set<ChronicDiseaseEntity>();
+        public DbSet<EducationIssueEntity> EducationIssues => Set<EducationIssueEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

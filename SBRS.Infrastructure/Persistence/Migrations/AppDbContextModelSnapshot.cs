@@ -575,6 +575,101 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("addresses", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryChronicDiseaseEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
+
+                    b.Property<Guid>("ChronicDiseaseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("chronic_disease_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_chronic_diseases");
+
+                    b.HasIndex("ChronicDiseaseId")
+                        .HasDatabaseName("ix_beneficiary_chronic_diseases_chronic_disease_id");
+
+                    b.HasIndex("BeneficiaryId", "ChronicDiseaseId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_chronic_diseases_beneficiary_id_chronic_disease");
+
+                    b.ToTable("beneficiary_chronic_diseases", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryDisabilityEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("DisabilityTypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disability_type_id");
+
+                    b.Property<Guid>("ReasonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reason_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_disabilities");
+
+                    b.HasIndex("DisabilityTypeId")
+                        .HasDatabaseName("ix_beneficiary_disabilities_disability_type_id");
+
+                    b.HasIndex("ReasonId")
+                        .HasDatabaseName("ix_beneficiary_disabilities_reason_id");
+
+                    b.HasIndex("BeneficiaryId", "DisabilityTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_disabilities_beneficiary_id_disability_type_id");
+
+                    b.ToTable("beneficiary_disabilities", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -810,6 +905,187 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("beneficiary_identities", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryProfileEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AccommodationTypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("accommodation_type_id");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
+
+                    b.Property<Guid>("BeneficiaryStatusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_status_id");
+
+                    b.Property<short?>("ChildrenNumber")
+                        .HasColumnType("smallint")
+                        .HasColumnName("children_number");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CurrentWork")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("current_work");
+
+                    b.Property<DateOnly?>("DisplacementDate")
+                        .HasColumnType("date")
+                        .HasColumnName("displacement_date");
+
+                    b.Property<Guid?>("EducationIssueId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("education_issue_id");
+
+                    b.Property<Guid>("EducationTypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("education_type_id");
+
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_disabled");
+
+                    b.Property<bool>("IsDisplaced")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_displaced");
+
+                    b.Property<Guid>("MaritalStatusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("marital_status_id");
+
+                    b.Property<Guid?>("OldAreaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("old_area_id");
+
+                    b.Property<string>("PhoneNumber1")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_number1");
+
+                    b.Property<string>("PhoneNumber2")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone_number2");
+
+                    b.Property<string>("PreviousWork")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("previous_work");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<short?>("WivesNumber")
+                        .HasColumnType("smallint")
+                        .HasColumnName("wives_number");
+
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_profiles");
+
+                    b.HasIndex("AccommodationTypeId")
+                        .HasDatabaseName("ix_beneficiary_profiles_accommodation_type_id");
+
+                    b.HasIndex("BeneficiaryId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_profiles_beneficiary_id");
+
+                    b.HasIndex("BeneficiaryStatusId")
+                        .HasDatabaseName("ix_beneficiary_profiles_beneficiary_status_id");
+
+                    b.HasIndex("EducationIssueId")
+                        .HasDatabaseName("ix_beneficiary_profiles_education_issue_id");
+
+                    b.HasIndex("EducationTypeId")
+                        .HasDatabaseName("ix_beneficiary_profiles_education_type_id");
+
+                    b.HasIndex("MaritalStatusId")
+                        .HasDatabaseName("ix_beneficiary_profiles_marital_status_id");
+
+                    b.HasIndex("OldAreaId")
+                        .HasDatabaseName("ix_beneficiary_profiles_old_area_id");
+
+                    b.ToTable("beneficiary_profiles", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_beneficiary_profiles_children_number_range", "children_number IS NULL OR children_number BETWEEN 0 AND 30");
+
+                            t.HasCheckConstraint("ck_beneficiary_profiles_displacement_consistency", "(is_displaced = true) OR (displacement_date IS NULL AND old_area_id IS NULL)");
+
+                            t.HasCheckConstraint("ck_beneficiary_profiles_wives_number_range", "wives_number IS NULL OR wives_number BETWEEN 1 AND 4");
+                        });
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryStatusEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_statuses");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_statuses_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_beneficiary_statuses_en_name");
+
+                    b.ToTable("beneficiary_statuses", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -864,6 +1140,116 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("branches", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.ChronicDiseaseEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_chronic_diseases");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_chronic_diseases_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_chronic_diseases_en_name");
+
+                    b.ToTable("chronic_diseases", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.DisabilityReasonEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_disability_reasons");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_disability_reasons_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_disability_reasons_en_name");
+
+                    b.ToTable("disability_reasons", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.DisabilityTypeEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -907,6 +1293,61 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_disability_types_en_name");
 
                     b.ToTable("disability_types", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.EducationIssueEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_education_issues");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_education_issues_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_education_issues_en_name");
+
+                    b.ToTable("education_issues", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.EducationTypeEntity", b =>
@@ -1206,6 +1647,61 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_identity_types_en_name");
 
                     b.ToTable("identity_types", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.MaritalStatusEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_marital_statuses");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_marital_statuses_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_marital_statuses_en_name");
+
+                    b.ToTable("marital_statuses", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.NationalityEntity", b =>
@@ -1649,6 +2145,47 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_addresses_areas_area_id");
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryChronicDiseaseEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_chronic_diseases_beneficiaries_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.ChronicDiseaseEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ChronicDiseaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_chronic_diseases_chronic_diseases_chronic_disea");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryDisabilityEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_disabilities_beneficiaries_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.DisabilityTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("DisabilityTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_disabilities_disability_types_disability_type_id");
+
+                    b.HasOne("SBRS.Domain.Entities.DisabilityReasonEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ReasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_disabilities_disability_reasons_reason_id");
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryEntity", b =>
                 {
                     b.HasOne("AreaEntity", null)
@@ -1696,6 +2233,56 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_beneficiary_identities_identity_types_identity_type_id");
 
                     b.Navigation("IdentityType");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryProfileEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.AccommodationTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AccommodationTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_profiles_accommodation_types_accommodation_type");
+
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_profiles_beneficiaries_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryStatusEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_profiles_beneficiary_statuses_beneficiary_statu");
+
+                    b.HasOne("SBRS.Domain.Entities.EducationIssueEntity", null)
+                        .WithMany()
+                        .HasForeignKey("EducationIssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_beneficiary_profiles_education_issues_education_issue_id");
+
+                    b.HasOne("SBRS.Domain.Entities.EducationTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("EducationTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_profiles_education_types_education_type_id");
+
+                    b.HasOne("SBRS.Domain.Entities.MaritalStatusEntity", null)
+                        .WithMany()
+                        .HasForeignKey("MaritalStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_profiles_marital_statuses_marital_status_id");
+
+                    b.HasOne("AreaEntity", null)
+                        .WithMany()
+                        .HasForeignKey("OldAreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_beneficiary_profiles_areas_old_area_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BranchEntity", b =>
