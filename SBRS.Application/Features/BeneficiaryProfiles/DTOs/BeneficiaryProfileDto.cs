@@ -13,16 +13,16 @@ public sealed record BeneficiaryProfileDto(
     bool IsDisplaced,
     DateOnly? DisplacementDate,
     Guid? OldAreaId,
-    Guid AccommodationTypeId,
+    Guid? AccommodationTypeId,          // null = the answer is not known yet
     bool IsDisabled,
     IReadOnlyList<BeneficiaryDisabilityDto> Disabilities,
     IReadOnlyList<Guid> ChronicDiseaseIds,
     Guid BeneficiaryStatusId,
     string? CurrentWork,
     string? PreviousWork,
-    Guid EducationTypeId,
+    Guid? EducationTypeId,              // null = the answer is not known yet
     Guid? EducationIssueId,
-    Guid MaritalStatusId,
+    Guid? MaritalStatusId,              // null = the answer is not known yet
     short? WivesNumber,
     short? ChildrenNumber);
 

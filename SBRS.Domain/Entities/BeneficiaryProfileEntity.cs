@@ -19,10 +19,10 @@ public class BeneficiaryProfileEntity : BaseEntity
         Guid beneficiaryId,
         string? phoneNumber1, string? phoneNumber2,
         bool isDisplaced, DateOnly? displacementDate, Guid? oldAreaId,
-        Guid accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
+        Guid? accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
         string? currentWork, string? previousWork,
-        Guid educationTypeId, Guid? educationIssueId,
-        Guid maritalStatusId, short? wivesNumber, short? childrenNumber)
+        Guid? educationTypeId, Guid? educationIssueId,
+        Guid? maritalStatusId, short? wivesNumber, short? childrenNumber)
     {
         if (beneficiaryId == Guid.Empty) throw new DomainException("Beneficiary is required.");
         BeneficiaryId = beneficiaryId;
@@ -37,14 +37,14 @@ public class BeneficiaryProfileEntity : BaseEntity
     public bool IsDisplaced { get; private set; }
     public DateOnly? DisplacementDate { get; private set; }
     public Guid? OldAreaId { get; private set; }
-    public Guid AccommodationTypeId { get; private set; }
+    public Guid? AccommodationTypeId { get; private set; }          // nullable: the answer may not be known yet
     public bool IsDisabled { get; private set; }
-    public Guid BeneficiaryStatusId { get; private set; }
+    public Guid BeneficiaryStatusId { get; private set; }           // filled with NOT_AVAILABLE by the handler when omitted
     public string? CurrentWork { get; private set; }
     public string? PreviousWork { get; private set; }
-    public Guid EducationTypeId { get; private set; }
+    public Guid? EducationTypeId { get; private set; }              // nullable: the answer may not be known yet
     public Guid? EducationIssueId { get; private set; }
-    public Guid MaritalStatusId { get; private set; }
+    public Guid? MaritalStatusId { get; private set; }              // nullable: the answer may not be known yet
     public short? WivesNumber { get; private set; }
     public short? ChildrenNumber { get; private set; }
 
@@ -52,10 +52,10 @@ public class BeneficiaryProfileEntity : BaseEntity
     public void Update(
         string? phoneNumber1, string? phoneNumber2,
         bool isDisplaced, DateOnly? displacementDate, Guid? oldAreaId,
-        Guid accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
+        Guid? accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
         string? currentWork, string? previousWork,
-        Guid educationTypeId, Guid? educationIssueId,
-        Guid maritalStatusId, short? wivesNumber, short? childrenNumber) =>
+        Guid? educationTypeId, Guid? educationIssueId,
+        Guid? maritalStatusId, short? wivesNumber, short? childrenNumber) =>
         Set(phoneNumber1, phoneNumber2, isDisplaced, displacementDate, oldAreaId,
             accommodationTypeId, isDisabled, beneficiaryStatusId, currentWork, previousWork,
             educationTypeId, educationIssueId, maritalStatusId, wivesNumber, childrenNumber);
@@ -63,20 +63,18 @@ public class BeneficiaryProfileEntity : BaseEntity
     private void Set(
         string? phoneNumber1, string? phoneNumber2,
         bool isDisplaced, DateOnly? displacementDate, Guid? oldAreaId,
-        Guid accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
+        Guid? accommodationTypeId, bool isDisabled, Guid beneficiaryStatusId,
         string? currentWork, string? previousWork,
-        Guid educationTypeId, Guid? educationIssueId,
-        Guid maritalStatusId, short? wivesNumber, short? childrenNumber)
+        Guid? educationTypeId, Guid? educationIssueId,
+        Guid? maritalStatusId, short? wivesNumber, short? childrenNumber)
     {
         // Phones are optional; empty becomes null. The digit conversion happens before the profile gets them.
         var phone1 = NormalizePhone(phoneNumber1);
         var phone2 = NormalizePhone(phoneNumber2);
         ValidatePhones(phone1, phone2);
 
-        // Required lookups.
-        if (accommodationTypeId == Guid.Empty) throw new DomainException("Accommodation type is required.");
-        if (educationTypeId == Guid.Empty) throw new DomainException("Education type is required.");
-        if (maritalStatusId == Guid.Empty) throw new DomainException("Marital status is required.");
+        // Required lookups. Only the status must always resolve (the handler defaults it to
+        // NOT_AVAILABLE); the remaining lookups may be omitted while the answer is unknown.
         if (beneficiaryStatusId == Guid.Empty) throw new DomainException("Beneficiary status is required.");
 
         // Displacement is consistent on its own: without displacement nothing may remain.

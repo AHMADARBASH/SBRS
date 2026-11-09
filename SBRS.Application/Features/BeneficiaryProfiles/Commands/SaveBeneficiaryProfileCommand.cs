@@ -21,16 +21,16 @@ public sealed record SaveBeneficiaryProfileCommand(
     bool IsDisplaced,
     DateOnly? DisplacementDate,
     Guid? OldAreaId,
-    Guid AccommodationTypeId,
+    Guid? AccommodationTypeId,          // nullable: the answer may not be known at save time
     bool IsDisabled,
     IReadOnlyList<SaveBeneficiaryDisabilityItem>? Disabilities,
     IReadOnlyList<Guid>? ChronicDiseaseIds,
     Guid? BeneficiaryStatusId,
     string? CurrentWork,
     string? PreviousWork,
-    Guid EducationTypeId,
+    Guid? EducationTypeId,              // nullable: the answer may not be known at save time
     Guid? EducationIssueId,
-    Guid MaritalStatusId,
+    Guid? MaritalStatusId,              // nullable: the answer may not be known at save time
     short? WivesNumber,
     short? ChildrenNumber) : IRequest<SaveBeneficiaryProfileResult>;
 
@@ -56,9 +56,10 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
     public SaveBeneficiaryProfileCommandValidator()
     {
         RuleFor(x => x.BeneficiaryId).NotEmpty();
-        RuleFor(x => x.AccommodationTypeId).NotEmpty();
-        RuleFor(x => x.EducationTypeId).NotEmpty();
-        RuleFor(x => x.MaritalStatusId).NotEmpty();
+        // nullable lookups: omitted = "not known yet", but a sent id must be a real one
+        RuleFor(x => x.AccommodationTypeId).NotEmpty().When(x => x.AccommodationTypeId.HasValue);
+        RuleFor(x => x.EducationTypeId).NotEmpty().When(x => x.EducationTypeId.HasValue);
+        RuleFor(x => x.MaritalStatusId).NotEmpty().When(x => x.MaritalStatusId.HasValue);
 
         RuleFor(x => x.BeneficiaryStatusId).NotEmpty()
             .When(x => x.BeneficiaryStatusId.HasValue);   // null falls back to NOT_AVAILABLE
@@ -170,9 +171,11 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
             !beneficiary.IsActive || beneficiary.MergedIntoBeneficiaryId is not null)
             throw new NotFoundException(nameof(BeneficiaryEntity), command.BeneficiaryId);
 
-        // Lookup existence: wrong ids are answered as validation errors (400), never silent defaults.
-        var marital = await maritalStatuses.GetByIdAsync(command.MaritalStatusId, cancellationToken)
-            ?? throw new DomainException("The selected marital status does not exist.");
+        // Lookup existence: a sent id must exist (400); omitted simply stays null ("not known yet").
+        var marital = command.MaritalStatusId is { } maritalId
+            ? await maritalStatuses.GetByIdAsync(maritalId, cancellationToken)
+                ?? throw new DomainException("The selected marital status does not exist.")
+            : null;
 
         BeneficiaryStatusEntity status;
         if (command.BeneficiaryStatusId is { } statusId)
@@ -187,10 +190,12 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
                     "The default beneficiary status is missing; reference data must be seeded first.");
         }
 
-        _ = await accommodationTypes.GetByIdAsync(command.AccommodationTypeId, cancellationToken)
-            ?? throw new DomainException("The selected accommodation type does not exist.");
-        _ = await educationTypes.GetByIdAsync(command.EducationTypeId, cancellationToken)
-            ?? throw new DomainException("The selected education type does not exist.");
+        if (command.AccommodationTypeId is { } accommodationId)
+            _ = await accommodationTypes.GetByIdAsync(accommodationId, cancellationToken)
+                ?? throw new DomainException("The selected accommodation type does not exist.");
+        if (command.EducationTypeId is { } educationId)
+            _ = await educationTypes.GetByIdAsync(educationId, cancellationToken)
+                ?? throw new DomainException("The selected education type does not exist.");
 
         if (command.EducationIssueId is { } issueId)
             _ = await educationIssues.GetByIdAsync(issueId, cancellationToken)
@@ -205,7 +210,7 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
             _ = await geography.GetAreaByIdAsync(oldAreaId, cancellationToken)
                 ?? throw new DomainException("The selected old area does not exist.");
 
-        ApplyMaritalFamilyRules(command, marital.Code, beneficiary);
+        ApplyMaritalFamilyRules(command, marital, beneficiary);
 
         var requestedDisabilities = command.Disabilities ?? [];
         await EnsureDisabilitiesExistAsync(requestedDisabilities, cancellationToken);
@@ -227,7 +232,7 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
                 command.AccommodationTypeId, command.IsDisabled, status.Id,
                 command.CurrentWork, command.PreviousWork,
                 command.EducationTypeId, command.EducationIssueId,
-                marital.Id, command.WivesNumber, command.ChildrenNumber);
+                marital?.Id, command.WivesNumber, command.ChildrenNumber);
             await profiles.AddAsync(profile, cancellationToken);
             created = true;
         }
@@ -239,7 +244,7 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
                 command.AccommodationTypeId, command.IsDisabled, status.Id,
                 command.CurrentWork, command.PreviousWork,
                 command.EducationTypeId, command.EducationIssueId,
-                marital.Id, command.WivesNumber, command.ChildrenNumber);
+                marital?.Id, command.WivesNumber, command.ChildrenNumber);
             created = false;
         }
 
@@ -257,18 +262,30 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
 
     /// <summary>
     /// Wives/children are allowed only for marital statuses keyed by Code (single extensible place),
-    /// and wives additionally only for a male beneficiary. Sending a count in any other case is rejected.
+    /// and wives additionally only for a male beneficiary. When the marital status itself is not
+    /// known yet, sending a count is rejected (the rule cannot be evaluated) — never silently stored.
     /// </summary>
     private void ApplyMaritalFamilyRules(SaveBeneficiaryProfileCommand command,
-        string maritalCode, BeneficiaryEntity beneficiary)
+        MaritalStatusEntity? marital, BeneficiaryEntity beneficiary)
     {
+        if (marital is null)
+        {
+            if (command.WivesNumber is not null)
+                throw new DomainException(
+                    "Wives number requires the marital status to be known and MARRIED.");
+            if (command.ChildrenNumber is not null)
+                throw new DomainException(
+                    "Children number requires the marital status to be known and MARRIED.");
+            return;
+        }
+
         if (command.WivesNumber is not null)
         {
-            if (!StatusesAllowingWivesNumber.Contains(maritalCode) || !beneficiary.Gender)
+            if (!StatusesAllowingWivesNumber.Contains(marital.Code) || !beneficiary.Gender)
                 throw new DomainException("Wives number can only be set for a married male beneficiary.");
         }
 
-        if (command.ChildrenNumber is not null && !StatusesAllowingChildrenNumber.Contains(maritalCode))
+        if (command.ChildrenNumber is not null && !StatusesAllowingChildrenNumber.Contains(marital.Code))
             throw new DomainException("Children number can only be set for a married beneficiary.");
     }
 

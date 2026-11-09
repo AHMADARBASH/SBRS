@@ -10,16 +10,16 @@ public sealed record SaveBeneficiaryProfileRequest(
     bool IsDisplaced,
     DateOnly? DisplacementDate,
     Guid? OldAreaId,
-    Guid AccommodationTypeId,
+    Guid? AccommodationTypeId,          // optional: null while the answer is not known yet
     bool IsDisabled,
     IReadOnlyList<SaveBeneficiaryProfileDisabilityRequest> Disabilities,
     IReadOnlyList<Guid>? ChronicDiseaseIds,
     Guid? BeneficiaryStatusId,
     string? CurrentWork,
     string? PreviousWork,
-    Guid EducationTypeId,
+    Guid? EducationTypeId,              // optional: null while the answer is not known yet
     Guid? EducationIssueId,
-    Guid MaritalStatusId,
+    Guid? MaritalStatusId,              // optional: null while the answer is not known yet
     short? WivesNumber,
     short? ChildrenNumber);
 

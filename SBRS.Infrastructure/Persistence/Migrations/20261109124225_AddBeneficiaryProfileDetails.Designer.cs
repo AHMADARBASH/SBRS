@@ -12,7 +12,7 @@ using SBRS.Infrastructure.Persistence;
 namespace SBRS.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261109104030_AddBeneficiaryProfileDetails")]
+    [Migration("20261109124225_AddBeneficiaryProfileDetails")]
     partial class AddBeneficiaryProfileDetails
     {
         /// <inheritdoc />
@@ -915,7 +915,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AccommodationTypeId")
+                    b.Property<Guid?>("AccommodationTypeId")
                         .HasColumnType("uuid")
                         .HasColumnName("accommodation_type_id");
 
@@ -952,7 +952,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("education_issue_id");
 
-                    b.Property<Guid>("EducationTypeId")
+                    b.Property<Guid?>("EducationTypeId")
                         .HasColumnType("uuid")
                         .HasColumnName("education_type_id");
 
@@ -964,7 +964,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_displaced");
 
-                    b.Property<Guid>("MaritalStatusId")
+                    b.Property<Guid?>("MaritalStatusId")
                         .HasColumnType("uuid")
                         .HasColumnName("marital_status_id");
 
@@ -2244,7 +2244,6 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AccommodationTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_beneficiary_profiles_accommodation_types_accommodation_type");
 
                     b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
@@ -2271,14 +2270,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("EducationTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_beneficiary_profiles_education_types_education_type_id");
 
                     b.HasOne("SBRS.Domain.Entities.MaritalStatusEntity", null)
                         .WithMany()
                         .HasForeignKey("MaritalStatusId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_beneficiary_profiles_marital_statuses_marital_status_id");
 
                     b.HasOne("AreaEntity", null)
