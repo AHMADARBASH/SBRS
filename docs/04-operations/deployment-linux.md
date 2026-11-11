@@ -6,7 +6,7 @@ Production is one Linux machine with the .NET 10 API, PostgreSQL and systemd. **
 ## 1. What the CI pipeline does today (`azure-pipelines.yml`, root + `SBRS/`) `[BUILT]`
 
 1. Triggers on `master`; agent pool `SBRS-Pool` (self-hosted Linux agent).
-2. `dotnet publish SBRS/SBRS.csproj -c Release -o <publish>` and verify `SBRS.dll` exists.
+2. `dotnet publish SBRS.API/SBRS.API.csproj -c Release -o <publish>` and verify `SBRS.dll` exists.
 3. `rsync -av --delete <publish>/ /var/www/sbrs/SBRS/` — excluding `appsettings.Production.json`, `wwwroot/uploads`, `logs` (host-local files survive deploys).
 4. `sudo systemctl restart sbrs` then check `systemctl is-active` (+ `journalctl -u sbrs -n 50` on failure).
 
@@ -63,7 +63,7 @@ Nested keys use double underscores in environment files `[CONFIRMED]`.
 ## 5. Update procedure (a release)
 
 1. Merge to `master`; pipeline publishes and restarts.
-2. Before merge (locally): add the migration; after deploy: `dotnet ef database update -p SBRS.Infrastructure -s SBRS` from a machine with production connectivity `[ASSUMED]` (or run it on the server against the publish output).
+2. Before merge (locally): add the migration; after deploy: `dotnet ef database update -p SBRS.Infrastructure -s SBRS.API` from a machine with production connectivity `[ASSUMED]` (or run it on the server against the publish output).
 3. Watch logs: `journalctl -u sbrs -f`; verify startup seeder logs; smoke-test login.
 
 ## 6. Rollback

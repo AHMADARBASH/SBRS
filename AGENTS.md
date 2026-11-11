@@ -4,8 +4,8 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Build and Run
 - **Build:** `dotnet build`
-- **Run:** `dotnet run --project SBRS`
-- **Migrations:** Uses Entity Framework Core with Npgsql (PostgreSQL). Run migrations via `dotnet ef` inside the `SBRS.Infrastructure` project or from the root pointing to `SBRS` as the startup project.
+- **Run:** `dotnet run --project SBRS.API`
+- **Migrations:** Uses Entity Framework Core with Npgsql (PostgreSQL). Run migrations via `dotnet ef` inside the `SBRS.Infrastructure` project or from the root pointing to `SBRS.API` as the startup project.
 
 ## Architecture
 This project follows a **Clean Architecture** (Onion Architecture) pattern:

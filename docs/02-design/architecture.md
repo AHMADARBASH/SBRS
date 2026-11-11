@@ -69,7 +69,7 @@ Key behaviors `[BUILT]`:
 2. Infrastructure: `XConfiguration : IEntityTypeConfiguration<XEntity>` (snake_case columns, indexes, FKs), repository implementing the interface with a `Scoped()` filter, register in `AppDbContext` (`DbSet` + config).
 3. Application: `Features/X/{Commands|Queries}/DoXCommand.cs` holding command record + validator + handler; `Features/X/DTOs` + `Features/X/Mappings` manual `ToDto`; register nothing (MediatR scans).
 4. API: request record(s) in `Contracts/X`, thin controller method combining route/body/current-user into the command, `ActionResult<T>` for data, `IActionResult` + 204 for mutations without body, explicit `[Authorize(Policy = ...)]`; add the policy in `Policies.cs` if new.
-5. Migration: `dotnet ef migrations add X -p SBRS.Infrastructure -s SBRS -o Persistence/Migrations` (see operations docs).
+5. Migration: `dotnet ef migrations add X -p SBRS.Infrastructure -s SBRS.API -o Persistence/Migrations` (see operations docs).
 6. Docs in the same commit (docs/README rule 1).
 7. New durable decisions → ADR under `02-design/decisions/`.
 

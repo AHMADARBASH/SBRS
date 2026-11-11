@@ -25,14 +25,14 @@ CREATE DATABASE "SBRS";
 -- application role with least privilege for runtime (dev shortcut: full owner while developing)
 ```
 
-## 4. User secrets (project: `SBRS` web project — UserSecretsId is in SBRS.csproj)
+## 4. User secrets (project: `SBRS.API` web project — UserSecretsId is in SBRS.API.csproj)
 
 ```bash
-dotnet user-secrets init --project SBRS
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<CONNECTION_STRING>" --project SBRS
-dotnet user-secrets set "Jwt:Key" "<JWT_KEY_32_PLUS_CHARS>" --project SBRS
-dotnet user-secrets set "SeedAdmin:UserName" "<ADMIN_USERNAME>" --project SBRS
-dotnet user-secrets set "SeedAdmin:Password" "<ADMIN_PASSWORD>" --project SBRS
+dotnet user-secrets init --project SBRS.API
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<CONNECTION_STRING>" --project SBRS.API
+dotnet user-secrets set "Jwt:Key" "<JWT_KEY_32_PLUS_CHARS>" --project SBRS.API
+dotnet user-secrets set "SeedAdmin:UserName" "<ADMIN_USERNAME>" --project SBRS.API
+dotnet user-secrets set "SeedAdmin:Password" "<ADMIN_PASSWORD>" --project SBRS.API
 ```
 
 - `Jwt:Key` must be ≥ 32 characters (HS256). The settings class binds property **`Key`**, so the secret name must be exactly `Jwt:Key`.
@@ -42,7 +42,7 @@ dotnet user-secrets set "SeedAdmin:Password" "<ADMIN_PASSWORD>" --project SBRS
 ## 5. Apply migrations
 
 ```bash
-dotnet ef database update -p SBRS.Infrastructure -s SBRS
+dotnet ef database update -p SBRS.Infrastructure -s SBRS.API
 ```
 
 (Add a migration with the command in [database-and-migrations.md](database-and-migrations.md).)
@@ -50,7 +50,7 @@ dotnet ef database update -p SBRS.Infrastructure -s SBRS
 ## 6. Run and verify
 
 ```bash
-dotnet run --project SBRS
+dotnet run --project SBRS.API
 ```
 
 1. On startup the `IdentitySeeder` runs: 6 roles created, first SystemAdmin created (if `SeedAdmin:*` set).

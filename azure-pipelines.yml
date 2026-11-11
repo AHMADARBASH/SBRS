@@ -7,7 +7,7 @@ pool:
   name: SBRS-Pool
 
 variables:
-  projectPath: 'SBRS/SBRS.csproj'          # path to the web project's .csproj inside the repo
+  projectPath: 'SBRS.API/SBRS.API.csproj'          # path to the web project's .csproj inside the repo
   appDll: 'SBRS.dll'                       # main DLL produced by the publish
   serviceName: 'sbrs'
   deployPath: '/var/www/sbrs/SBRS'

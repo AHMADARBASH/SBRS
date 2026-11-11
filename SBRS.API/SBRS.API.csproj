@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>f9f74f27-55e5-4228-85df-4286413ffd1c</UserSecretsId>
+    <!-- the code namespaces and the published SBRS.dll stay "SBRS" on purpose:
+         only the project file/folder is renamed, so nothing else has to change -->
+    <RootNamespace>SBRS</RootNamespace>
+    <AssemblyName>SBRS</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

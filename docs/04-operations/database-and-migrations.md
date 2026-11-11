@@ -7,16 +7,16 @@ PostgreSQL 14+ with EF Core 10 (Npgsql). Facts verified from the repo `[BUILT]` 
 
 ```bash
 # add a migration (one per change, review the generated SQL)
-dotnet ef migrations add <Name> -p SBRS.Infrastructure -s SBRS -o Persistence/Migrations
+dotnet ef migrations add <Name> -p SBRS.Infrastructure -s SBRS.API -o Persistence/Migrations
 
 # apply
-dotnet ef database update -p SBRS.Infrastructure -s SBRS
+dotnet ef database update -p SBRS.Infrastructure -s SBRS.API
 
 # undo the last un-applied migration file
-dotnet ef migrations remove -p SBRS.Infrastructure -s SBRS   # NEVER delete files by hand
+dotnet ef migrations remove -p SBRS.Infrastructure -s SBRS.API   # NEVER delete files by hand
 
 # generate SQL for review (optional)
-dotnet ef migrations script -p SBRS.Infrastructure -s SBRS
+dotnet ef migrations script -p SBRS.Infrastructure -s SBRS.API
 ```
 
 - Migrations live in `SBRS.Infrastructure/Persistence/Migrations`; the model snapshot (`AppDbContextModelSnapshot.cs`) is the schema source of truth.
