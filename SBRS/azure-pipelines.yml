@@ -21,7 +21,7 @@ steps:
 
   - script: |
       set -e
-      echo "Agent user: $(whoami)"
+      echo "Host: $(hostname)  User: $(whoami)"
       dotnet --list-sdks
       dotnet --list-runtimes
     displayName: Check .NET SDK
@@ -47,6 +47,7 @@ steps:
       mkdir -p "$(deployPath)"
       rsync -av --delete \
         --exclude 'appsettings.Production.json' \
+        --exclude '.env' \
         --exclude 'wwwroot/uploads' \
         --exclude 'logs' \
         "$(publishDir)/" "$(deployPath)/"
