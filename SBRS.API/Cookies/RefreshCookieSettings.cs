@@ -11,8 +11,12 @@ public class RefreshCookieSettings
     /// <summary>Cookie name; deleting must use the same name, path and domain.</summary>
     public string Name { get; set; } = "sbrs_rt";
 
-    /// <summary>Limits the cookie to the auth endpoints.</summary>
-    public string Path { get; set; } = "/api/auth";
+    /// <summary>
+    /// Limits the cookie to the auth endpoints. Must match the route casing exactly
+    /// ("api/[controller]" → controller class name → "Auth"): browser cookie-path
+    /// matching is case-sensitive, even though ASP.NET routing is not.
+    /// </summary>
+    public string Path { get; set; } = "/api/Auth";
 
     /// <summary>
     /// "Lax" (default) or "Strict". "None" requires Secure = true and is only
