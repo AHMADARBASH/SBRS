@@ -1,21 +1,69 @@
 trigger:
   branches:
     include:
-      - master        # change to master if that's your branch name
+      - master
 
 pool:
-  name: SBRS-Pool   # must match your agent pool name exactly
+  name: SBRS-Pool
+
+variables:
+  projectPath: 'SBRS/SBRS.csproj'          # path to the web project's .csproj inside the repo
+  appDll: 'SBRS.dll'                       # main DLL produced by the publish
+  serviceName: 'sbrs'
+  deployPath: '/var/www/sbrs/SBRS'
+  publishDir: '$(Build.ArtifactStagingDirectory)/publish'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  DOTNET_NOLOGO: 'true'
 
 steps:
   - checkout: self
     clean: true
 
   - script: |
+      set -e
+      echo "Host: $(hostname)  User: $(whoami)"
+      dotnet --list-sdks
+      dotnet --list-runtimes
+    displayName: Check .NET SDK
+
+  - script: |
+      set -e
+      rm -rf "$(publishDir)"
+      dotnet publish "$(projectPath)" -c Release -o "$(publishDir)"
+    displayName: Build & publish
+
+  - script: |
+      set -e
+      if [ ! -f "$(publishDir)/$(appDll)" ]; then
+        echo "##vso[task.logissue type=error]$(appDll) not found in publish output. Stopping before deploy."
+        ls -la "$(publishDir)"
+        exit 1
+      fi
+      echo "Found $(appDll), OK to deploy."
+    displayName: Verify publish output
+
+  - script: |
+      set -e
+      mkdir -p "$(deployPath)"
       rsync -av --delete \
-        --exclude '.git' \
+        --exclude 'appsettings.Production.json' \
         --exclude '.env' \
-        --exclude 'node_modules' \
-        --exclude 'venv' \
-        --exclude 'uploads' \
-        $(Build.SourcesDirectory)/ /var/www/sbrs/SBRS/
-    displayName: Deploy files to /var/www/sbrs/SBRS
+        --exclude 'wwwroot/uploads' \
+        --exclude 'logs' \
+        "$(publishDir)/" "$(deployPath)/"
+    displayName: Deploy to $(deployPath)
+
+  - script: sudo /usr/bin/systemctl restart $(serviceName)
+    displayName: Restart $(serviceName)
+
+  - script: |
+      sleep 5
+      if systemctl is-active --quiet $(serviceName); then
+        echo "$(serviceName) is running."
+      else
+        echo "##vso[task.logissue type=error]$(serviceName) failed to start."
+        systemctl status $(serviceName) --no-pager || true
+        journalctl -u $(serviceName) -n 50 --no-pager || true
+        exit 1
+      fi
+    displayName: Check service is running
