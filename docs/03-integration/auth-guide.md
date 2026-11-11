@@ -49,7 +49,7 @@ Send header `X-Client-Type: web` on the auth endpoints (`login`, `refresh`, `log
 
 | Client | Access token | Refresh token delivery |
 |---|---|---|
-| **Web** | keep **in memory only** (never in localStorage/sessionStorage) | **HttpOnly cookie** `sbrs_rt`, `Path=/api/auth`, `Secure`, `SameSite=Lax` default; configured via `RefreshCookie:{Name,Path,SameSite,Secure,Domain}` section |
+| **Web** | keep **in memory only** (never in localStorage/sessionStorage) | **HttpOnly cookie** `sbrs_rt`, `Path=/api/Auth`, `Secure`, `SameSite=Lax` default; configured via `RefreshCookie:{Name,Path,SameSite,Secure,Domain}` section. ⚠️ The path casing must match the routes (`api/[controller]` → `Auth`): browsers match cookie paths **case-sensitively** even though ASP.NET routing doesn't |
 | **Mobile (any client** without the header**) | in memory or secure storage per your stack | in the JSON body (`refreshToken` field) |
 
 - On the web the response body's `refreshToken` is **null** (`result with { RefreshToken = null }` in `AuthController`); the cookie carries the token.

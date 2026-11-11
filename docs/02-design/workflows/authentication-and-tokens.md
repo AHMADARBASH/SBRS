@@ -13,7 +13,7 @@ Design-level companion to [../../03-integration/auth-guide.md](../../03-integrat
 | Rotation | every refresh burns the old token (`used_at`) and issues a new sibling in the same `family_id` |
 | Reuse detection | refreshToken of a used/burned token revokes the **whole family** (`revoked_at` on all rows) |
 | Refresh hard-checks | user reloaded from DB: must exist, `IsActive`, not locked, role present — otherwise 401 + family revoked |
-| Web delivery | HttpOnly cookie `sbrs_rt` (`/api/auth` path, `Secure`, `SameSite=Lax` configurable) when `X-Client-Type: web` |
+| Web delivery | HttpOnly cookie `sbrs_rt` (`/api/Auth` path — case-sensitive, matches the route; `Secure`, `SameSite=Lax` configurable) when `X-Client-Type: web` |
 | Mobile delivery | JSON body field `refreshToken` |
 | Logout | `logout` revokes one token's family (body or cookie); web deletes the cookie. `logout-all` revokes **all** families of the user (any device) |
 | Session depth | `logout-all` requires authentication (it's authorized); login/refresh/logout anonymous by design (the token itself is the credential) |

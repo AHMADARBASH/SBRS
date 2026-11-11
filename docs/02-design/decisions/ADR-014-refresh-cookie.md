@@ -5,7 +5,7 @@
 Web SPAs cannot safely store refresh tokens in JS-readable storage (XSS); mobile apps cannot rely on cookies and have secure OS storage instead. One auth API must serve both safely.
 
 ## Decision
-The auth endpoints branch on the `X-Client-Type: web` request header: web clients receive the refresh token as an **HttpOnly cookie** (`sbrs_rt`, path `/api/auth`, `Secure`, `SameSite=Lax` — configurable via `RefreshCookie:*` settings) and the response body's `refreshToken` is null; every other client gets the token in the JSON body. Sending the body value is ignored for web; logout/refetch without a cookie is a no-op `204`. CORS must send credentials only to explicit origins.
+The auth endpoints branch on the `X-Client-Type: web` request header: web clients receive the refresh token as an **HttpOnly cookie** (`sbrs_rt`, path `/api/Auth` — the casing must match the `api/[controller]` route because browser cookie-path matching is case-sensitive; `Secure`, `SameSite=Lax` — configurable via `RefreshCookie:*` settings) and the response body's `refreshToken` is null; every other client gets the token in the JSON body. Sending the body value is ignored for web; logout/refetch without a cookie is a no-op `204`. CORS must send credentials only to explicit origins.
 
 ## Consequences
 - XSS on web cannot steal the refresh token (never readable by JS).

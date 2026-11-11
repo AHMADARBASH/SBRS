@@ -38,7 +38,7 @@ Bound to `RefreshCookieSettings` (`SectionName = "RefreshCookie"`) `[BUILT]`:
 | Key | Purpose | Default behaviour |
 |---|---|---|
 | `RefreshCookie:Name` | cookie name | `sbrs_rt` |
-| `RefreshCookie:Path` | cookie path | `/api/auth` |
+| `RefreshCookie:Path` | cookie path | `/api/Auth` (case-sensitive for browsers — must match the route casing) |
 | `RefreshCookie:SameSite` | SameSite mode | `Lax` |
 | `RefreshCookie:Secure` | Secure flag | true |
 | `RefreshCookie:Domain` | cookie domain | host-only |
