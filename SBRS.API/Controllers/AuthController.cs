@@ -5,6 +5,7 @@ using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Features.Auth.Commands;
 using SBRS.Application.Features.Auth.DTOs;
+using SBRS.Application.Features.Auth.Queries;
 using SBRS.Contracts.Auth;
 using SBRS.Cookies;
 using SBRS.Services;
@@ -15,7 +16,6 @@ namespace SBRS.Controllers
     [ApiController]
     public class AuthController(
         ISender sender,
-        ICurrentUser currentUser,
         IClientTypeResolver clientType,
         IRefreshCookieService cookies) : ControllerBase
     {
@@ -39,14 +39,8 @@ namespace SBRS.Controllers
         // temporary endpoint to verify tokens and the claims read by ICurrentUser
         [Authorize]
         [HttpGet("me")]
-        public IActionResult Me() => Ok(new
-        {
-            currentUser.UserId,
-            currentUser.Role,
-            currentUser.OrganizationId,
-            currentUser.FacilityId,
-            currentUser.IsSystemAdmin
-        });
+        public async Task<ActionResult<CurrentUserDto>> Me(CancellationToken ct) =>
+            Ok(await sender.Send(new GetMeQuery(), ct));
 
         [AllowAnonymous]
         [HttpPost("refresh")]

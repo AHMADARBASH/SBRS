@@ -11,7 +11,7 @@ For the web and mobile clients. Everything below is `[BUILT]` (verified in `Auth
 | POST | `api/Auth/refresh` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `LoginResultDto` |
 | POST | `api/Auth/logout` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `204` |
 | POST | `api/Auth/logout-all` | any logged-in user | — | `204` (revokes every refresh token of the caller, incl. phones) |
-| GET | `api/Auth/me` | any logged-in user | — | `{ userId, role, organizationId, facilityId, isSystemAdmin }` |
+| GET | `api/Auth/me` | any logged-in user | — | `CurrentUserDto`: full user + nested `organization{}` / `facility{}` — see §2.1 |
 
 ## 2. Login
 
@@ -42,6 +42,54 @@ Response (`LoginResultDto`) — fake values:
 - `token` is a JWT with claims: `NameIdentifier` (user id), `Name` (username), `Role`, `jti`, plus `organization_id` / `facility_id` when set. Branch claim is `[PLANNED]`.
 - `ExpiresAt` is the **access token** expiry (240 minutes `[CONFIRMED][BUILT]`); `DateTime` UTC.
 - Login fails with `401 { "title": "Unauthorized", "detail": "Unauthorized" }` — same body for wrong password, inactive user, locked-out user, or user without a role.
+
+### 2.1 `GET api/Auth/me` — the full session object
+
+One call that returns the **complete user plus the complete facility/organization context**, so the client
+shell needs no follow-up requests after login. The user identity part is the same shape as the login
+response; the scope part is resolved fresh from the database on **every** call.
+
+```json
+{
+  "userId": "3f0d1c9a-5b2e-4111-8a20-6c7d8e9f0a1b",
+  "userName": "demo.user",
+  "firstName": "Ahmad", "lastName": "Arbash",
+  "role": "FacilityAdmin",
+  "isSystemAdmin": false,
+  "isMobile": false,
+  "organizationId": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",   // flat ids kept for backward compat
+  "facilityId": "9a8b7c6d-5e4f-4001-92a3-b4c5d6e7f809",
+  "organization": {
+    "id": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",
+    "code": "SARC",
+    "arName": "...", "enName": "...",
+    "isActive": true
+  },
+  "facility": {
+    "id": "9a8b7c6d-5e4f-4001-92a3-b4c5d6e7f809",
+    "arName": "...", "enName": "...",
+    "code": "DAM-PHC-000012",
+    "isActive": true,
+    "typeId": "...",
+    "typeCode": "HEALTH",
+    "typeArName": "صحي", "typeEnName": "Health",
+    "branchId": "...", "branchArName": "...", "branchEnName": "...",
+    "organizationId": "...", "organizationArName": "...", "organizationEnName": "..."
+  }
+}
+```
+
+Rules:
+
+- `organization` is `null` for SystemAdmin; for OrganizationAdmin it is their own organization; for
+  facility roles it is the organization owning their facility (resolved through the branch).
+- `facility` is `null` when the role has no facility (SystemAdmin, OrganizationAdmin).
+- **`facility.typeCode` is the client's routing key** (`facility_types.code`): route facility users to
+  the workspace matching their facility type (e.g. `HEALTH` → health screens). Route on the *code*, never
+  on ids or names; an unknown code should fall back to a neutral default workspace.
+- The facility **type is read from the DB per call, not stored in the JWT** — the access token lives up to
+  240 minutes and a type can change mid-session; the new value takes effect at the next `me`/refresh.
+- Authorization is still role/policy-based (`role` + claims); the facility type is routing/display data only.
 
 ## 3. Web vs mobile: where the refresh token goes
 

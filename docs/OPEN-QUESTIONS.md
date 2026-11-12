@@ -54,6 +54,6 @@ When one of these is answered, change the status below, update the affected file
 
 - `FacilityTypes` add/update validators allow 50/200-char names while EF config caps at 100/100 — DB error 500 instead of 400 on long input; align validator lengths with EF config.
 - Same class of mismatch: facility Add/Update validators allow `arName`/`enName` ≤ 200 while `facilities.ar_name`/`en_name` are `varchar(100)` — long names end in a 500, not 400.
-- `GET /api/Auth/me` returns the token snapshot of identity claims, not the DB user; acceptable, but document it as "claims reader".
+- `GET /api/Auth/me` returned the token snapshot of identity claims; now `[RESOLVED 2026-11-12]` it returns the full session object (`GetMeQuery` → `CurrentUserDto`): DB user via `IIdentityService` + resolved organization/facility/type/branch, see `docs/03-integration/auth-guide.md` §2.1.
 - `FacilityTypes` add/update validators allow 50/200-char names while EF config caps at 100/100 — DB error 500 instead of 400 on long input; align validator lengths with EF config.
 - `BrowserRouter`'s `UserAdminService.ResolveScopeAsync` throws `NotFoundException(nameof(OrganizationEntity), "")` with an empty key; include the id.

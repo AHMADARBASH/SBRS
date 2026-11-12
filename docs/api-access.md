@@ -39,15 +39,44 @@ Roles come back as plain strings (`SystemAdmin`, `OrganizationAdmin`, …) in th
 | `FacilityAdmin` | Manages one facility (has `facilityId` in the token). Sees/reviews that facility's beneficiaries, reviews match candidates. | Its facility only. |
 | `DataEntry` | Terminal operator at a facility (has `facilityId`). Registers beneficiaries, searches, lists. | Its facility only. |
 
-**How the frontend learns its own role:** call `GET /api/Auth/me` after login. Response:
+**How the frontend learns its own role & scope:** call `GET /api/Auth/me` after login. The response is the
+**full session object**: the complete user plus the complete facility/organization context, so the client
+shell needs no follow-up requests after login:
 
 ```json
-{ "userId": "...", "role": "FacilityAdmin",
-  "organizationId": null, "facilityId": "...", "isSystemAdmin": false }
+{
+  "userId": "...",
+  "userName": "fa.damascus",
+  "firstName": "...", "lastName": "...",
+  "role": "FacilityAdmin",
+  "isSystemAdmin": false,
+  "isMobile": false,
+  "organizationId": null,          // backward-compatible flat ids (also nested below)
+  "facilityId": "...",
+  "organization": {                 // null for SystemAdmin; own org for OrganizationAdmin;
+    "id": "...",                    // the owning org of the facility for facility roles
+    "code": "SARC",
+    "arName": "...", "enName": "...",
+    "isActive": true
+  },
+  "facility": {                     // null when the role has no facility (SA/OA)
+    "id": "...",
+    "arName": "...", "enName": "...",
+    "code": "DAM-PHC-000012",
+    "isActive": true,
+    "typeId": "...",
+    "typeCode": "HEALTH",           // ⭐ stable routing key (facility_types.code) — route the UI on this, never on ids/names
+    "typeArName": "صحي", "typeEnName": "Health",
+    "branchId": "...", "branchArName": "...", "branchEnName": "...",
+    "organizationId": "...", "organizationArName": "...", "organizationEnName": "..."
+  }
+}
 ```
 
-Use `role` to decide which menu items/views to show, and `organizationId` / `facilityId` to preselect
-scope fields.
+Use `role` to decide which menu items/views to show, `facility.typeCode` to route facility users to the
+workspace matching their facility type (unknown code → neutral default workspace), and the flat
+`organizationId` / `facilityId` ids to preselect scope fields. The type is read from the database on
+every call — it is **not** a JWT claim — so a mid-session type change takes effect on the next `me`/refresh.
 
 ---
 
@@ -66,7 +95,7 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 | POST | `login` | 🌐 Public | Returns access token (+ refresh cookie for web clients / refresh token for mobile) |
 | POST | `refresh` | 🌐 Public | Web: reads cookie; Mobile: refresh token in body |
 | POST | `logout` | 🌐 Public | Web: revokes cookie token |
-| GET | `me` | Any logged-in user | ⭐ Use this to know the user's role & scope |
+| GET | `me` | Any logged-in user | ⭐ Full session object: user + nested `organization{}` / `facility{}` (incl. `facility.typeCode` routing key) |
 | POST | `logout-all` | Any logged-in user | Revokes all refresh tokens |
 
 ### Users — `api/Users` (whole controller: **SA only**)
