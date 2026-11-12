@@ -1,4 +1,5 @@
 using MediatR;
+using SBRS.Application.Common.DTOs;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Features.Auth.DTOs;
@@ -44,7 +45,8 @@ public sealed class GetMeQueryHandler(
             var facilityEntity = await facilities.GetByIdAsync(facilityId, cancellationToken);
             if (facilityEntity is not null)
             {
-                var type = await facilityTypes.GetByIdAsync(facilityEntity.TypeId, cancellationToken);
+                var type = await facilityTypes.GetByIdAsync(facilityEntity.TypeId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(FacilityTypeEntity), facilityEntity.TypeId);
                 var branch = await branches.GetByIdAsync(facilityEntity.BranchId, cancellationToken)
                     ?? throw new NotFoundException(nameof(BranchEntity), facilityEntity.BranchId);
 
@@ -52,11 +54,13 @@ public sealed class GetMeQueryHandler(
                 organization ??= MapOrganization(await organizations.GetByIdAsync(branch.organizationId, cancellationToken));
 
                 facility = new CurrentFacilityDto(
-                    facilityEntity.Id, facilityEntity.ArName, facilityEntity.EnName, facilityEntity.Code, facilityEntity.IsActive,
-                    facilityEntity.TypeId,
-                    type?.Code ?? "", type?.ArName ?? "", type?.EnName ?? "",
-                    branch.Id, branch.ArName, branch.EnName,
-                    branch.organizationId, organization?.ArName ?? "", organization?.EnName ?? "");
+                    facilityEntity.Id,
+                    facilityEntity.ArName,
+                    facilityEntity.EnName,
+                    facilityEntity.Code,
+                    facilityEntity.IsActive,
+                    new FacilityTypeSummaryDto(type.Id, type.Code, type.ArName, type.EnName),
+                    new BranchSummaryDto(branch.Id, branch.ArName, branch.EnName));
             }
         }
 
@@ -67,8 +71,9 @@ public sealed class GetMeQueryHandler(
             organization, facility);
     }
 
-    private static CurrentOrganizationDto? MapOrganization(OrganizationEntity? organization) =>
+    private static OrganizationSummaryDto? MapOrganization(OrganizationEntity? organization) =>
         organization is null
             ? null
-            : new CurrentOrganizationDto(organization.Id, organization.Code, organization.ArName, organization.EnName, organization.IsActive);
+            : new OrganizationSummaryDto(
+                organization.Id, organization.Code, organization.ArName, organization.EnName, organization.IsActive);
 }

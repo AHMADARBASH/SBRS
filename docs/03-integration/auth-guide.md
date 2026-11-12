@@ -47,7 +47,9 @@ Response (`LoginResultDto`) — fake values:
 
 One call that returns the **complete user plus the complete facility/organization context**, so the client
 shell needs no follow-up requests after login. The user identity part is the same shape as the login
-response; the scope part is resolved fresh from the database on **every** call.
+response; the scope part is resolved fresh from the database on **every** call. Child data is nested as
+reusable summary objects (`organization{}`, `facility.type{}`, `facility.branch{}`) — the same summary
+types are intended to be embedded in other endpoints, so the frontend can reuse its models.
 
 ```json
 {
@@ -57,7 +59,7 @@ response; the scope part is resolved fresh from the database on **every** call.
   "role": "FacilityAdmin",
   "isSystemAdmin": false,
   "isMobile": false,
-  "organizationId": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",   // flat ids kept for backward compat
+  "organizationId": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",   // flat scope ids kept for preselect / backward compat
   "facilityId": "9a8b7c6d-5e4f-4001-92a3-b4c5d6e7f809",
   "organization": {
     "id": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",
@@ -70,11 +72,8 @@ response; the scope part is resolved fresh from the database on **every** call.
     "arName": "...", "enName": "...",
     "code": "DAM-PHC-000012",
     "isActive": true,
-    "typeId": "...",
-    "typeCode": "HEALTH",
-    "typeArName": "صحي", "typeEnName": "Health",
-    "branchId": "...", "branchArName": "...", "branchEnName": "...",
-    "organizationId": "...", "organizationArName": "...", "organizationEnName": "..."
+    "type":   { "id": "...", "code": "HEALTH", "arName": "صحي", "enName": "Health" },
+    "branch": { "id": "...", "arName": "...", "enName": "..." }
   }
 }
 ```
@@ -82,14 +81,17 @@ response; the scope part is resolved fresh from the database on **every** call.
 Rules:
 
 - `organization` is `null` for SystemAdmin; for OrganizationAdmin it is their own organization; for
-  facility roles it is the organization owning their facility (resolved through the branch).
+  facility roles it is the organization owning their facility (resolved through the branch). It appears
+  **once** — the facility does not repeat it.
 - `facility` is `null` when the role has no facility (SystemAdmin, OrganizationAdmin).
-- **`facility.typeCode` is the client's routing key** (`facility_types.code`): route facility users to
+- **`facility.type.code` is the client's routing key** (`facility_types.code`): route facility users to
   the workspace matching their facility type (e.g. `HEALTH` → health screens). Route on the *code*, never
   on ids or names; an unknown code should fall back to a neutral default workspace.
 - The facility **type is read from the DB per call, not stored in the JWT** — the access token lives up to
   240 minutes and a type can change mid-session; the new value takes effect at the next `me`/refresh.
 - Authorization is still role/policy-based (`role` + claims); the facility type is routing/display data only.
+- Underlying shared types: `OrganizationSummaryDto`, `FacilityTypeSummaryDto`, `BranchSummaryDto`
+  (`SBRS.Application/Common/DTOs`) — deliberately lightweight (no audit timestamps) for embedding.
 
 ## 3. Web vs mobile: where the refresh token goes
 
