@@ -37,6 +37,7 @@ Actor is SystemAdmin; the referenced organization/facility exist.
 | Role without required scope field (or vice versa) | `400` validation |
 | FA/DE without exactly one facility | `400` |
 | SA deactivates a DE | `204`; the user cannot refresh afterwards |
+| SA reactivates a deactivated DE | `204`; the user can log in again (already-active → still `204`) |
 | SA tries to deactivate their own account | `400` "You cannot deactivate your own account." |
 | SA tries to deactivate the SystemAdmin account | `400` "System Admin cannot be deactivated." (target check) |
 | BranchAdmin/ProjectCoordinator creation | `400` "Users with the role '…' cannot be managed yet." |

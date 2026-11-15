@@ -25,5 +25,7 @@ public interface IUserAdminService
 
     Task DeactivateAsync(Guid id, CancellationToken ct);
 
+    Task ActivateAsync(Guid id, CancellationToken ct);
+
     Task ResetPasswordAsync(Guid id, string newPassword, CancellationToken ct);
 }

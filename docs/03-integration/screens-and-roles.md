@@ -57,6 +57,7 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 | User create | pick role → dynamic scope fields (org/facility) | SA | `GET api/Users/Roles`, `POST api/Users/CreateUser` | `[BUILT]` |
 | User edit | change name, role, scope, mobile flag | SA | `PUT api/Users/UpdateUser` | `[BUILT]` |
 | User deactivate | disable an account (revokes refresh tokens) | SA | `POST api/Users/deactivateUser/{id}` | `[BUILT]` |
+| User reactivate | re-enable a deactivated account ("back to work") | SA | `POST api/Users/activateUser/{id}` | `[BUILT]` |
 | Password reset | give a new password | SA | `POST api/Users/reset-password` | `[BUILT]` |
 
 ## 6. Beneficiary module (the core)

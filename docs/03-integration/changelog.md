@@ -18,6 +18,7 @@ Documentation release: the whole `docs/` tree was created; no API code changed w
 - `GET api/Users/GetAll` — paged user list for the SystemAdmin screen: `page`, `pageSize` (1–100),
   `includeInactive`, `search` (user/first/last name), `role`; each row embeds the shared
   `organization{}` / `facility{}` summary objects (OQ-10 resolved for the list).
+- `POST api/Users/activateUser/{id}` — re-enables a deactivated user (204; no-op when already active).
 - `valueRegex` on `api/identity-types/Add` and `Update` — the SA can now create/fix identity document
   patterns through the API (required, valid .NET regex, ≤200 chars). Registration validates against it.
 - Shared summary DTOs (`OrganizationSummaryDto`, `FacilitySummaryDto`, `FacilityTypeSummaryDto`,

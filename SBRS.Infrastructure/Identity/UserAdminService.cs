@@ -102,6 +102,15 @@ public class UserAdminService(
         await refreshTokens.RevokeAllForUserAsync(user.Id, ct);
     }
 
+    public async Task ActivateAsync(Guid id, CancellationToken ct)
+    {
+        var user = await FindAsync(id);
+        if (user.IsActive) return;
+
+        user.IsActive = true;
+        Check(await userManager.UpdateAsync(user));
+    }
+
     public async Task ResetPasswordAsync(Guid id, string newPassword, CancellationToken ct)
     {
         var user = await FindAsync(id);

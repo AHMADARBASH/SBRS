@@ -24,6 +24,7 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 | POST | `api/Users/CreateUser` | `userName` (3–50, `[A-Za-z0-9._-]`), `password` (≥8), `firstName`, `lastName`, `role` (Roles constant), `organizationId?` (OrgAdmin req), `facilityId?` (FA/DE req), `isMobile` (bool) | 201 | `UserDto` | 400 (validation / role-scope rules / inactive org / facility), 409 (username taken) |
 | PUT | `api/Users/UpdateUser` | `id`, `firstName`, `lastName`, `role`, `organizationId?`, `facilityId?`, `isMobile` | 200 | `UserDto` | 400, 404 |
 | POST | `api/Users/deactivateUser/{id}` | — | 204 | — | 400 (self-account; target is SystemAdmin), 404 |
+| POST | `api/Users/activateUser/{id}` | — | 204 | — | 404 (no-op when already active) |
 | POST | `api/Users/reset-password` | `id`, `newPassword` (≥8) | 204 | — | 400, 404 |
 
 Role change or scope change revokes the user's refresh tokens. `GetAll` is the only user-read endpoint;

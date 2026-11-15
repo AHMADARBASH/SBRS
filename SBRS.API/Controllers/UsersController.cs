@@ -55,6 +55,13 @@ public class UsersController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("activateUser/{id:guid}")]
+    public async Task<IActionResult> Activate(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new ActivateUserCommand(id), ct);
+        return NoContent();
+    }
+
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword( ResetUserPasswordRequest r, CancellationToken ct)
     {

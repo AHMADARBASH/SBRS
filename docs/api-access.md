@@ -107,6 +107,7 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 | POST | `CreateUser` | SA | Body needs `role` + `organizationId` (OrganizationAdmin) / `facilityId` (FacilityAdmin, DataEntry) |
 | PUT | `UpdateUser` | SA | Same role/id rules as create |
 | POST | `deactivateUser/{id}` | SA | Soft-deactivates the user |
+| POST | `activateUser/{id}` | SA | Re-enables a deactivated user (204; no-op if already active) |
 | POST | `reset-password` | SA | Body: `{ id, newPassword }` |
 
 ### Organizations — `api/organizations`

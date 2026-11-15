@@ -43,6 +43,7 @@ Manual acceptance pass before each release. Mark Pass/Fail per step; every step 
 | 24 | Duplicate username | SA | 409 | |
 | 25 | SA deactivates DE account | SA | 204; the account can no longer refresh; list hides it unless "include inactive" | |
 | 26 | After deactivation, DE's refresh | DE | 401 | |
+| 26a | SA activates the deactivated DE | SA | 204; DE can log in again; already-active call also 204 | |
 | 27 | reset password, old login | SA | 204; old password 401; new 200 | |
 
 ## UC-06 Geography/addresses (BR-GEO)

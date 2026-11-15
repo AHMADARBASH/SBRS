@@ -181,6 +181,7 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 | POST | `CreateUser` | `{ userName, password, firstName, lastName, role, organizationId?, facilityId?, isMobile }` | **201** | `UserDto` |
 | PUT | `UpdateUser` | `{ id, firstName, lastName, role, organizationId?, facilityId?, isMobile }` | 200 | `UserDto` |
 | POST | `deactivateUser/{id}` | — | 204 | — |
+| POST | `activateUser/{id}` | — | 204 | — |
 | POST | `reset-password` | `{ id, newPassword }` | 204 | — |
 
 **List** — `GET api/Users/GetAll?page=1&pageSize=20&search=ahmad&role=FacilityAdmin`:
@@ -230,6 +231,9 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 - `userName`: 3–50 chars, only `A-Z a-z 0-9 . _ -`.
 - Deactivation: confirm dialog; the server refuses deactivating **your own account** and the **SystemAdmin
   account** (target check), and revokes that user's sessions.
+- **Reactivation:** inactive rows (visible with `includeInactive=true`) show an "Activate" action →
+  `POST api/Users/activateUser/{id}` → 204 → refetch. Activating does not restore a forgotten password or
+  clear a lockout — those are handled by `reset-password`.
 - Changing role/scope or resetting a password **revokes that user's sessions** server-side.
 
 `UserDto` (single-user responses):
@@ -427,7 +431,8 @@ Reference: `docs/03-integration/error-catalog.md`.
       unknown code → neutral workspace.
 - [ ] SA can list users (search + role filter + inactive toggle) and sees role and scope names without
       extra calls.
-- [ ] SA can create a user for every role with the correct required id; reset a password; deactivate a user.
+- [ ] SA can create a user for every role with the correct required id; reset a password; deactivate a user;
+      and reactivate a deactivated user (reappears as active in the list).
 - [ ] SA can add/edit organizations, branches, facilities (with address + partner), and deactivate a facility.
 - [ ] SA can add/edit every editable lookup; identity type form includes `valueRegex` with client-side
       regex validation and server 400 shown on invalid patterns.
@@ -447,6 +452,7 @@ GET    api/Auth/me
 GET    api/Users/GetAll               GET    api/Users/Roles
 POST   api/Users/CreateUser           PUT    api/Users/UpdateUser
 POST   api/Users/deactivateUser/{id}  POST   api/Users/reset-password
+POST   api/Users/activateUser/{id}
 
 GET    api/organizations/GetAll       GET    api/organizations/GetById/{id}
 POST   api/organizations/Add          PUT    api/organizations/Update/{id}
