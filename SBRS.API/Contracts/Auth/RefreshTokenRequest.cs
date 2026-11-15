@@ -1,3 +1,3 @@
 ﻿namespace SBRS.Contracts.Auth;
 
-public record RefreshTokenRequest(string RefreshToken);
+public record RefreshTokenRequest(string? RefreshToken);
