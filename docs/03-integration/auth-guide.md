@@ -34,12 +34,13 @@ Response (`LoginResultDto`) — fake values:
   "lastName": "Arbash",
   "role": "FacilityAdmin",
   "organizationId": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",
+  "branchId": null,
   "facilityId": "9a8b7c6d-5e4f-4001-92a3-b4c5d6e7f809",
   "isMobile": false
 }
 ```
 
-- `token` is a JWT with claims: `NameIdentifier` (user id), `Name` (username), `Role`, `jti`, plus `organization_id` / `facility_id` when set. Branch claim is `[PLANNED]`.
+- `token` is a JWT with claims: `NameIdentifier` (user id), `Name` (username), `Role`, `jti`, plus `organization_id` / `branch_id` / `facility_id` when set. A BranchAdmin token carries `branch_id` (and the derived `organization_id`).
 - `ExpiresAt` is the **access token** expiry (240 minutes `[CONFIRMED][BUILT]`); `DateTime` UTC.
 - Login fails with `401 { "title": "Unauthorized", "detail": "Unauthorized" }` — same body for wrong password, inactive user, locked-out user, or user without a role.
 
@@ -60,6 +61,7 @@ types are intended to be embedded in other endpoints, so the frontend can reuse 
   "isSystemAdmin": false,
   "isMobile": false,
   "organizationId": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",   // flat scope ids kept for preselect / backward compat
+  "branchId": null,                                        // set for BranchAdmin only
   "facilityId": "9a8b7c6d-5e4f-4001-92a3-b4c5d6e7f809",
   "organization": {
     "id": "0c1d2e3f-4a5b-4c22-8d90-1e2f3a4b5c6d",
@@ -81,9 +83,10 @@ types are intended to be embedded in other endpoints, so the frontend can reuse 
 Rules:
 
 - `organization` is `null` for SystemAdmin; for OrganizationAdmin it is their own organization; for
-  facility roles it is the organization owning their facility (resolved through the branch). It appears
-  **once** — the facility does not repeat it.
-- `facility` is `null` when the role has no facility (SystemAdmin, OrganizationAdmin).
+  BranchAdmin it is the branch's organization; for facility roles it is the organization owning their
+  facility (resolved through the branch). It appears **once** — the facility does not repeat it.
+- `branchId` is set only for BranchAdmin; `facility` is `null` when the role has no facility
+  (SystemAdmin, OrganizationAdmin, BranchAdmin).
 - **`facility.type.code` is the client's routing key** (`facility_types.code`): route facility users to
   the workspace matching their facility type (e.g. `HEALTH` → health screens). Route on the *code*, never
   on ids or names; an unknown code should fall back to a neutral default workspace.

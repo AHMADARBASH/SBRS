@@ -2,8 +2,9 @@
 
 > **Status:** Ready to implement · **Last updated:** 2026-11-15 · **Owner:** Frontend (handoff from backend)
 >
-> Every endpoint in this document exists in the running API. The two former blockers are built:
-> `GET api/Users/GetAll` (paged user list) and `valueRegex` on identity-type Add/Update.
+> Every endpoint in this document exists in the running API. The former blockers are built:
+> `GET api/Users/GetAll` (paged user list), `valueRegex` on identity-type Add/Update, and BranchAdmin
+> creation/scoping (`branchId` on users, `branch_id` claim, branch-scoped reads).
 > Field lists, routes and rules below were read from the controllers/contracts — not from memory.
 
 ---
@@ -88,7 +89,7 @@ Rules that prevent most frontend bugs:
   "userId": "…", "userName": "fa.damascus",
   "firstName": "Ahmad", "lastName": "Arbash",
   "role": "FacilityAdmin",
-  "organizationId": "…", "facilityId": "…",
+  "organizationId": "…", "branchId": null, "facilityId": "…",
   "isMobile": false
 }
 ```
@@ -102,7 +103,7 @@ Rules that prevent most frontend bugs:
   "role": "FacilityAdmin",
   "isSystemAdmin": false,
   "isMobile": false,
-  "organizationId": "…", "facilityId": "…",
+  "organizationId": "…", "branchId": null, "facilityId": "…",
   "organization": {
     "id": "…", "code": "SARC", "arName": "…", "enName": "…", "isActive": true
   },
@@ -114,8 +115,9 @@ Rules that prevent most frontend bugs:
 }
 ```
 
-- `organization` is `null` for SA; own org for OA; the facility's owning org for facility roles.
-- `facility` is `null` for SA and OA.
+- `organization` is `null` for SA; own org for OA; the branch's org for BA; the facility's owning org for
+  facility roles. `branchId` is set only for BranchAdmin.
+- `facility` is `null` for SA, OA and BA.
 - **Routing key = `facility.type.code`.** Keep a map in the frontend:
 
 ```ts
@@ -177,9 +179,9 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 | Method | Route | Body / query | Success | Response |
 |---|---|---|---|---|
 | GET | `GetAll` | `page=1`, `pageSize=20` (1–100), `includeInactive=false`, `search?`, `role?` | 200 | `PagedResult<UserListItemDto>` |
-| GET | `Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresFacilityId }]` |
-| POST | `CreateUser` | `{ userName, password, firstName, lastName, role, organizationId?, facilityId?, isMobile }` | **201** | `UserDto` |
-| PUT | `UpdateUser` | `{ id, firstName, lastName, role, organizationId?, facilityId?, isMobile }` | 200 | `UserDto` |
+| GET | `Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresBranchId, requiresFacilityId }]` |
+| POST | `CreateUser` | `{ userName, password, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile }` | **201** | `UserDto` |
+| PUT | `UpdateUser` | `{ id, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile }` | 200 | `UserDto` |
 | POST | `deactivateUser/{id}` | — | 204 | — |
 | POST | `activateUser/{id}` | — | 204 | — |
 | POST | `reset-password` | `{ id, newPassword }` | 204 | — |
@@ -198,6 +200,7 @@ Header shows `me.firstName + me.lastName` and the logout actions.
       "isActive": true,
       "createdAt": "2026-11-15T08:00:00Z",
       "organization": { "id": "…", "code": "SARC", "arName": "…", "enName": "…", "isActive": true },
+      "branch":     { "id": "…", "arName": "…", "enName": "…" },   // null unless the role has a branch
       "facility":   { "id": "…", "code": "DAM-PHC-000012", "arName": "…", "enName": "…", "isActive": true }
     }
   ],
@@ -208,24 +211,26 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 
 - `search` matches user name, first name or last name (case-insensitive substring).
 - `role` is an exact role name from `GetAll Roles`.
-- Sorted newest first. `organization`/`facility` are `null` when the role has no scope.
+- Sorted newest first. `organization`/`branch`/`facility` are `null` when the role has no such scope.
 - Inactive users are hidden unless `includeInactive=true`.
 
 **Create/Edit form:** build it from `GET api/Users/Roles` so no role logic is hardcoded:
 
 ```json
 [
-  { "role": "SystemAdmin",        "requiresOrganizationId": false, "requiresFacilityId": false },
-  { "role": "OrganizationAdmin",  "requiresOrganizationId": true,  "requiresFacilityId": false },
-  { "role": "BranchAdmin",        "requiresOrganizationId": false, "requiresFacilityId": false },
-  { "role": "ProjectCoordinator", "requiresOrganizationId": false, "requiresFacilityId": false },
-  { "role": "FacilityAdmin",      "requiresOrganizationId": false, "requiresFacilityId": true  },
-  { "role": "DataEntry",          "requiresOrganizationId": false, "requiresFacilityId": true  }
+  { "role": "SystemAdmin",        "requiresOrganizationId": false, "requiresBranchId": false, "requiresFacilityId": false },
+  { "role": "OrganizationAdmin",  "requiresOrganizationId": true,  "requiresBranchId": false, "requiresFacilityId": false },
+  { "role": "BranchAdmin",        "requiresOrganizationId": false, "requiresBranchId": true,  "requiresFacilityId": false },
+  { "role": "ProjectCoordinator", "requiresOrganizationId": false, "requiresBranchId": false, "requiresFacilityId": false },
+  { "role": "FacilityAdmin",      "requiresOrganizationId": false, "requiresBranchId": false, "requiresFacilityId": true  },
+  { "role": "DataEntry",          "requiresOrganizationId": false, "requiresBranchId": false, "requiresFacilityId": true  }
 ]
 ```
 
-- Show the organization picker only when `requiresOrganizationId`; the facility picker only when
-  `requiresFacilityId` (pick a branch in §4.3, then its facilities in §4.4). Hide both otherwise.
+- Show the organization picker only when `requiresOrganizationId`; the branch picker only when
+  `requiresBranchId`; the facility picker only when `requiresFacilityId` (pick a branch in §4.3, then its
+  facilities in §4.4). Hide the others. A BranchAdmin sends **only** `branchId` — the organization is
+  derived server-side from the branch, so an organization sent alongside it is ignored.
 - **Password policy** (server-enforced by ASP.NET Identity): **≥ 8 chars with at least one uppercase,
   one lowercase, one digit and one non-alphanumeric character.** Mirror it in the form and show a hint.
 - `userName`: 3–50 chars, only `A-Z a-z 0-9 . _ -`.
@@ -240,7 +245,7 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 
 ```json
 { "id": "…", "userName": "…", "firstName": "…", "lastName": "…",
-  "role": "FacilityAdmin", "organizationId": "…", "facilityId": "…",
+  "role": "FacilityAdmin", "organizationId": "…", "branchId": null, "facilityId": "…",
   "isMobile": false, "isActive": true, "createdAt": "…" }
 ```
 
@@ -265,15 +270,16 @@ There is **no deactivate endpoint** for organizations (commented out in the cont
 | POST | `Add` | `{ organizationId, arName, enName }` | SA/OA |
 | PUT | `Update/{id}` | `{ arName, enName }` | SA/OA |
 
-⚠️ `Branches/GetAll` currently returns **all** branches and ignores the `includeInactive` flag; filter
-client-side on `isActive` for the "show inactive" toggle. `Update` cannot move a branch to another
-organization — hide the organization field when editing.
+⚠️ `Branches/GetAll` ignores the `includeInactive` flag; filter client-side on `isActive` for the "show
+inactive" toggle. It is **scoped**: SA sees all branches, OA its organization's, **BranchAdmin only its own
+branch**, FA/DE their organization's. `GetById` for an out-of-scope id returns 404. `Update` cannot move a
+branch to another organization — hide the organization field when editing.
 
 ### 4.4 Facilities — `api/Facilities`
 
 | Method | Route | Body / query | Access |
 |---|---|---|---|
-| GET | `GetByBranchId/{branchId}?includeInactive=` | — | logged-in |
+| GET | `GetByBranchId/{branchId}?includeInactive=` | — | logged-in (scoped: SA all, OA its org, BA its own branch, FA/DE own facility, PC nothing) |
 | GET | `GetById/{id}` | — | logged-in |
 | POST | `AddFacility` | see below | SA/OA |
 | PUT | `UpdateFacility/{id}` | `{ arName, enName, addressId, typeId }` | SA/OA |
@@ -375,7 +381,7 @@ sessions in a way that prevents new areas from appearing.
 |---|---|---|
 | User | `userName` | 3–50, `A-Za-z0-9._-` |
 | User | `password` / `newPassword` | ≥8, upper + lower + digit + non-alphanumeric |
-| User | `role` | one of `GetAll Roles`; scope picker per `requiresOrganizationId` / `requiresFacilityId` |
+| User | `role` | one of `GetAll Roles`; scope picker per `requiresOrganizationId` / `requiresBranchId` / `requiresFacilityId` |
 | Organization | `arName`, `enName` | required, ≤50 |
 | Organization | `code` | required, ≤10, unique (409) |
 | Branch | `arName`, `enName` | required, ≤50 |
@@ -427,11 +433,12 @@ Reference: `docs/03-integration/error-catalog.md`.
       `Path=/api/Auth`; F5 keeps the session through silent refresh.
 - [ ] Deleting the cookie / forcing a 401 routes to login without a redirect loop.
 - [ ] Two tabs refreshing simultaneously never log the user out (serialized refresh).
-- [ ] `me` decides routing: SA → admin area; facility users → workspace chosen by `facility.type.code`;
-      unknown code → neutral workspace.
+- [ ] `me` decides routing: SA → admin area; BranchAdmin (`branchId` set) → branch overview; facility users
+      → workspace chosen by `facility.type.code`; unknown code → neutral workspace.
 - [ ] SA can list users (search + role filter + inactive toggle) and sees role and scope names without
       extra calls.
-- [ ] SA can create a user for every role with the correct required id; reset a password; deactivate a user;
+- [ ] SA can create a user for every role with the correct required id (including a BranchAdmin whose
+      organization is derived from the chosen branch); reset a password; deactivate a user;
       and reactivate a deactivated user (reappears as active in the list).
 - [ ] SA can add/edit organizations, branches, facilities (with address + partner), and deactivate a facility.
 - [ ] SA can add/edit every editable lookup; identity type form includes `valueRegex` with client-side

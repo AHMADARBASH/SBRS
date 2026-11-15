@@ -42,7 +42,7 @@ All routes are mounted under `api/…` (with the casing exactly as listed in [en
 
 ## 5. Scoping and the 404 rule
 
-- Each user sees only their scope (SystemAdmin: all; OrganizationAdmin: own organization; FacilityAdmin/DataEntry: own facility; BranchAdmin/ProjectCoordinator: not yet wired — empty results).
+- Each user sees only their scope (SystemAdmin: all; OrganizationAdmin: own organization; BranchAdmin: own branch + its facilities; FacilityAdmin/DataEntry: own facility; ProjectCoordinator: not yet wired — empty results).
 - **Records outside the caller's scope are returned as `404 Not Found`, not `403`** `[CONFIRMED][BUILT]` — the frontend cannot enumerate ids it is not allowed to see. Show "not found", do not retry.
 - A `403 Forbidden` means the *role* is wrong for the endpoint (policy check), not the data.
 

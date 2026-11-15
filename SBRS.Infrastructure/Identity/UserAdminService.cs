@@ -20,10 +20,10 @@ public class UserAdminService(
 {
     public async Task<UserDto> CreateAsync(
         string userName, string password, string firstName, string lastName,
-        string role, Guid? organizationId, Guid? facilityId, bool isMobile,
+        string role, Guid? organizationId, Guid? branchId, Guid? facilityId, bool isMobile,
         CancellationToken ct)
     {
-        var (orgId, facId) = await ResolveScopeAsync(role, organizationId, facilityId, ct);
+        var (orgId, branch, facId) = await ResolveScopeAsync(role, organizationId, branchId, facilityId, ct);
 
         if (await userManager.FindByNameAsync(userName) is not null)
             throw new ConflictException($"User name '{userName}' is already taken.");
@@ -35,6 +35,7 @@ public class UserAdminService(
             FirstName = firstName,
             LastName = lastName,
             OrganizationId = orgId,
+            BranchId = branch,
             FacilityId = facId,
             IsMobile = isMobile,
             IsActive = true,
@@ -52,15 +53,15 @@ public class UserAdminService(
 
     public async Task<UserDto> UpdateAsync(
         Guid id, string firstName, string lastName,
-        string role, Guid? organizationId, Guid? facilityId, bool isMobile,
+        string role, Guid? organizationId, Guid? branchId, Guid? facilityId, bool isMobile,
         CancellationToken ct)
     {
         var user = await FindAsync(id);
-        var (orgId, facId) = await ResolveScopeAsync(role, organizationId, facilityId, ct);
+        var (orgId, branch, facId) = await ResolveScopeAsync(role, organizationId, branchId, facilityId, ct);
 
         var oldRoles = await userManager.GetRolesAsync(user);
         var roleChanged = oldRoles.Count != 1 || oldRoles[0] != role;
-        var scopeChanged = user.OrganizationId != orgId || user.FacilityId != facId;
+        var scopeChanged = user.OrganizationId != orgId || user.BranchId != branch || user.FacilityId != facId;
 
         await using var tx = await db.Database.BeginTransactionAsync(ct);
 
@@ -74,6 +75,7 @@ public class UserAdminService(
         user.FirstName = firstName;
         user.LastName = lastName;
         user.OrganizationId = orgId;
+        user.BranchId = branch;
         user.FacilityId = facId;
         user.IsMobile = isMobile;
         Check(await userManager.UpdateAsync(user));
@@ -190,6 +192,20 @@ public class UserAdminService(
                     .ToListAsync(ct))
                 .ToDictionary(f => f.Id);
 
+        var branchIds = pageRows
+            .Where(x => x.User.BranchId is not null)
+            .Select(x => x.User.BranchId!.Value)
+            .Distinct()
+            .ToList();
+
+        var branches = branchIds.Count == 0
+            ? new Dictionary<Guid, BranchSummaryDto>()
+            : (await db.Branches.AsNoTracking()
+                    .Where(b => branchIds.Contains(b.Id))
+                    .Select(b => new BranchSummaryDto(b.Id, b.ArName, b.EnName))
+                    .ToListAsync(ct))
+                .ToDictionary(b => b.Id);
+
         var items = pageRows.Select(x => new UserListItemDto(
                 x.User.Id,
                 x.User.UserName!,
@@ -201,6 +217,9 @@ public class UserAdminService(
                 x.User.CreatedAt,
                 x.User.OrganizationId is { } organizationId && organizations.TryGetValue(organizationId, out var organization)
                     ? organization
+                    : null,
+                x.User.BranchId is { } branchId && branches.TryGetValue(branchId, out var branch)
+                    ? branch
                     : null,
                 x.User.FacilityId is { } facilityId && facilities.TryGetValue(facilityId, out var facility)
                     ? facility
@@ -217,42 +236,66 @@ public class UserAdminService(
         ?? throw new NotFoundException(nameof(ApplicationUser), id.ToString());
 
     /// <summary>
-    /// Validates the role's scope and returns the OrganizationId/FacilityId to store.
-    /// OrganizationId for facility-level users is derived from the facility's branch.
+    /// Validates the role's scope and returns the OrganizationId/BranchId/FacilityId to store.
+    /// A BranchAdmin's organization is always derived from the branch; a facility-level user's
+    /// organization is derived from the facility's branch.
     /// </summary>
-    private async Task<(Guid? OrganizationId, Guid? FacilityId)> ResolveScopeAsync(
-        string role, Guid? organizationId, Guid? facilityId, CancellationToken ct)
+    private async Task<(Guid? OrganizationId, Guid? BranchId, Guid? FacilityId)> ResolveScopeAsync(
+        string role, Guid? organizationId, Guid? branchId, Guid? facilityId, CancellationToken ct)
     {
         switch (role)
         {
             case Roles.SystemAdmin:
-                return (null, null);
+                return (null, null, null);
 
             case Roles.OrganizationAdmin:
                 {
+                    if (organizationId is null)
+                        throw new DomainException("OrganizationId is required for this role.");
+
                     var org = await db.Set<OrganizationEntity>().AsNoTracking()
                         .Where(o => o.Id == organizationId)
                         .Select(o => new { o.IsActive })
                         .FirstOrDefaultAsync(ct);
 
-                    if (org is null) throw new NotFoundException(nameof(OrganizationEntity), "");
+                    if (org is null) throw new NotFoundException(nameof(OrganizationEntity), organizationId.Value.ToString());
                     if (!org.IsActive) throw new DomainException("The organization is inactive.");
 
-                    return (organizationId, null);
+                    return (organizationId, null, null);
+                }
+
+            case Roles.BranchAdmin:
+                {
+                    if (branchId is null)
+                        throw new DomainException("BranchId is required for this role.");
+
+                    var branch = await db.Set<BranchEntity>().AsNoTracking()
+                        .Where(b => b.Id == branchId)
+                        .Select(b => new { b.IsActive, b.organizationId })
+                        .FirstOrDefaultAsync(ct);
+
+                    if (branch is null) throw new NotFoundException(nameof(BranchEntity), branchId.Value.ToString());
+                    if (!branch.IsActive) throw new DomainException("The branch is inactive.");
+
+                    // organization is derived from the branch, never trusted from the client
+                    return (branch.organizationId, branchId, null);
                 }
 
             case Roles.FacilityAdmin:
             case Roles.DataEntry:
                 {
+                    if (facilityId is null)
+                        throw new DomainException("FacilityId is required for this role.");
+
                     var facility = await db.Set<FacilityEntity>().AsNoTracking()
                         .Where(f => f.Id == facilityId)
                         .Select(f => new { f.IsActive, f.Branch.organizationId })
                         .FirstOrDefaultAsync(ct);
 
-                    if (facility is null) throw new NotFoundException(nameof(facility),"");
+                    if (facility is null) throw new NotFoundException(nameof(FacilityEntity), facilityId.Value.ToString());
                     if (!facility.IsActive) throw new DomainException("The facility is inactive.");
 
-                    return (facility.organizationId, facilityId);
+                    return (facility.organizationId, null, facilityId);
                 }
 
             default:
@@ -269,5 +312,5 @@ public class UserAdminService(
 
     private static UserDto ToDto(ApplicationUser u, string role) => new(
         u.Id, u.UserName!, u.FirstName, u.LastName, role,
-        u.OrganizationId, u.FacilityId, u.IsMobile, u.IsActive, u.CreatedAt);
+        u.OrganizationId, u.BranchId, u.FacilityId, u.IsMobile, u.IsActive, u.CreatedAt);
 }

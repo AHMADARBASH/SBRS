@@ -1866,6 +1866,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("branch_id");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -1961,6 +1965,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_asp_net_users");
+
+                    b.HasIndex("BranchId")
+                        .HasDatabaseName("ix_asp_net_users_branch_id");
 
                     b.HasIndex("FacilityId")
                         .HasDatabaseName("ix_asp_net_users_facility_id");
@@ -2354,6 +2361,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
                 {
+                    b.HasOne("SBRS.Domain.Entities.BranchEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_asp_net_users_branches_branch_id");
+
                     b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
                         .WithMany()
                         .HasForeignKey("FacilityId")

@@ -5,7 +5,7 @@
 SARC staff have one job function each; permissions follow the role plus the org/facility they work at, which the system can derive — admins must not hand-wire rights.
 
 ## Decision
-Exactly one Identity role per user (`AspNetUserRoles` enforced by service code). Scope lives on `ApplicationUser`: `OrganizationId` and `FacilityId` (nullable), `IsMobile` flag; `BranchId` is `[PLANNED]`. OrganizationId is derived from the facility/branch, never entered by hand. Claims `organization_id`/`facility_id` (branch_id planned) flow inside the access token; repositories scope reads by those claims.
+Exactly one Identity role per user (`AspNetUserRoles` enforced by service code). Scope lives on `ApplicationUser`: `OrganizationId`, `BranchId` and `FacilityId` (nullable), `IsMobile` flag. OrganizationId is derived from the facility/branch, never entered by hand. Claims `organization_id`/`branch_id`/`facility_id` flow inside the access token; repositories scope reads by those claims.
 
 ## Consequences
 - Role × scope is atomic per user; no compound-role ambiguity.

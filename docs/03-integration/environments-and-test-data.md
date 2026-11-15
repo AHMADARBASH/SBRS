@@ -44,7 +44,7 @@ Created by SA via `POST api/Users/CreateUser` after the base SystemAdmin exists.
 |---|---|---|---|---|
 | `sysadmin` | SystemAdmin | — (never bind) | false | global reads, structure admin, users, match review across facilities |
 | `orgadmin.dam` | OrganizationAdmin | one organization (Damascus) | false | org-scoped read/404, facility add in own org |
-| `branchadmin.dam` | BranchAdmin | branchId `[PLANNED]` — cannot be set yet | false | today: empty scoped results (OQ-28) |
+| `branchadmin.dam` | BranchAdmin | one branch (`branchId`; organization derived) | false | token `branch_id`, own branch only, its facilities |
 | `projcoord.dam` | ProjectCoordinator | assigned facilities `[PLANNED]` — cannot be set yet | false | today: empty scoped results (OQ-28) |
 | `facadmin.h001` | FacilityAdmin | one facility | false | match review queue, facility list |
 | `dataentry.h001` | DataEntry | same facility as `facadmin.h001` | false | register, search, list |

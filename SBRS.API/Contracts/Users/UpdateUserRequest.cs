@@ -6,5 +6,6 @@ public sealed record UpdateUserRequest(
     string LastName,
     string Role,
     Guid? OrganizationId,
+    Guid? BranchId,
     Guid? FacilityId,
     bool IsMobile);

@@ -15,12 +15,12 @@ public interface IUserAdminService
 
     Task<UserDto> CreateAsync(
         string userName, string password, string firstName, string lastName,
-        string role, Guid? organizationId, Guid? facilityId, bool isMobile,
+        string role, Guid? organizationId, Guid? branchId, Guid? facilityId, bool isMobile,
         CancellationToken ct);
 
     Task<UserDto> UpdateAsync(
         Guid id, string firstName, string lastName,
-        string role, Guid? organizationId, Guid? facilityId, bool isMobile,
+        string role, Guid? organizationId, Guid? branchId, Guid? facilityId, bool isMobile,
         CancellationToken ct);
 
     Task DeactivateAsync(Guid id, CancellationToken ct);

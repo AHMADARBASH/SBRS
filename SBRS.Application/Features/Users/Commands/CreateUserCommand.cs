@@ -13,6 +13,7 @@ public sealed record CreateUserCommand(
     string LastName,
     string Role,
     Guid? OrganizationId,
+    Guid? BranchId,
     Guid? FacilityId,
     bool IsMobile) : IRequest<UserDto>;
 
@@ -37,11 +38,15 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 
         When(x => x.Role == Roles.OrganizationAdmin, () =>
             RuleFor(x => x.OrganizationId).NotEmpty()
-                .WithMessage("OrganizationId is required for OrganizationAdmin."));
+                .WithMessage("OrganizationId is required for this role."));
+
+        When(x => x.Role == Roles.BranchAdmin, () =>
+            RuleFor(x => x.BranchId).NotEmpty()
+                .WithMessage("BranchId is required for this role."));
 
         When(x => x.Role == Roles.FacilityAdmin || x.Role == Roles.DataEntry, () =>
             RuleFor(x => x.FacilityId).NotEmpty()
-                .WithMessage("FacilityId is required for FacilityAdmin and DataEntry."));
+                .WithMessage("FacilityId is required for this role."));
     }
 }
 
@@ -51,5 +56,5 @@ public sealed class CreateUserCommandHandler(IUserAdminService users)
     public Task<UserDto> Handle(CreateUserCommand c, CancellationToken ct) =>
         users.CreateAsync(
             c.UserName.Trim(), c.Password, c.FirstName.Trim(), c.LastName.Trim(),
-            c.Role, c.OrganizationId, c.FacilityId, c.IsMobile, ct);
+            c.Role, c.OrganizationId, c.BranchId, c.FacilityId, c.IsMobile, ct);
 }

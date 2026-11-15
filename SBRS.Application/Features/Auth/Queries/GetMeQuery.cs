@@ -67,7 +67,7 @@ public sealed class GetMeQueryHandler(
         return new CurrentUserDto(
             user.Id, user.UserName, user.FirstName, user.LastName, user.Role,
             user.Role == Roles.SystemAdmin, user.IsMobile,
-            user.OrganizationId, user.FacilityId,
+            user.OrganizationId, user.BranchId, user.FacilityId,
             organization, facility);
     }
 

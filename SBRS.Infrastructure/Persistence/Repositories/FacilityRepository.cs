@@ -22,7 +22,10 @@ public class FacilityRepository(AppDbContext db, ICurrentUser currentUser) : IFa
             case Roles.FacilityAdmin or Roles.DataEntry when currentUser.FacilityId is { } facilityId:
                 return db.Facilities.Where(f => f.Id == facilityId);
 
-            // BranchAdmin and ProjectCoordinator are added when their scope data exists
+            case Roles.BranchAdmin when currentUser.BranchId is { } branchId:
+                return db.Facilities.Where(f => f.BranchId == branchId);
+
+            // ProjectCoordinator is added when its scope data exists
             default:
                 return db.Facilities.Where(_ => false);   // no scope = nothing
         }

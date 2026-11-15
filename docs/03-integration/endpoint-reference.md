@@ -10,7 +10,7 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 | Method | Route | Roles | Request body | Success | Response | Errors |
 |---|---|---|---|---|---|---|
 | POST | `api/Auth/login` | **anonymous** | `userName` (req), `password` (req) | 200 | `LoginResultDto` | 400 (validation), 401 (bad credentials / inactive / locked / no role) |
-| GET | `api/Auth/me` | logged-in | — | 200 | `CurrentUserDto` — full user + nested `organization{}` / `facility{ type{}, branch{} }` (see [auth-guide](auth-guide.md#21-get-apiauthme--the-full-session-object)) | |
+| GET | `api/Auth/me` | logged-in | — | 200 | `CurrentUserDto` — full user + flat `organizationId`/`branchId`/`facilityId` + nested `organization{}` / `facility{ type{}, branch{} }` (see [auth-guide](auth-guide.md#21-get-apiauthme--the-full-session-object)) | |
 | POST | `api/Auth/refresh` | **anonymous** (web: token from HttpOnly cookie) | `refreshToken` (mobile req; web ignored) | 200 | `LoginResultDto` (`refreshToken` null for web) | 400 (mobile empty), 401 |
 | POST | `api/Auth/logout` | **anonymous** | `refreshToken`(mobile req; web ignored) | 204 | — | 400 (mobile empty) |
 | POST | `api/Auth/logout-all` | logged-in | — | 204 | — | |
@@ -19,10 +19,10 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 
 | Method | Route | Request body | Success | Response | Errors |
 |---|---|---|---|---|---|
-| GET | `api/Users/GetAll` | query: `page=1`, `pageSize=20` (1–100), `includeInactive=false`, `search?`, `role?` | 200 | `PagedResult<UserListItemDto>` (`organization{}` / `facility{}` embedded) | 400 (unknown role / paging out of range) |
-| GET | `api/Users/Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresFacilityId }]` | |
-| POST | `api/Users/CreateUser` | `userName` (3–50, `[A-Za-z0-9._-]`), `password` (≥8), `firstName`, `lastName`, `role` (Roles constant), `organizationId?` (OrgAdmin req), `facilityId?` (FA/DE req), `isMobile` (bool) | 201 | `UserDto` | 400 (validation / role-scope rules / inactive org / facility), 409 (username taken) |
-| PUT | `api/Users/UpdateUser` | `id`, `firstName`, `lastName`, `role`, `organizationId?`, `facilityId?`, `isMobile` | 200 | `UserDto` | 400, 404 |
+| GET | `api/Users/GetAll` | query: `page=1`, `pageSize=20` (1–100), `includeInactive=false`, `search?`, `role?` | 200 | `PagedResult<UserListItemDto>` (`organization{}` / `branch{}` / `facility{}` embedded) | 400 (unknown role / paging out of range) |
+| GET | `api/Users/Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresBranchId, requiresFacilityId }]` | |
+| POST | `api/Users/CreateUser` | `userName` (3–50, `[A-Za-z0-9._-]`), `password` (≥8), `firstName`, `lastName`, `role` (Roles constant), `organizationId?` (OrgAdmin req), `branchId?` (BranchAdmin req), `facilityId?` (FA/DE req), `isMobile` (bool) | 201 | `UserDto` | 400 (validation / role-scope rules / inactive org / branch / facility), 404 (unknown org/branch/facility), 409 (username taken) |
+| PUT | `api/Users/UpdateUser` | `id`, `firstName`, `lastName`, `role`, `organizationId?`, `branchId?`, `facilityId?`, `isMobile` | 200 | `UserDto` | 400, 404 |
 | POST | `api/Users/deactivateUser/{id}` | — | 204 | — | 400 (self-account; target is SystemAdmin), 404 |
 | POST | `api/Users/activateUser/{id}` | — | 204 | — | 404 (no-op when already active) |
 | POST | `api/Users/reset-password` | `id`, `newPassword` (≥8) | 204 | — | 400, 404 |
@@ -55,7 +55,7 @@ Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 
 | Method | Route | Roles | Request | Success | Response | Errors |
 |---|---|---|---|---|---|---|
-| GET | `api/Facilities/GetByBranchId/{branchId}?includeInactive=` | logged-in (scoped; BA/PC currently empty) | query | 200 | `FacilityDto[]` | |
+| GET | `api/Facilities/GetByBranchId/{branchId}?includeInactive=` | logged-in (scoped) | query | 200 | `FacilityDto[]` | |
 | GET | `api/Facilities/GetById/{id}` | logged-in (scoped) | — | 200 | `FacilityDto` | 404 |
 | POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `addressId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50) — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/address/type/partner), 409 (code generation retries exhausted) |
 | PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `addressId`, `typeId` (req), `arName`, `enName` (req) | 200 | `FacilityDto` | 400, 404 |
@@ -134,8 +134,9 @@ Type-specific fields:
 
 | DTO | Fields |
 |---|---|
-| `LoginResultDto` | `token, refreshToken?, expiresAt, userId, userName, firstName, lastName, role, organizationId?, facilityId?, isMobile` |
-| `UserDto` | `id, userName, firstName, lastName, role, organizationId?, facilityId?, isMobile, isActive, createdAt` |
+| `LoginResultDto` | `token, refreshToken?, expiresAt, userId, userName, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile` |
+| `UserDto` | `id, userName, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile, isActive, createdAt` |
+| `UserListItemDto` | `id, userName, firstName, lastName, role, isMobile, isActive, createdAt, organization?, branch?, facility?` |
 | `OrganizationDto` | `id, arName, enName, code, isActive, createdAt, updatedAt?` |
 | `BranchDto` | `id, arName, enName, organizationId, isActive, createdAt, updatedAt?` |
 | `FacilityDto` | `id, branchId, addressId, arName, enName, code, isActive, typeId, createdAt, updatedAt?` |

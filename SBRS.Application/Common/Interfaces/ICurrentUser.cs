@@ -10,6 +10,7 @@ namespace SBRS.Application.Common.Interfaces
         Guid? UserId { get; }
         string? Role { get; }
         Guid? OrganizationId { get; }
+        Guid? BranchId { get; }
         Guid? FacilityId { get; }
         bool IsSystemAdmin { get; }
     }

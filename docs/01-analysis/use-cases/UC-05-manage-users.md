@@ -16,11 +16,12 @@ SystemAdmin provisions every account, binds exactly one role and the matching sc
 Actor is SystemAdmin; the referenced organization/facility exist.
 
 ## Main flow
-1. SA loads the role metadata form `GET api/Users/Roles` (`requiresOrganizationId` / `requiresFacilityId` per role).
+1. SA loads the role metadata form `GET api/Users/Roles` (`requiresOrganizationId` / `requiresBranchId` / `requiresFacilityId` per role).
 2. Create user: userName (3–50, `[A-Za-z0-9._-]`), password (≥ 8), firstName/lastName, role, and scope:
    - OrganizationAdmin → `organizationId` required
+   - BranchAdmin → `branchId` required; the organization is derived from the branch
    - FacilityAdmin / DataEntry → `facilityId` required (org derived automatically)
-   - BranchAdmin / ProjectCoordinator → rejected today ("cannot be managed yet") `[BUILT]` ⚠ OQ-28
+   - ProjectCoordinator → rejected today ("cannot be managed yet") `[BUILT]` ⚠ OQ-28
    - `isMobile` flags mobile users.
 3. `201` returns `UserDto`.
 4. Editions: `UpdateUser` changes names, role, scope, `isMobile`; changing role/scope **revokes the user's refresh tokens** `[BUILT]`.
@@ -40,7 +41,7 @@ Actor is SystemAdmin; the referenced organization/facility exist.
 | SA reactivates a deactivated DE | `204`; the user can log in again (already-active → still `204`) |
 | SA tries to deactivate their own account | `400` "You cannot deactivate your own account." |
 | SA tries to deactivate the SystemAdmin account | `400` "System Admin cannot be deactivated." (target check) |
-| BranchAdmin/ProjectCoordinator creation | `400` "Users with the role '…' cannot be managed yet." |
+| BranchAdmin/ProjectCoordinator creation | ProjectCoordinator: `400` "Users with the role '…' cannot be managed yet." BranchAdmin is supported (`branchId`; unknown → 404, inactive → 400) |
 | No `GetById` user endpoint | detail screens must render from a `GetAll` row (OQ-10) |
 
 ## Postconditions

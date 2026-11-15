@@ -58,6 +58,7 @@ erDiagram
     PARTNERS ||--o{ FACILITIES_PARTNERS : "partner_id"
     FACILITIES ||--o{ FACILITIES_PARTNERS : "facility_id"
     ORGANIZATIONS |o--o{ ASPNET_USERS : "organization_id"
+    BRANCHES |o--o{ ASPNET_USERS : "branch_id"
     FACILITIES |o--o{ ASPNET_USERS : "facility_id"
 
     ORGANIZATIONS {
@@ -184,6 +185,7 @@ erDiagram
         varchar first_name "50"
         varchar last_name "50"
         uuid organization_id FK
+        uuid branch_id FK
         uuid facility_id FK
         boolean is_active
         boolean is_mobile

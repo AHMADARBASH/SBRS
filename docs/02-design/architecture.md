@@ -60,7 +60,7 @@ Key behaviors `[BUILT]`:
 - **LoggingBehavior** logs handler name + duration (never body contents).
 - Handlers load/stage via repositories; **only handlers call `IUnitOfWork.SaveChangesAsync`**.
 - `AppDbContext.SaveChangesAsync` stamps `createdAt/updatedAt/createdBy/updatedBy` from the current user.
-- **Scoping** comes from `ICurrentUser` (claims: sub, role, organization_id, facility_id; branch_id planned): repositories build a private `Scoped()` query. Code-uniqueness probes are deliberately unscoped (codes unique system-wide).
+- **Scoping** comes from `ICurrentUser` (claims: sub, role, organization_id, branch_id, facility_id): repositories build a private `Scoped()` query. Code-uniqueness probes are deliberately unscoped (codes unique system-wide).
 - Exception → HTTP mapping in `GlobalExceptionHandler` (RFC 7807): validation/domain 400, not-found 404, conflict 409 (incl. Npgsql `23505` → generic retry message), unauthorized 401, everything else 500 without detail.
 
 ## 3. Conventions when adding a feature

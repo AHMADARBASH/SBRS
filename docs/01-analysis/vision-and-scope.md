@@ -13,7 +13,7 @@ The system runs as a single ASP.NET Core Web API backed by PostgreSQL, consumed 
 |---|---|
 | SystemAdmin (HQ IT) | owns the structure: organizations, branches, facilities, partners, lookups, user accounts |
 | OrganizationAdmin | manages their organization's branches, facilities, addresses; proposes medicines `[PLANNED]` |
-| BranchAdmin | oversight of a branch's facilities `[PLANNED]`: scope machinery not built yet |
+| BranchAdmin | read-only oversight of a branch and its facilities: `branchId` scope wired into the token and branch/facility reads |
 | ProjectCoordinator | oversight of their assigned facilities `[PLANNED]`: assigned-facilities table not built |
 | FacilityAdmin | runs one facility: reviews duplicate-match cases, views the facility roster |
 | DataEntry (field/office) | searches and registers beneficiaries at one facility (also on mobile) |
@@ -33,7 +33,7 @@ The system runs as a single ASP.NET Core Web API backed by PostgreSQL, consumed 
 ## 4. Out of scope for v1 `[PLANNED]`
 
 - Clinics and doctors per facility (UC-11), medicines catalogue (UC-12), pharmacy transactions (UC-13), reports (UC-14) — designed, not built.
-- BranchAdmin / ProjectCoordinator scoping (branch_id claim, assigned facilities) `[PLANNED]`.
+- BranchAdmin scoping **is wired** (`branch_id` claim, own branch + its facilities, read-only); ProjectCoordinator scoping (assigned facilities) `[PLANNED]`.
 - BeneficiaryProfile (education, accommodation, disabilities 1:1 extension) `[PLANNED]`.
 - Enrollment of an already-registered person in an additional facility (`FacilityBeneficiary`) `[PLANNED]`.
 - EducationIssue lookup `[OPEN]` (OQ-07).

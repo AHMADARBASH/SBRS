@@ -11,6 +11,7 @@ namespace SBRS.Domain.Constants
         public const string UserName = "unique_name";
         public const string Role = "role";
         public const string OrganizationId = "organization_id";
+        public const string BranchId = "branch_id";
         public const string FacilityId = "facility_id";
         public const string IsMobile = "is_mobile";
     }

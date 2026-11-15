@@ -39,7 +39,7 @@ Terms | Arabic | Definition, and where the concept lives (table / endpoint).
 |---|---|---|
 | SystemAdmin | مدير النظام | Global administrator; the only role that manages users, all lookups, and can act system-wide |
 | OrganizationAdmin | مدير المنظمة | Manages one organization's branches/facilities/addresses |
-| BranchAdmin | مدير الفرع | Branch-level oversight `[PLANNED]` (scope not wired) |
+| BranchAdmin | مدير الفرع | Branch-level, read-only oversight of one branch and its facilities `[BUILT]` |
 | ProjectCoordinator | منسق المشروع | Oversight across their assigned facilities `[PLANNED]` |
 | FacilityAdmin | مدير المركز | Runs one facility; reviews match cases; views the facility roster |
 | DataEntry | مدخل بيانات | Registers and searches beneficiaries at one facility (web or mobile) |

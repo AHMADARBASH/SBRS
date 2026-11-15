@@ -10,6 +10,7 @@ namespace SBRS.Infrastructure.Identity
         public string FirstName { get; set; } = default!;
         public string LastName { get; set; } = default!;
         public Guid? OrganizationId { get; set; }
+        public Guid? BranchId { get; set; }
         public Guid? FacilityId { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsMobile { get; set; } = false;

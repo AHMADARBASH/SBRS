@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SBRS.Application.Common.Interfaces;
+using SBRS.Domain.Constants;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 using System;
@@ -15,6 +16,12 @@ namespace SBRS.Infrastructure.Persistence.Repositories
         {
             if (currentUser.IsSystemAdmin)
                 return db.Branches;
+
+            // BranchAdmin only ever sees the branch it is assigned to
+            if (currentUser.Role == Roles.BranchAdmin)
+                return currentUser.BranchId is { } ownBranchId
+                    ? db.Branches.Where(b => b.Id == ownBranchId)
+                    : db.Branches.Where(_ => false);
 
             var organizationId = currentUser.OrganizationId;
             if (organizationId is null)

@@ -22,7 +22,8 @@ What exists, and what must be tested first. **No test projects exist in the repo
 | DE reads foreign facility roster | scoped/404 |
 | SA passes `facilityId` explicitly | sees any facility |
 | Code-exists probes across facilities | still return true (unscoped by design) |
-| BranchAdmin/ProjectCoordinator reads | empty results today (OQ-28) — test documents reality |
+| BranchAdmin reads | own branch + its facilities; other scopes still empty (writes: none) |
+| ProjectCoordinator reads | empty results today (OQ-28) — test documents reality |
 
 ### 2.2 Authorization policies
 | Case | Expected |

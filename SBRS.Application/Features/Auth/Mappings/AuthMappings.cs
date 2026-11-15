@@ -9,5 +9,5 @@ public static class AuthMappings
         this AuthenticatedUser u, TokenResult access, string refreshToken)
         => new(access.Token, refreshToken, access.ExpiresAt,
                u.Id, u.UserName, u.FirstName, u.LastName, u.Role,
-               u.OrganizationId, u.FacilityId, u.IsMobile);
+               u.OrganizationId, u.BranchId, u.FacilityId, u.IsMobile);
 }

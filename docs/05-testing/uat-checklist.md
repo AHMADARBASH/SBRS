@@ -39,7 +39,13 @@ Manual acceptance pass before each release. Mark Pass/Fail per step; every step 
 | 20 | Create FA without facility | SA | 400 | |
 | 21 | Create FA with facility; org derived | SA | 201, `organizationId` set | |
 | 22 | Create OA (org), DE (facility, isMobile) | SA | 201 | |
-| 23 | Create BranchAdmin/ProjectCoordinator | SA | 400 "cannot be managed yet" (OQ-28) | |
+| 23 | Create BranchAdmin with branchId only | SA | 201; organizationId = branch's org, branchId set, facilityId null | |
+| 23a | Create BranchAdmin without branchId | SA | 400 "BranchId is required for this role." | |
+| 23b | Create BranchAdmin with unknown / inactive branch | SA | 404 / 400 "The branch is inactive." | |
+| 23c | Create BranchAdmin sending facilityId + a different organizationId | SA | both ignored; stored values derived from the branch | |
+| 23d | Update a BranchAdmin to another branch | SA | 200; that user's refresh tokens revoked | |
+| 23e | Create ProjectCoordinator | SA | 400 "cannot be managed yet" (OQ-28) | |
+| 23f | Login as BranchAdmin; GET Branches | BA | token has branch_id; `me.branchId` set; list contains only their branch | |
 | 24 | Duplicate username | SA | 409 | |
 | 25 | SA deactivates DE account | SA | 204; the account can no longer refresh; list hides it unless "include inactive" | |
 | 26 | After deactivation, DE's refresh | DE | 401 | |

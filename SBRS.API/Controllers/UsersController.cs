@@ -37,7 +37,7 @@ public class UsersController(ISender sender) : ControllerBase
     {
         var user = await sender.Send(new CreateUserCommand(
             r.UserName, r.Password, r.FirstName, r.LastName,
-            r.Role, r.OrganizationId, r.FacilityId, r.IsMobile), ct);
+            r.Role, r.OrganizationId, r.BranchId, r.FacilityId, r.IsMobile), ct);
 
         return StatusCode(StatusCodes.Status201Created, user);
     }
@@ -46,7 +46,7 @@ public class UsersController(ISender sender) : ControllerBase
     [Route("UpdateUser")]
     public async Task<ActionResult<UserDto>> Update( UpdateUserRequest r, CancellationToken ct) =>
         Ok(await sender.Send(new UpdateUserCommand(
-            r.id, r.FirstName, r.LastName, r.Role, r.OrganizationId, r.FacilityId, r.IsMobile), ct));
+            r.id, r.FirstName, r.LastName, r.Role, r.OrganizationId, r.BranchId, r.FacilityId, r.IsMobile), ct));
 
     [HttpPost("deactivateUser/{id:guid}")]
     public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)

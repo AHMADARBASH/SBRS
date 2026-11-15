@@ -26,6 +26,9 @@ public class TokenService(IOptions<JwtSettings> options) : ITokenService
         if (user.OrganizationId is { } organizationId)
             claims.Add(new Claim(AppClaims.OrganizationId, organizationId.ToString()));
 
+        if (user.BranchId is { } branchId)
+            claims.Add(new Claim(AppClaims.BranchId, branchId.ToString()));
+
         if (user.FacilityId is { } facilityId)
             claims.Add(new Claim(AppClaims.FacilityId, facilityId.ToString()));
 

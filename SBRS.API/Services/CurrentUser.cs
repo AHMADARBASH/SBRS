@@ -12,6 +12,7 @@ public class CurrentUser(IHttpContextAccessor accessor) : ICurrentUser
     public Guid? UserId => ParseGuid(Principal?.FindFirstValue(ClaimTypes.NameIdentifier));
     public string? Role => Principal?.FindFirstValue(ClaimTypes.Role);
     public Guid? OrganizationId => ParseGuid(Principal?.FindFirstValue(AppClaims.OrganizationId));
+    public Guid? BranchId => ParseGuid(Principal?.FindFirstValue(AppClaims.BranchId));
     public Guid? FacilityId => ParseGuid(Principal?.FindFirstValue(AppClaims.FacilityId));
     public bool IsSystemAdmin => Role == Roles.SystemAdmin;
 

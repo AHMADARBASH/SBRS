@@ -58,12 +58,12 @@ Scoring detail (for context; the client only shows `score` and `reasons`): first
 |---|---|---|
 | `SystemAdmin` | (no facility) | never bound; can pass facilityId on beneficiary list |
 | `OrganizationAdmin` | organizationId (from branch/facility) | created by SystemAdmin |
-| `BranchAdmin` | branchId `[PLANNED]` not built yet | scoped empty today |
+| `BranchAdmin` | branchId (organization derived) | read-only: own branch + its facilities; no write policy |
 | `ProjectCoordinator` | ≥ 1 facility `[PLANNED]` (assigned-facilities table not built) | scoped empty today |
 | `FacilityAdmin` | exactly one facilityId | reviews matches |
 | `DataEntry` | exactly one facilityId | registers beneficiaries, searches, lists |
 
-The `GET api/Users/Roles` endpoint returns these as `[{ role, requiresOrganizationId, requiresFacilityId }]` so the frontend can build the role picker dynamically.
+The `GET api/Users/Roles` endpoint returns these as `[{ role, requiresOrganizationId, requiresBranchId, requiresFacilityId }]` so the frontend can build the role picker dynamically.
 
 ## 6. Identity types (`IdentityTypeCodes`) and value regexes [BUILT]
 

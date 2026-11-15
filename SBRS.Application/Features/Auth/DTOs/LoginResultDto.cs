@@ -14,5 +14,6 @@ public record LoginResultDto(
     string LastName,
     string Role,
     Guid? OrganizationId,
+    Guid? BranchId,
     Guid? FacilityId,
     bool IsMobile);

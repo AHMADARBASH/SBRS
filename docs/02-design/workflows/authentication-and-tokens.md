@@ -8,7 +8,7 @@ Design-level companion to [../../03-integration/auth-guide.md](../../03-integrat
 | Aspect | Decision |
 |---|---|
 | Access token | JWT (HS256, `Jwt:Key`), issuer/audience validated, **240 minutes** `[CONFIRMED]`; `ClockSkew = Zero` — expired tokens rejected immediately |
-| Claims | `sub` (user id), `unique_name`, `role`, `jti`, `organization_id`, `facility_id`, `is_mobile`; `branch_id` `[PLANNED]` |
+| Claims | `sub` (user id), `unique_name`, `role`, `jti`, `organization_id`, `branch_id`, `facility_id`, `is_mobile` (each scope claim only when set) |
 | Refresh token | 30 days, SHA-256 hashed at rest (`refresh_tokens.token_hash`, unique), single-use |
 | Rotation | every refresh burns the old token (`used_at`) and issues a new sibling in the same `family_id` |
 | Reuse detection | refreshToken of a used/burned token revokes the **whole family** (`revoked_at` on all rows) |

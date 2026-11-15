@@ -7,6 +7,7 @@ public sealed record UserDto(
     string LastName,
     string Role,
     Guid? OrganizationId,
+    Guid? BranchId,
     Guid? FacilityId,
     bool IsMobile,
     bool IsActive,

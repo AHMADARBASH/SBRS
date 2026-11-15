@@ -130,5 +130,5 @@ Collected from `SBRS.Domain/{Entities,Common}` and handlers `[BUILT]`; show them
 | Identity type | `Value regex is required.` / `Value regex is not a valid regular expression.` | admin edit |
 | Auth/refresh | `Invalid refresh token.` | unknown/revoked/expired/reused |
 | Search | `Provide the full code, or both first name and last name (at least 2 characters each).` | bad search input |
-| Users scope | `Users with the role '{role}' cannot be managed yet.` | BranchAdmin/ProjectCoordinator creation |
+| Users scope | `Users with the role '{role}' cannot be managed yet.` | ProjectCoordinator creation (BranchAdmin is supported) |
 | Fetch | `The selected area does not exist.` / `The selected nationality does not exist.` / `The selected identity type does not exist.` | register references |

@@ -15,9 +15,18 @@ Documentation release: the whole `docs/` tree was created; no API code changed w
 
 ### Added
 
+- BranchAdmin support end-to-end:
+  - user management accepts `branchId` (required for BranchAdmin; the organization is derived from the
+    branch and any client-sent organization/facility id is ignored);
+  - migration `AddBranchIdToUsers` adds nullable `branch_id` to `AspNetUsers` (FK → `branches`, Restrict);
+  - `branch_id` JWT claim + `ICurrentUser.BranchId`, so `GET api/Auth/me` and the repositories carry the
+    branch scope (BranchAdmin sees only its branch and the facilities under it; still read-only);
+  - `login` / `me` / `UserDto` now expose `branchId`; `UserListItemDto` embeds a `branch{}` summary;
+  - `GET api/Users/Roles` also returns `requiresBranchId`.
+  - BranchAdmin role listed as manageable by SA; ProjectCoordinator is still rejected.
 - `GET api/Users/GetAll` — paged user list for the SystemAdmin screen: `page`, `pageSize` (1–100),
   `includeInactive`, `search` (user/first/last name), `role`; each row embeds the shared
-  `organization{}` / `facility{}` summary objects (OQ-10 resolved for the list).
+  `organization{}` / `branch{}` / `facility{}` summary objects (OQ-10 resolved for the list).
 - `POST api/Users/activateUser/{id}` — re-enables a deactivated user (204; no-op when already active).
 - `valueRegex` on `api/identity-types/Add` and `Update` — the SA can now create/fix identity document
   patterns through the API (required, valid .NET regex, ≤200 chars). Registration validates against it.
@@ -32,7 +41,7 @@ Documentation release: the whole `docs/` tree was created; no API code changed w
 
 - **BREAKING (no client yet):** `GET api/Auth/me` returns the full session object (`CurrentUserDto`):
   the complete user plus nested `organization{}` / `facility{}` (with `facility.type.code` as the routing
-  key and `facility.branch{}`). The flat `organizationId` / `facilityId` ids are kept.
+  key and `facility.branch{}`). The flat `organizationId` / `branchId` / `facilityId` ids are kept.
 - Refresh-cookie default path `/api/auth` → `/api/Auth` so browsers (case-sensitive path matching) send
   the cookie to the actual route casing.
 

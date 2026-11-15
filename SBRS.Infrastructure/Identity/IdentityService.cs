@@ -47,6 +47,6 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
 
         return new AuthenticatedUser(
             user.Id, user.UserName!, user.FirstName, user.LastName, role,
-            user.OrganizationId, user.FacilityId, user.IsMobile);
+            user.OrganizationId, user.BranchId, user.FacilityId, user.IsMobile);
     }
 }

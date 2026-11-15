@@ -17,6 +17,7 @@ public sealed record CurrentUserDto(
     bool IsSystemAdmin,
     bool IsMobile,
     Guid? OrganizationId,
+    Guid? BranchId,
     Guid? FacilityId,
     OrganizationSummaryDto? Organization,
     CurrentFacilityDto? Facility);

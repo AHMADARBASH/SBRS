@@ -4,7 +4,7 @@
 | Item | Value |
 |---|---|
 | Module | Reporting `[PLANNED]` |
-| Primary actor | SystemAdmin (all), OrganizationAdmin, BranchAdmin `[PLANNED]`, ProjectCoordinator `[PLANNED]`, FacilityAdmin (own) |
+| Primary actor | SystemAdmin (all), OrganizationAdmin, BranchAdmin (own branch), ProjectCoordinator `[PLANNED]`, FacilityAdmin (own) |
 | Implementation status | `[PLANNED]` — no reporting endpoints |
 | Related rules | OQ-03 aggregated-only vs individual records; distinct-beneficiary counting; privacy rules NFR-PRV-05 |
 | Endpoints | none (planned e.g. `api/reports/*`) |
@@ -17,7 +17,7 @@ Give each level of the hierarchy trustworthy numbers about registrations and ser
 |---|---|
 | SystemAdmin | everything |
 | OrganizationAdmin | own organization |
-| BranchAdmin | own branch `[PLANNED]` (OQ-28) |
+| BranchAdmin | own branch (scope claim wired; reports themselves still `[PLANNED]`) |
 | ProjectCoordinator | their assigned facilities (OQ-04) |
 | FacilityAdmin | own facility |
 | DataEntry | none (or own-facility basics) |

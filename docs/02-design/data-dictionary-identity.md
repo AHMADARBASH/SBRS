@@ -26,6 +26,7 @@ Companion to [data-dictionary.md](data-dictionary.md). These tables belong to AS
 | `first_name` | varchar(50) | NOT NULL | project field |
 | `last_name` | varchar(50) | NOT NULL | project field |
 | `organization_id` | uuid | NULL | FK → organizations (Restrict), indexed |
+| `branch_id` | uuid | NULL | FK → branches (Restrict), indexed — set for BranchAdmin |
 | `facility_id` | uuid | NULL | FK → facilities (Restrict), indexed |
 | `is_active` | boolean | NOT NULL | project field (soft delete of accounts) |
 | `is_mobile` | boolean | NOT NULL | project field (mobile users) |

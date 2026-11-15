@@ -7,6 +7,7 @@ namespace SBRS.Application.Features.Users.Queries;
 public sealed record RoleDto(
     string Role,
     bool RequiresOrganizationId,
+    bool RequiresBranchId,
     bool RequiresFacilityId);
 
 /// <summary>
@@ -22,6 +23,7 @@ public sealed class GetRolesQueryHandler : IRequestHandler<GetRolesQuery, IReadO
         IReadOnlyList<RoleDto> roles = Roles.All.Select(r => new RoleDto(
             r,
             r == Roles.OrganizationAdmin,
+            r == Roles.BranchAdmin,
             r == Roles.FacilityAdmin || r == Roles.DataEntry)).ToList();
 
         return Task.FromResult(roles);

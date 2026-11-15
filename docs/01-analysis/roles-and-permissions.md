@@ -9,7 +9,7 @@ Two sources are reconciled here: the intended matrix (project decisions) and the
 |---|---|---|---|
 | **SystemAdmin** | Owns the whole system: organizations, branches, facilities, partners, lookups, users; participates in search/list/review | none (global); may pass `facilityId` on beneficiary list | `[BUILT]` |
 | **OrganizationAdmin** | Creates/updates branches and facilities of **their own organization**, manages addresses, updates own organization | `organization_id` claim derived from their facility/branch assignment | `[BUILT]` (org-scoped queries); OA is bound via facility → branch → org |
-| **BranchAdmin** | Branch-level oversight of facilities and beneficiaries | `branch_id` claim `[PLANNED]` | Not built — role exists, gets empty scoped results (OQ-28) |
+| **BranchAdmin** | Branch-level oversight of facilities and beneficiaries (read-only) | `branch_id` claim (organization derived from the branch) | `[BUILT]` for branches/facilities (own branch); other repository scopes not wired |
 | **ProjectCoordinator** | Program oversight across assigned facilities | assigned-facilities table `[PLANNED]` | Not built — role exists, gets empty scoped results (OQ-28) |
 | **FacilityAdmin** | Runs one facility: views its roster, reviews match cases | `facility_id` claim | `[BUILT]` |
 | **DataEntry** | Registers and searches beneficiaries, views own facility roster, also on mobile (`is_mobile`) | `facility_id` claim | `[BUILT]` |
@@ -81,9 +81,9 @@ Legend: ✅ allowed · 📖 read-only · — no access · 🔜 `[PLANNED]`. Scop
 
 ## 4. Scope rules per role
 
-- **Scope is computed server-side** from the JWT claims (`sub`, `role`, `organization_id`, `facility_id`; `branch_id` `[PLANNED]`) via `ICurrentUser`, and applied by a private `Scoped()` query in each repository `[BUILT]`.
+- **Scope is computed server-side** from the JWT claims (`sub`, `role`, `organization_id`, `branch_id`, `facility_id`) via `ICurrentUser`, and applied by a private `Scoped()` query in each repository `[BUILT]`.
 - OrganizationAdmin's organization is **derived** from their bound facility → branch → organization chain, not chosen `[BUILT]`.
-- FacilityAdmin and DataEntry: exactly one facility. BranchAdmin: one branch `[PLANNED]`. ProjectCoordinator: ≥ 1 assigned facility, expected within one organization `[CONFIRMED]/[ASSUMED]` (OQ-04) `[PLANNED]`.
+- FacilityAdmin and DataEntry: exactly one facility. BranchAdmin: exactly one branch `[BUILT]` (branches + facilities scoped; report-only, no write policy). ProjectCoordinator: ≥ 1 assigned facility, expected within one organization `[CONFIRMED]/[ASSUMED]` (OQ-04) `[PLANNED]`.
 - Code-uniqueness ("does this code already exist?") checks are deliberately **unscoped** because codes are unique system-wide `[BUILT]`.
 - Out-of-scope records → `404` (ADR-006) `[BUILT]`.
 - SystemAdmin has no facility; beneficiary *register* therefore fails for them today (needs `facility_id`) — part of OQ-12.
@@ -94,7 +94,7 @@ Legend: ✅ allowed · 📖 read-only · — no access · 🔜 `[PLANNED]`. Scop
 |---|---|---|
 | 1 | Intended: SA can register beneficiaries. Code: `RegisterBeneficiaries` = DataEntry only | [OQ-12](../OPEN-QUESTIONS.md#oq-12) |
 | 2 | Intended: FA/DE can add/update their own facility (BR-FAC-06). Code: facility mutation is `OrganizationLevel` only | [OQ-33](../OPEN-QUESTIONS.md#oq-33) (aFA/FA facility-edit policy) — see business-rules BR-FAC-06 |
-| 3 | Intended: BranchAdmin has real powers. Code: role exists, no scope, no endpoints beyond read-with-empty-results | [OQ-28](../OPEN-QUESTIONS.md#oq-28) |
+| 3 | BranchAdmin is now created with a `branchId` (organization derived) and has branch-scoped reads; it remains report-only (no write policy). ProjectCoordinator still has no scope | [OQ-28](../OPEN-QUESTIONS.md#oq-28) |
 | 4 | Intended: ProjectCoordinator exists for oversight. Code: assigned facilities not built | [OQ-04](../OPEN-QUESTIONS.md#oq-04) + OQ-28 |
 | 5 | Intended: pharmacy role separation (ADR-015). Code: no pharmacy role/facility handling yet | [OQ-01](../OPEN-QUESTIONS.md#oq-01), [OQ-02](../OPEN-QUESTIONS.md#oq-02) |
 | 6 | Ambiguity: the `DataEntry` **policy** name includes all six roles — easy to misread as "DataEntry users only" | noted in code comments; keep as-is unless renamed |

@@ -24,7 +24,7 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 | Branches list (by organization) | browse the org structure | SA, OA (others scoped read) | `GET api/Branches/GetAll`, `GetByOrganizationId/{organizationId}` | `[BUILT]` |
 | Branch add / update | add branch (incl. HQ), rename | SA, OA | `POST api/Branches/Add`, `PUT api/Branches/Update/{id}` | `[BUILT]` |
 | Branch deactivate | disable branch (guard: active facilities) | SA, OA | — (no endpoint, OQ-16) | `[PLANNED]` |
-| Facility list (by branch) | browse facilities | SA, OA, BA, PC (scope), FA/DE (own) | `GET api/Facilities/GetByBranchId/{branchId}` | `[BUILT]` |
+| Facility list (by branch) | browse facilities | SA, OA, BA (own branch), PC (scope), FA/DE (own) | `GET api/Facilities/GetByBranchId/{branchId}` | `[BUILT]` |
 | Facility add / update | create facility (auto code, address, type, partner) | SA, OA | `POST api/Facilities/AddFacility`, `PUT …/UpdateFacility/{id}` | `[BUILT]` |
 | Facility deactivate | disable facility | SA, OA | `POST api/Facilities/deactivateFacility/{id}` | `[BUILT]` |
 | Facility partner history | view partner assignments, assign a new partner | SA | `GET api/facility-partners/GetByFacility/{facilityId}`, `POST …/Assign` | `[BUILT]` |
@@ -97,6 +97,6 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 | Match review | yes | no | no | no | yes | no |
 | Pharmacy / clinics / reports | yes | yes | read | read | read | no |
 
-† registers policy is DataEntry-only today — see [OQ-12](../OPEN-QUESTIONS.md#oq-12). BA/PC get empty scoped results until branch scoping is built ([OQ-28](../OPEN-QUESTIONS.md#oq-28)).
+† registers policy is DataEntry-only today — see [OQ-12](../OPEN-QUESTIONS.md#oq-12). BA is scoped to its own branch (read-only); PC still gets empty scoped results ([OQ-28](../OPEN-QUESTIONS.md#oq-28)).
 
 See also [roles-and-permissions.md](../01-analysis/roles-and-permissions.md) for the full matrix and policy mapping.
