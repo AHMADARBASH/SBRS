@@ -10,6 +10,8 @@ You are building a web or mobile client for the SBRS API. Read the files in this
 5. [enums-and-lookups.md](enums-and-lookups.md) — gender, match statuses, roles, identity regexes, lookup endpoints.
 6. [screens-and-roles.md](screens-and-roles.md) — screen-by-screen map with the endpoints each screen calls.
 7. [environments-and-test-data.md](environments-and-test-data.md) — base URLs, seed accounts, fixtures.
+8. [tasks/frontend-login-and-admin.md](tasks/frontend-login-and-admin.md) — ready-to-implement task: login/session
+   + the SystemAdmin area (users, organizations, branches, facilities, lookups), with every request/response.
 
 ## Base conventions in 10 lines
 

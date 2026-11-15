@@ -65,7 +65,7 @@ Legend: ✅ allowed · 📖 read-only · — no access · 🔜 `[PLANNED]`. Scop
 | **Addresses** add/update | ✅ | ✅ (own org's facilities' areas) | 🔜 | — | — | — |
 | **Addresses** view | 📖 | 📖 | 📖 | 📖 | 📖 | 📖 |
 | **Users** create/update/deactivate/reset | ✅ | — | — | — | — | — |
-| **Users** view | 🔜 (no endpoints, OQ-10) | — | — | — | — | — |
+| **Users** view | ✅ (`GET api/Users/GetAll`, paged) | — | — | — | — | — |
 | **Beneficiary search** (cross-facility) | ✅ | — | — | — | ✅ (own facility identity only) | ✅ (own facility) |
 | **Beneficiary register** | — † | — | — | — | — | ✅ (own facility) |
 | **Beneficiary list** (facility roster) | ✅ (any facility via param) | — | — | — | ✅ (own) | ✅ (own) |

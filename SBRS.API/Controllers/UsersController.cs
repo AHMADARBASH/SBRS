@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SBRS.Application.Common.Models;
 using SBRS.Application.Features.Users.Commands;
 using SBRS.Application.Features.Users.DTOs;
 using SBRS.Application.Features.Users.Queries;
@@ -14,6 +15,17 @@ namespace SBRS.Controllers;
 [Authorize(Policy = Policies.SystemAdminOnly)]
 public class UsersController(ISender sender) : ControllerBase
 {
+    // paged list for the admin screen; inactive users are hidden unless asked for
+    [HttpGet("GetAll")]
+    public async Task<ActionResult<PagedResult<UserListItemDto>>> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool includeInactive = false,
+        [FromQuery] string? search = null,
+        [FromQuery] string? role = null,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetPagedUsersQuery(page, pageSize, includeInactive, search, role), ct));
+
     // which role to use when creating a user (and which ids that role expects)
     [HttpGet("Roles")]
     public async Task<ActionResult<IReadOnlyList<RoleDto>>> Roles(CancellationToken ct) =>

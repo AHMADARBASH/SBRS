@@ -75,7 +75,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | BR-USR-06 | Deactivating a user revokes their refresh tokens | `[CONFIRMED]` `[BUILT]` | `DeactivateUserCommandHandler` → `IRefreshTokenService.RevokeAllForUserAsync` |
 | BR-USR-07 | `IsMobile` marks users who work on the mobile app; carried as the `is_mobile` claim | `[CONFIRMED]` `[BUILT]` | `TokenService.CreateToken`, `ApplicationUser.IsMobile` |
 | BR-USR-08 | A user cannot deactivate their own account or change their own role | `[CONFIRMED]` `[BUILT]` | `UserAdminService` (self checks) |
-| BR-USR-09 | ⚠ Deactivation currently checks the **caller's** role instead of the target's, so SystemAdmin can never deactivate anyone (probable bug) | `[BUILT]` ⚠ | `DeactivateUserCommandHandler` (OQ-14) |
+| BR-USR-09 | The target `SystemAdmin` account cannot be deactivated; the caller cannot deactivate themselves | `[BUILT]` | `DeactivateUserCommandHandler` + `UserAdminService.DeactivateAsync` |
 | BR-USR-10 | Username rules: 3–50 chars, only letters/digits/`.`/`_`/`-`; unique (409 on duplicate) | `[CONFIRMED]` `[BUILT]` | `AddUserCommandValidator`, unique index on `AspNetUsers.NormalizedUserName` |
 
 ## 7. Beneficiaries (BR-BEN)

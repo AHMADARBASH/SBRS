@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using SBRS.Application.Common.Exceptions;
+using SBRS.Application.Common.Validation;
 using SBRS.Application.Features.IdentityTypes.DTOs;
 using SBRS.Application.Features.IdentityTypes.Mappings;
 using SBRS.Domain.Entities;
@@ -8,7 +9,8 @@ using SBRS.Domain.Interfaces;
 
 namespace SBRS.Application.Features.IdentityTypes.Commands;
 
-public sealed record AddIdentityTypeCommand(string ArName, string EnName, string Code) : IRequest<IdentityTypeDto>;
+public sealed record AddIdentityTypeCommand(string ArName, string EnName, string Code, string ValueRegex)
+    : IRequest<IdentityTypeDto>;
 
 public sealed class AddIdentityTypeCommandValidator : AbstractValidator<AddIdentityTypeCommand>
 {
@@ -17,6 +19,13 @@ public sealed class AddIdentityTypeCommandValidator : AbstractValidator<AddIdent
         RuleFor(x => x.ArName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.EnName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Code).NotEmpty().MaximumLength(30);
+
+        // A type without a working rule cannot be used for registration.
+        RuleFor(x => x.ValueRegex)
+            .NotEmpty()
+            .MaximumLength(200)
+            .Must(RegexValidation.IsValidPattern)
+            .WithMessage("ValueRegex must be a valid .NET regular expression (max 200 characters).");
     }
 }
 
@@ -32,7 +41,7 @@ public sealed class AddIdentityTypeCommandHandler(IIdentityTypeRepository identi
         if (await identityTypes.CodeExistsAsync(code, null, ct))
             throw new ConflictException($"Identity type code '{code}' already exists.");
 
-        var identityType = new IdentityTypeEntity(c.ArName, enName, code);
+        var identityType = new IdentityTypeEntity(c.ArName, enName, code, c.ValueRegex);
         await identityTypes.AddAsync(identityType, ct);
         await uow.SaveChangesAsync(ct);
 

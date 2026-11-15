@@ -9,13 +9,7 @@ namespace SBRS.Application.Features.Auth.Commands;
 
 public record RefreshTokenCommand(string RefreshToken) : IRequest<LoginResultDto>;
 
-public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
-{
-    public RefreshTokenCommandValidator()
-    {
-        RuleFor(x => x.RefreshToken).NotEmpty().MaximumLength(200);
-    }
-}
+
 
 public class RefreshTokenCommandHandler(
     IRefreshTokenService refreshTokens,

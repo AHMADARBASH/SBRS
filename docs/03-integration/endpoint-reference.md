@@ -10,7 +10,7 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 | Method | Route | Roles | Request body | Success | Response | Errors |
 |---|---|---|---|---|---|---|
 | POST | `api/Auth/login` | **anonymous** | `userName` (req), `password` (req) | 200 | `LoginResultDto` | 400 (validation), 401 (bad credentials / inactive / locked / no role) |
-| GET | `api/Auth/me` | logged-in | — | 200 | `{ userId, role, organizationId, facilityId, isSystemAdmin }` | |
+| GET | `api/Auth/me` | logged-in | — | 200 | `CurrentUserDto` — full user + nested `organization{}` / `facility{ type{}, branch{} }` (see [auth-guide](auth-guide.md#21-get-apiauthme--the-full-session-object)) | |
 | POST | `api/Auth/refresh` | **anonymous** (web: token from HttpOnly cookie) | `refreshToken` (mobile req; web ignored) | 200 | `LoginResultDto` (`refreshToken` null for web) | 400 (mobile empty), 401 |
 | POST | `api/Auth/logout` | **anonymous** | `refreshToken`(mobile req; web ignored) | 204 | — | 400 (mobile empty) |
 | POST | `api/Auth/logout-all` | logged-in | — | 204 | — | |
@@ -19,13 +19,15 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 
 | Method | Route | Request body | Success | Response | Errors |
 |---|---|---|---|---|---|
+| GET | `api/Users/GetAll` | query: `page=1`, `pageSize=20` (1–100), `includeInactive=false`, `search?`, `role?` | 200 | `PagedResult<UserListItemDto>` (`organization{}` / `facility{}` embedded) | 400 (unknown role / paging out of range) |
 | GET | `api/Users/Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresFacilityId }]` | |
 | POST | `api/Users/CreateUser` | `userName` (3–50, `[A-Za-z0-9._-]`), `password` (≥8), `firstName`, `lastName`, `role` (Roles constant), `organizationId?` (OrgAdmin req), `facilityId?` (FA/DE req), `isMobile` (bool) | 201 | `UserDto` | 400 (validation / role-scope rules / inactive org / facility), 409 (username taken) |
 | PUT | `api/Users/UpdateUser` | `id`, `firstName`, `lastName`, `role`, `organizationId?`, `facilityId?`, `isMobile` | 200 | `UserDto` | 400, 404 |
-| POST | `api/Users/deactivateUser/{id}` | — | 204 | — | 400 (self-account; see [OQ-14](../OPEN-QUESTIONS.md#oq-14) bug), 404 |
+| POST | `api/Users/deactivateUser/{id}` | — | 204 | — | 400 (self-account; target is SystemAdmin), 404 |
 | POST | `api/Users/reset-password` | `id`, `newPassword` (≥8) | 204 | — | 400, 404 |
 
-No user list/read endpoints exist yet ([OQ-10](../OPEN-QUESTIONS.md#oq-10)). Role change or scope change revokes the user's refresh tokens.
+Role change or scope change revokes the user's refresh tokens. `GetAll` is the only user-read endpoint;
+`GetById` is still absent ([OQ-10](../OPEN-QUESTIONS.md#oq-10)).
 
 ## 3. Organizations — `api/organizations`
 
@@ -108,7 +110,7 @@ Type-specific fields:
 | Accommodation, Disability, Education types | `arName`, `enName` (≤100) | `id`, `arName`, `enName` |
 | Nationalities | `arName`, `enName` (≤100) | `id`, `arName`, `enName` |
 | FacilityTypes | `arName`, `enName` (≤200 in validator; ≤100 in DB — [OQ note](../OPEN-QUESTIONS.md#odds-and-ends-low-priority)), `code` (req) | `id`, `arName`, `enName`, `code` |
-| IdentityTypes | `arName`, `enName` (≤100), `code` (req ≤30) | `id`, `arName`, `enName`, `code`, `valueRegex` |
+| IdentityTypes | `arName`, `enName` (≤100), `code` (req ≤30), `valueRegex` (req, valid .NET regex ≤200) | `id`, `arName`, `enName`, `code`, `valueRegex` |
 | Partners | `arName`, `enName` (≤100), `code` (req, ≤10) | `id`, `arName`, `enName`, `code` |
 
 ## 10. Beneficiaries — `api/Beneficiaries`

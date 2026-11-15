@@ -1,3 +1,3 @@
 namespace SBRS.Contracts.IdentityTypes;
 
-public sealed record AddIdentityTypeRequest(string ArName, string EnName, string Code);
+public sealed record AddIdentityTypeRequest(string ArName, string EnName, string Code, string ValueRegex);

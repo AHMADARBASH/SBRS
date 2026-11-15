@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SBRS.Application.Common.DTOs;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
+using SBRS.Application.Common.Models;
 using SBRS.Application.Features.Users.DTOs;
 using SBRS.Domain.Constants;
 using SBRS.Domain.Entities;
@@ -90,6 +92,10 @@ public class UserAdminService(
         var user = await FindAsync(id);
         if (!user.IsActive) return;
 
+        // Deactivation is refused for the target SystemAdmin account, not the caller.
+        if (await userManager.IsInRoleAsync(user, Roles.SystemAdmin))
+            throw new DomainException("System Admin cannot be deactivated.");
+
         user.IsActive = false;
         Check(await userManager.UpdateAsync(user));
 
@@ -108,6 +114,91 @@ public class UserAdminService(
         await userManager.SetLockoutEndDateAsync(user, null);
 
         await refreshTokens.RevokeAllForUserAsync(user.Id, ct);
+    }
+
+    public async Task<PagedResult<UserListItemDto>> GetPagedAsync(
+        int page, int pageSize, bool includeInactive, string? search, string? role,
+        CancellationToken ct)
+    {
+        var rows =
+            from u in db.Users.AsNoTracking()
+            join ur in db.UserRoles on u.Id equals ur.UserId into userRoles
+            from ur in userRoles.DefaultIfEmpty()
+            join r in db.Roles on ur.RoleId equals r.Id into roles
+            from r in roles.DefaultIfEmpty()
+            select new { User = u, RoleName = r == null ? null : r.Name };
+
+        if (!includeInactive)
+            rows = rows.Where(x => x.User.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLower();
+            rows = rows.Where(x =>
+                x.User.UserName!.ToLower().Contains(term) ||
+                x.User.FirstName.ToLower().Contains(term) ||
+                x.User.LastName.ToLower().Contains(term));
+        }
+
+        if (!string.IsNullOrWhiteSpace(role))
+            rows = rows.Where(x => x.RoleName == role);
+
+        var totalCount = await rows.CountAsync(ct);
+
+        var pageRows = await rows
+            .OrderByDescending(x => x.User.CreatedAt)
+            .ThenBy(x => x.User.UserName)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        // one query each for the whole page, instead of per-row lookups
+        var organizationIds = pageRows
+            .Where(x => x.User.OrganizationId is not null)
+            .Select(x => x.User.OrganizationId!.Value)
+            .Distinct()
+            .ToList();
+
+        var organizations = organizationIds.Count == 0
+            ? new Dictionary<Guid, OrganizationSummaryDto>()
+            : (await db.Organizations.AsNoTracking()
+                    .Where(o => organizationIds.Contains(o.Id))
+                    .Select(o => new OrganizationSummaryDto(o.Id, o.Code, o.ArName, o.EnName, o.IsActive))
+                    .ToListAsync(ct))
+                .ToDictionary(o => o.Id);
+
+        var facilityIds = pageRows
+            .Where(x => x.User.FacilityId is not null)
+            .Select(x => x.User.FacilityId!.Value)
+            .Distinct()
+            .ToList();
+
+        var facilities = facilityIds.Count == 0
+            ? new Dictionary<Guid, FacilitySummaryDto>()
+            : (await db.Facilities.AsNoTracking()
+                    .Where(f => facilityIds.Contains(f.Id))
+                    .Select(f => new FacilitySummaryDto(f.Id, f.Code, f.ArName, f.EnName, f.IsActive))
+                    .ToListAsync(ct))
+                .ToDictionary(f => f.Id);
+
+        var items = pageRows.Select(x => new UserListItemDto(
+                x.User.Id,
+                x.User.UserName!,
+                x.User.FirstName,
+                x.User.LastName,
+                x.RoleName ?? string.Empty,
+                x.User.IsMobile,
+                x.User.IsActive,
+                x.User.CreatedAt,
+                x.User.OrganizationId is { } organizationId && organizations.TryGetValue(organizationId, out var organization)
+                    ? organization
+                    : null,
+                x.User.FacilityId is { } facilityId && facilities.TryGetValue(facilityId, out var facility)
+                    ? facility
+                    : null))
+            .ToList();
+
+        return new PagedResult<UserListItemDto>(items, page, pageSize, totalCount);
     }
 
     // ---------- helpers ----------

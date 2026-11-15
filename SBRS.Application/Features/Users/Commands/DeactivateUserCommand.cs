@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using SBRS.Application.Common.Interfaces;
-using SBRS.Domain.Constants;
 using SBRS.Domain.Exceptions;
 
 namespace SBRS.Application.Features.Users.Commands;
@@ -20,9 +19,8 @@ public sealed class DeactivateUserCommandHandler(IUserAdminService users, ICurre
     {
         if (c.Id == currentUser.UserId)
             throw new DomainException("You cannot deactivate your own account.");
-        if(currentUser.Role == Roles.SystemAdmin) 
-            throw new DomainException("System Admin cannot be deactivated.");
 
+        // The target's role is checked in the service, where the user is loaded (the caller is SA by policy).
         await users.DeactivateAsync(c.Id, ct);
     }
 }

@@ -5,7 +5,7 @@
 |---|---|
 | Module | Users |
 | Primary actor | SystemAdmin |
-| Implementation status | `[BUILT]` ⚠ deactivation currently fails for every target (OQ-14) |
+| Implementation status | `[BUILT]` |
 | Related rules | BR-USR-01…10 |
 | Endpoints | `GET api/Users/Roles`, `POST api/Users/CreateUser`, `PUT api/Users/UpdateUser`, `POST api/Users/deactivateUser/{id}`, `POST api/Users/reset-password` |
 
@@ -36,12 +36,14 @@ Actor is SystemAdmin; the referenced organization/facility exist.
 | Duplicate username | `409` |
 | Role without required scope field (or vice versa) | `400` validation |
 | FA/DE without exactly one facility | `400` |
-| SA deactivates anyone today | `400` "System Admin cannot be deactivated." — bug: handler checks caller role instead of target role (OQ-14) |
+| SA deactivates a DE | `204`; the user cannot refresh afterwards |
+| SA tries to deactivate their own account | `400` "You cannot deactivate your own account." |
+| SA tries to deactivate the SystemAdmin account | `400` "System Admin cannot be deactivated." (target check) |
 | BranchAdmin/ProjectCoordinator creation | `400` "Users with the role '…' cannot be managed yet." |
-| No list/read endpoints | cannot build a user-admin table UI today (OQ-10) |
+| No `GetById` user endpoint | detail screens must render from a `GetAll` row (OQ-10) |
 
 ## Postconditions
 - The user can (or can no longer) authenticate; a deactivated user's next refresh fails; their access token remains valid ≤ 4 h (OQ-05).
 
 ## Screens (for frontend)
-- User admin console: create/edit forms with dynamic scope pickers following the selected role; password reset dialog. A list screen needs `GET users` (OQ-10).
+- User admin console: create/edit forms with dynamic scope pickers following the selected role; password reset dialog; paged list from `GET api/Users/GetAll` (OQ-10).

@@ -41,7 +41,7 @@ Manual acceptance pass before each release. Mark Pass/Fail per step; every step 
 | 22 | Create OA (org), DE (facility, isMobile) | SA | 201 | |
 | 23 | Create BranchAdmin/ProjectCoordinator | SA | 400 "cannot be managed yet" (OQ-28) | |
 | 24 | Duplicate username | SA | 409 | |
-| 25 | SA deactivates DE account **(known bug OQ-14)** | SA | currently 400 "System Admin cannot be deactivated" — FAIL expected until fixed | |
+| 25 | SA deactivates DE account | SA | 204; the account can no longer refresh; list hides it unless "include inactive" | |
 | 26 | After deactivation, DE's refresh | DE | 401 | |
 | 27 | reset password, old login | SA | 204; old password 401; new 200 | |
 

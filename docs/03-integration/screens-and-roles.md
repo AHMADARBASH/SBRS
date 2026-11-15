@@ -53,10 +53,10 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 
 | Screen | Purpose | Roles | Endpoints | Status |
 |---|---|---|---|---|
-| User list | list users by org/facility | SA | — (no GET endpoints, OQ-10) | `[OPEN]` |
+| User list | list users by org/facility, search by name, role filter, inactive toggle | SA | `GET api/Users/GetAll?page=&pageSize=&includeInactive=&search=&role=` | `[BUILT]` |
 | User create | pick role → dynamic scope fields (org/facility) | SA | `GET api/Users/Roles`, `POST api/Users/CreateUser` | `[BUILT]` |
 | User edit | change name, role, scope, mobile flag | SA | `PUT api/Users/UpdateUser` | `[BUILT]` |
-| User deactivate | disable an account (revokes refresh tokens) | SA | `POST api/Users/deactivateUser/{id}` (currently fails for every target — OQ-14) | `[BUILT]` ⚠ |
+| User deactivate | disable an account (revokes refresh tokens) | SA | `POST api/Users/deactivateUser/{id}` | `[BUILT]` |
 | Password reset | give a new password | SA | `POST api/Users/reset-password` | `[BUILT]` |
 
 ## 6. Beneficiary module (the core)

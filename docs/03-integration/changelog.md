@@ -11,6 +11,38 @@ Documentation release: the whole `docs/` tree was created; no API code changed w
 
 - Added — this documentation set; see [README](../README.md).
 
+## 2026-11-15 — frontend enablement & profile feature
+
+### Added
+
+- `GET api/Users/GetAll` — paged user list for the SystemAdmin screen: `page`, `pageSize` (1–100),
+  `includeInactive`, `search` (user/first/last name), `role`; each row embeds the shared
+  `organization{}` / `facility{}` summary objects (OQ-10 resolved for the list).
+- `valueRegex` on `api/identity-types/Add` and `Update` — the SA can now create/fix identity document
+  patterns through the API (required, valid .NET regex, ≤200 chars). Registration validates against it.
+- Shared summary DTOs (`OrganizationSummaryDto`, `FacilitySummaryDto`, `FacilityTypeSummaryDto`,
+  `BranchSummaryDto`) for reuse across responses.
+- Beneficiary profile feature: `PUT/GET api/Beneficiaries/SaveProfile|GetProfile/{beneficiaryId}`,
+  five profile lookups (`accommodation-types`, `education-types`, `beneficiary-statuses`,
+  `marital-statuses`, `disability-reasons`, `chronic-diseases`, `education-issues`), migration
+  `AddBeneficiaryProfileDetails`, startup reference-data seeder.
+
+### Changed
+
+- **BREAKING (no client yet):** `GET api/Auth/me` returns the full session object (`CurrentUserDto`):
+  the complete user plus nested `organization{}` / `facility{}` (with `facility.type.code` as the routing
+  key and `facility.branch{}`). The flat `organizationId` / `facilityId` ids are kept.
+- Refresh-cookie default path `/api/auth` → `/api/Auth` so browsers (case-sensitive path matching) send
+  the cookie to the actual route casing.
+
+### Fixed / notable behavior
+
+- Identity type `value_regex` is the pattern registration enforces (`IdentityTypeEntity.IsValidValue`);
+  `IdentityValuePatterns` remains a legacy constants list.
+- `POST api/Users/deactivateUser/{id}` now checks the **target** user's role (was the caller's, which made
+  every deactivation fail — OQ-14 resolved).
+
+
 ## 2026-10-08 → 2026-11-05 (initial development, from git history)
 
 ### Added

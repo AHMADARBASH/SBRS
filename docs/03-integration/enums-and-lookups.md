@@ -67,7 +67,15 @@ The `GET api/Users/Roles` endpoint returns these as `[{ role, requiresOrganizati
 
 ## 6. Identity types (`IdentityTypeCodes`) and value regexes [BUILT]
 
-The list of identity types in the DB comes from seed data `[OPEN]` — but these are the fixed codes the system recognizes and validates (`IdentityValuePatterns.cs`):
+Identity types are rows in the `identity_types` table. **The DB is the source of truth**: registration
+validates the document value against `identity_types.value_regex` (`IdentityTypeEntity.IsValidValue`),
+after trimming and converting Arabic-Indic digits to ASCII. The table below lists the **default patterns**
+the system was seeded with — read the live values from `GET api/identity-types/GetAll`, never from here.
+
+SystemAdmin can now maintain the rows through the API: `POST api/identity-types/Add` and
+`PUT api/identity-types/Update` take `{ arName, enName, code, valueRegex }`; `valueRegex` is required
+(≤200 chars, valid .NET regex, invalid → 400). Changes apply to future registrations immediately;
+already-stored values are not re-checked.
 
 | Code | Value regex | Notes |
 |---|---|---|
@@ -84,6 +92,7 @@ The list of identity types in the DB comes from seed data `[OPEN]` — but these
 | `UNREGISTERED` | `^$` | value **must be empty** (no identity document) |
 
 - Before the regex runs, the value is trimmed and Arabic/Persian digits are converted to ASCII (`IdentityValueNormalizer`) `[BUILT]`. The regexes are case-sensitive for `PASSPORT`.
+- The patterns are per-row data now (see above), not hardcoded constants; `IdentityValuePatterns.cs` is a legacy list and no longer the runtime source.
 - Planned Arabic names of seeded types (from the original seed plan; not verified in repo because no seeder exists): بيان عائلي, دفتر عائلة, جواز سفر, وثيقة زواج, بطاقة لقاحات, هوية وطنية, شهادة ميلاد, شهادة إعاقة, شهادة قيادة, قيد مدني, غير مسجل `[ASSUMED]`.
 - `GET api/identity-types/GetAll` returns the seeded rows with `id, arName, enName, code, valueRegex` — **read the actual list from this endpoint**, not from this table.
 

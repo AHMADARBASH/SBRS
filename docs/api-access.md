@@ -102,6 +102,7 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 
 | Method | Path | Access | Notes |
 |---|---|---|---|
+| GET | `GetAll` | SA | Paged user list: `?page=1&pageSize=20&includeInactive=false&search=&role=`. Rows embed `organization{}` / `facility{}` summaries |
 | GET | `Roles` | SA | Which roles exist and which ids each needs (see §4) |
 | POST | `CreateUser` | SA | Body needs `role` + `organizationId` (OrganizationAdmin) / `facilityId` (FacilityAdmin, DataEntry) |
 | PUT | `UpdateUser` | SA | Same role/id rules as create |
@@ -176,6 +177,12 @@ profile lookups** `api/beneficiary-statuses`, `api/marital-statuses`, `api/disab
 | GET | `GetAll` (also `api/partners/GetAll`) | Any logged-in user |
 | POST | `Add` | **SA only** |
 | PUT | `Update` | **SA only** |
+
+Editable fields: `{ arName, enName }` for accommodation/disability/education types and nationalities;
+`{ arName, enName, code }` for facility types and partners; **`{ arName, enName, code, valueRegex }` for
+identity types** — `valueRegex` is required, ≤200 chars, a valid .NET regex, and is the pattern registration
+enforces on the document value (after trim + Arabic-Indic digit normalization). Changing it affects future
+registrations immediately.
 
 The profile lookups have **no Add/Update** — they are seeded by the server (DTO shape
 `{ id, code, arName, enName }`, ordered by code).

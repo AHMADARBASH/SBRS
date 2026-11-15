@@ -7,7 +7,7 @@
 | [UC-02](UC-02-manage-organizations.md) | Manage organizations | SystemAdmin (+OA update) | Organizations | `[BUILT]` |
 | [UC-03](UC-03-manage-branches.md) | Manage branches | SystemAdmin, OrganizationAdmin | Branches | `[BUILT]` (deactivate `[PLANNED]`) |
 | [UC-04](UC-04-manage-facilities.md) | Manage facilities (type, address, partner, partner history) | SystemAdmin, OrganizationAdmin | Facilities | `[BUILT]` |
-| [UC-05](UC-05-manage-users.md) | Manage users and assign role + scope | SystemAdmin | Users | `[BUILT]` ⚠ deactivation bug (OQ-14) |
+| [UC-05](UC-05-manage-users.md) | Manage users and assign role + scope | SystemAdmin | Users | `[BUILT]` |
 | [UC-06](UC-06-geography-and-addresses.md) | Browse geography and manage addresses | all (manage: SA, OA) | Geography / Addresses | `[BUILT]` |
 | [UC-07](UC-07-search-beneficiary.md) | Search for a beneficiary (FullCode or first+last name) | SA, FA, DE | Beneficiaries | `[BUILT]` |
 | [UC-08](UC-08-register-beneficiary.md) | Register a beneficiary (search-first + match detection) | DataEntry | Beneficiaries | `[BUILT]` |
