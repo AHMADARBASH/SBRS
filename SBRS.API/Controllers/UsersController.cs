@@ -48,21 +48,21 @@ public class UsersController(ISender sender) : ControllerBase
         Ok(await sender.Send(new UpdateUserCommand(
             r.id, r.FirstName, r.LastName, r.Role, r.OrganizationId, r.BranchId, r.FacilityId, r.IsMobile), ct));
 
-    [HttpPost("deactivateUser/{id:guid}")]
+    [HttpPost("DeactivateUser/{id:guid}")]
     public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
     {
         await sender.Send(new DeactivateUserCommand(id), ct);
         return NoContent();
     }
 
-    [HttpPost("activateUser/{id:guid}")]
+    [HttpPost("ActivateUser/{id:guid}")]
     public async Task<IActionResult> Activate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ActivateUserCommand(id), ct);
         return NoContent();
     }
 
-    [HttpPost("reset-password")]
+    [HttpPost("ResetPassword")]
     public async Task<IActionResult> ResetPassword( ResetUserPasswordRequest r, CancellationToken ct)
     {
         await sender.Send(new ResetUserPasswordCommand(r.id, r.NewPassword), ct);

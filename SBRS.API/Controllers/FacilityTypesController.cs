@@ -10,7 +10,7 @@ using SBRS.Contracts.FacilityTypes;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/facility-types")]
+[Route("api/FacilityTypes")]
 public class FacilityTypesController(ISender sender) : ControllerBase
 {
     [HttpGet]

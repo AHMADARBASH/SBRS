@@ -1,5 +1,5 @@
 # Workflow — Authentication and Tokens
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 Design-level companion to [../../03-integration/auth-guide.md](../../03-integration/auth-guide.md) (client-facing). All `[BUILT]` unless tagged; decision basis ADR-005 + ADR-014.
 
@@ -15,8 +15,8 @@ Design-level companion to [../../03-integration/auth-guide.md](../../03-integrat
 | Refresh hard-checks | user reloaded from DB: must exist, `IsActive`, not locked, role present — otherwise 401 + family revoked |
 | Web delivery | HttpOnly cookie `sbrs_rt` (`/api/Auth` path — case-sensitive, matches the route; `Secure`, `SameSite=Lax` configurable) when `X-Client-Type: web` |
 | Mobile delivery | JSON body field `refreshToken` |
-| Logout | `logout` revokes one token's family (body or cookie); web deletes the cookie. `logout-all` revokes **all** families of the user (any device) |
-| Session depth | `logout-all` requires authentication (it's authorized); login/refresh/logout anonymous by design (the token itself is the credential) |
+| Logout | `Logout` revokes one token's family (body or cookie); web deletes the cookie. `LogoutAll` revokes **all** families of the user (any device) |
+| Session depth | `LogoutAll` requires authentication (it's authorized); login/refresh/logout anonymous by design (the token itself is the credential) |
 
 ## Token lifetime vs revocation gap `[CONFIRMED]`
 

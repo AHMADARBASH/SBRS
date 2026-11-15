@@ -10,7 +10,7 @@ using SBRS.Contracts.Partners;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/partners")]
+[Route("api/Partners")]
 public class PartnersController(ISender sender) : ControllerBase
 {
     [HttpGet]

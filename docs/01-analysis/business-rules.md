@@ -1,5 +1,5 @@
 # SBRS Business Rules
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 One table per area. `Status` is one of `[CONFIRMED]`, `[ASSUMED]`, `[OPEN]`, `[PLANNED]`, `[BUILT]` (code verified — for planned rules the *intent* may still be `[CONFIRMED]`; the tag reflects the rule's implementation status). Enforced-in points at the exact code location.
 
@@ -57,7 +57,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | ID | Rule | Status | Enforced in |
 |---|---|---|---|
 | BR-GEO-01 | Hierarchy Country → City → Region → District → Area; read-only lookups (no write endpoints) seeded from OCHA Syria admin boundaries + populated places; `Code` is the OCHA pcode, unique within its parent | `[CONFIRMED]` [BUILT hierarchy/FKs] / `[OPEN]` seeding (OQ-21) | `GeographyConfiguration`, `api/Geography` GET-only controller |
-| BR-GEO-02 | Areas also carry `CityId` so a client can fetch all areas of a selected city | `[CONFIRMED]` `[BUILT]` | `AreaEntity.CityId`, `GET api/Geography/cities/{cityId}/areas` |
+| BR-GEO-02 | Areas also carry `CityId` so a client can fetch all areas of a selected city | `[CONFIRMED]` `[BUILT]` | `AreaEntity.CityId`, `GET api/Geography/Cities/{cityId}/Areas` |
 | BR-GEO-03 | Addresses are unique per (AreaId, ArName) and per (AreaId, EnName); no Code; shared system-wide data readable by every logged-in user | `[CONFIRMED]` `[BUILT]` | composite unique indexes in `AddressConfiguration`; read endpoints under fallback policy |
 | BR-GEO-04 | An address cannot be deactivated while an active facility uses it | `[CONFIRMED]` ⚠ guard **not implemented**, no deactivate endpoint | — (OQ-17) |
 | BR-GEO-05 | Mobile users choose a working location (address) saved per facility (`WorkingAddresses`) | `[PLANNED]` | — |
@@ -75,7 +75,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | BR-USR-06 | Deactivating a user revokes their refresh tokens | `[CONFIRMED]` `[BUILT]` | `DeactivateUserCommandHandler` → `IRefreshTokenService.RevokeAllForUserAsync` |
 | BR-USR-07 | `IsMobile` marks users who work on the mobile app; carried as the `is_mobile` claim | `[CONFIRMED]` `[BUILT]` | `TokenService.CreateToken`, `ApplicationUser.IsMobile` |
 | BR-USR-08 | A user cannot deactivate their own account or change their own role | `[CONFIRMED]` `[BUILT]` | `UserAdminService` (self checks) |
-| BR-USR-09 | The target `SystemAdmin` account cannot be deactivated; the caller cannot deactivate themselves. Deactivation revokes the user's refresh tokens; reactivation (`activateUser`) restores login | `[BUILT]` | `DeactivateUserCommandHandler` + `UserAdminService.Deactivate/ActivateAsync` |
+| BR-USR-09 | The target `SystemAdmin` account cannot be deactivated; the caller cannot deactivate themselves. Deactivation revokes the user's refresh tokens; reactivation (`ActivateUser`) restores login | `[BUILT]` | `DeactivateUserCommandHandler` + `UserAdminService.Deactivate/ActivateAsync` |
 | BR-USR-10 | Username rules: 3–50 chars, only letters/digits/`.`/`_`/`-`; unique (409 on duplicate) | `[CONFIRMED]` `[BUILT]` | `AddUserCommandValidator`, unique index on `AspNetUsers.NormalizedUserName` |
 
 ## 7. Beneficiaries (BR-BEN)
@@ -110,5 +110,5 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | BR-AUTH-01 | Access token: JWT, 240 minutes, claims sub/unique_name/role/jti/organization_id/facility_id (+ is_mobile), signed HS256 from `Jwt:Key` | `[CONFIRMED]` `[BUILT]` | `TokenService`, `JwtSettings` |
 | BR-AUTH-02 | Refresh token: 30 days, SHA-256 hashed at rest, single-use, rotating, family-scoped; reuse of a burned token revokes the family | `[CONFIRMED]` `[BUILT]` | `RefreshTokenService`, `RefreshTokenConfiguration` |
 | BR-AUTH-03 | Web clients receive the refresh token as HttpOnly cookie `sbrs_rt` when sending `X-Client-Type: web`; the body then carries null | `[CONFIRMED]` `[BUILT]` | `AuthController` + `RefreshCookieService` |
-| BR-AUTH-04 | All four token endpoints (login/refresh/logout) are anonymous and take the refresh token from the body or cookie; `logout-all` and `me` require authentication | `[CONFIRMED]` `[BUILT]` | `AuthController` attributes |
+| BR-AUTH-04 | All four token endpoints (login/refresh/logout) are anonymous and take the refresh token from the body or cookie; `LogoutAll` and `Me` require authentication | `[CONFIRMED]` `[BUILT]` | `AuthController` attributes |
 | BR-AUTH-05 | Known caveat: an access token stays valid until expiry after logout/deactivation/role change (up to 4 h) | `[CONFIRMED]` `[BUILT]` | no per-request session check (OQ-05) |

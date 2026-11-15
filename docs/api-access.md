@@ -15,11 +15,11 @@ Generated: 2026-11-09.
   *fallback policy*, so even an endpoint that forgot to declare an attribute stays protected.
 - Send the access token on every call:
   `Authorization: Bearer <access_token>`
-- Token comes from `POST /api/Auth/login` (web clients also receive an http-only refresh-token
-  cookie; refresh via `POST /api/Auth/refresh`).
+- Token comes from `POST /api/Auth/Login` (web clients also receive an http-only refresh-token
+  cookie; refresh via `POST /api/Auth/Refresh`).
 - Result codes:
   - **401 Unauthorized** — no token / invalid / expired token → the UI should redirect to login and
-    call `POST /api/Auth/refresh` first when the web refresh cookie exists.
+    call `POST /api/Auth/Refresh` first when the web refresh cookie exists.
   - **403 Forbidden** — valid user, but their **role** is not allowed on this endpoint. The UI should
     hide/disable that feature instead of letting the user hit a 403.
 - Running instance: live Swagger is still the best request/response reference —
@@ -28,7 +28,7 @@ Generated: 2026-11-09.
 ## 2. The roles
 
 Roles come back as plain strings (`SystemAdmin`, `OrganizationAdmin`, …) in the JWT role claim and in
-`GET /api/Auth/me`.
+`GET /api/Auth/Me`.
 
 | Role | Meaning | Scope of the data it sees |
 |---|---|---|
@@ -39,7 +39,7 @@ Roles come back as plain strings (`SystemAdmin`, `OrganizationAdmin`, …) in th
 | `FacilityAdmin` | Manages one facility (has `facilityId` in the token). Sees/reviews that facility's beneficiaries, reviews match candidates. | Its facility only. |
 | `DataEntry` | Terminal operator at a facility (has `facilityId`). Registers beneficiaries, searches, lists. | Its facility only. |
 
-**How the frontend learns its own role & scope:** call `GET /api/Auth/me` after login. The response is the
+**How the frontend learns its own role & scope:** call `GET /api/Auth/Me` after login. The response is the
 **full session object**: the complete user plus the complete facility/organization context, with the child
 data as **nested reusable objects** (`organization{}`, `facility.type{}`, `facility.branch{}`), so the client
 shell needs no follow-up requests after login:
@@ -75,7 +75,7 @@ shell needs no follow-up requests after login:
 Use `role` to decide which menu items/views to show, `facility.type.code` to route facility users to the
 workspace matching their facility type (unknown code → neutral default workspace), and the flat
 `organizationId` / `facilityId` ids to preselect scope fields. The type is read from the database on
-every call — it is **not** a JWT claim — so a mid-session type change takes effect on the next `me`/refresh.
+every call — it is **not** a JWT claim — so a mid-session type change takes effect on the next `Me`/refresh.
 The nested objects are shared summary DTOs (`OrganizationSummaryDto`, `FacilityTypeSummaryDto`,
 `BranchSummaryDto`) intended to appear in other endpoints too, so the frontend can reuse the same types.
 
@@ -93,11 +93,11 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 
 | Method | Path | Access | Notes |
 |---|---|---|---|
-| POST | `login` | 🌐 Public | Returns access token (+ refresh cookie for web clients / refresh token for mobile) |
-| POST | `refresh` | 🌐 Public | Web: reads cookie; Mobile: refresh token in body |
-| POST | `logout` | 🌐 Public | Web: revokes cookie token |
-| GET | `me` | Any logged-in user | ⭐ Full session object: user + nested `organization{}` / `facility{}` (incl. `facility.type.code` routing key) |
-| POST | `logout-all` | Any logged-in user | Revokes all refresh tokens |
+| POST | `Login` | 🌐 Public | Returns access token (+ refresh cookie for web clients / refresh token for mobile) |
+| POST | `Refresh` | 🌐 Public | Web: reads cookie; Mobile: refresh token in body |
+| POST | `Logout` | 🌐 Public | Web: revokes cookie token |
+| GET | `Me` | Any logged-in user | ⭐ Full session object: user + nested `organization{}` / `facility{}` (incl. `facility.type.code` routing key) |
+| POST | `LogoutAll` | Any logged-in user | Revokes all refresh tokens |
 
 ### Users — `api/Users` (whole controller: **SA only**)
 
@@ -107,11 +107,11 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 | GET | `Roles` | SA | Which roles exist and which ids each needs (see §4) |
 | POST | `CreateUser` | SA | Body needs `role` + `organizationId` (OrganizationAdmin) / `branchId` (BranchAdmin) / `facilityId` (FacilityAdmin, DataEntry) |
 | PUT | `UpdateUser` | SA | Same role/id rules as create |
-| POST | `deactivateUser/{id}` | SA | Soft-deactivates the user |
-| POST | `activateUser/{id}` | SA | Re-enables a deactivated user (204; no-op if already active) |
-| POST | `reset-password` | SA | Body: `{ id, newPassword }` |
+| POST | `DeactivateUser/{id}` | SA | Soft-deactivates the user |
+| POST | `ActivateUser/{id}` | SA | Re-enables a deactivated user (204; no-op if already active) |
+| POST | `ResetPassword` | SA | Body: `{ id, newPassword }` |
 
-### Organizations — `api/organizations`
+### Organizations — `api/Organizations`
 
 | Method | Path | Access | Notes |
 |---|---|---|---|
@@ -138,9 +138,9 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 | GET | `GetById/{id}` | same as above | Same scoping |
 | POST | `AddFacility` | SA, OA | Facility **code is generated by the server** (`{City}-{Type}-{NNN}`); never send/sketch a code field |
 | PUT | `UpdateFacility/{id}` | SA, OA | Code is immutable — no code field in the request |
-| POST | `deactivateFacility/{id}` | SA, OA | |
+| POST | `DeactivateFacility/{id}` | SA, OA | |
 
-### Facility Partners — `api/facility-partners` (whole controller: **SA only**)
+### Facility Partners — `api/FacilityPartners` (whole controller: **SA only**)
 
 | Method | Path | Access |
 |---|---|---|
@@ -159,24 +159,24 @@ Abbreviations: **SA**=SystemAdmin, **OA**=OrganizationAdmin, **BA**=BranchAdmin,
 ### Geography — `api/Geography` (all GET, any logged-in user)
 
 - `Countries`
-- `countries/{countryId}/cities`
-- `cities/{cityId}/regions`
-- `cities/{cityId}/areas`
-- `regions/{regionId}/districts`
-- `districts/{districtId}/areas`
+- `Countries/{countryId}/Cities`
+- `Cities/{cityId}/Regions`
+- `Cities/{cityId}/Areas`
+- `Regions/{regionId}/Districts`
+- `Districts/{districtId}/Areas`
 
 (These feed the address pickers — freely callable by any logged-in role.)
 
 ### Lookup tables (same pattern in each controller)
 
-Controllers: `api/accommodation-types`, `api/disability-types`, `api/education-types`,
-`api/facility-types`, `api/identity-types`, `api/nationalities`, `api/partners` — **and the
-profile lookups** `api/beneficiary-statuses`, `api/marital-statuses`, `api/disability-reasons`,
-`api/chronic-diseases`, `api/education-issues` (GetAll only).
+Controllers: `api/AccommodationTypes`, `api/DisabilityTypes`, `api/EducationTypes`,
+`api/FacilityTypes`, `api/IdentityTypes`, `api/Nationalities`, `api/Partners` — **and the
+profile lookups** `api/BeneficiaryStatuses`, `api/MaritalStatuses`, `api/DisabilityReasons`,
+`api/ChronicDiseases`, `api/EducationIssues` (GetAll only).
 
 | Method | Path | Access |
 |---|---|---|
-| GET | `GetAll` (also `api/partners/GetAll`) | Any logged-in user |
+| GET | `GetAll` (also `api/Partners/GetAll`) | Any logged-in user |
 | POST | `Add` | **SA only** |
 | PUT | `Update` | **SA only** |
 
@@ -231,7 +231,7 @@ BranchAdmin send **only** `branchId`; the organization is always derived from th
 
 ## 5. Practical tips for the frontend
 
-1. **Never show a register/merge screen based on the URL only** — check `/api/Auth/me`'s `role`:
+1. **Never show a register/merge screen based on the URL only** — check `/api/Auth/Me`'s `role`:
    `DataEntry` gets Register/Search, `FacilityAdmin` gets Register-review, `SystemAdmin` gets everything
    administrative, etc.
 2. **Stores/filters by scope:** when the user is FA/DE, the backend ignores/forbids facility selection —

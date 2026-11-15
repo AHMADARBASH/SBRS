@@ -1,5 +1,5 @@
 # UC-01 Log in / refresh / log out
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | any user (mobile or web) |
 | Implementation status | `[BUILT]` |
 | Related rules | BR-USR-04, BR-USR-05, BR-USR-07, BR-AUTH-01…05 |
-| Endpoints | `POST api/Auth/login`, `POST api/Auth/refresh`, `POST api/Auth/logout`, `POST api/Auth/logout-all`, `GET api/Auth/me` |
+| Endpoints | `POST api/Auth/Login`, `POST api/Auth/Refresh`, `POST api/Auth/Logout`, `POST api/Auth/LogoutAll`, `GET api/Auth/Me` |
 
 ## Goal
 Give the user a working authenticated session and let them end it deliberately on any device.
@@ -22,11 +22,11 @@ Give the user a working authenticated session and let them end it deliberately o
 3. Web: refresh token is set as HttpOnly cookie `sbrs_rt` and the body's `refreshToken` is null; mobile: refresh token is in the body.
 4. Client shows the role-based menu built from the response (`role`, `organizationId`, `facilityId`).
 5. On access-token expiry: exactly **one** serialized `POST refresh` call; retry the failed request with the new token.
-6. Logout: revoke the current family (`POST logout`, body or cookie); logout-all revokes every family plus the web cookie.
+6. Logout: revoke the current family (`POST api/Auth/Logout`, body or cookie); `LogoutAll` revokes every family plus the web cookie.
 
 ## Alternative flows
 - A1 Web cookie absent on logout → still 204, no error.
-- A2 `logout-all` on a user with several devices kills all sessions immediately (mobile included).
+- A2 `LogoutAll` on a user with several devices kills all sessions immediately (mobile included).
 
 ## Errors and edge cases
 | Situation | System behaviour |
@@ -43,7 +43,7 @@ Give the user a working authenticated session and let them end it deliberately o
 - Logout: family revoked (`revoked_at`), user redirected to login.
 
 ## Screens (for frontend)
-- Login screen, role-based foyer/menu, session-expiry handler, "log out everywhere" button, account menu from `GET api/Auth/me`.
+- Login screen, role-based foyer/menu, session-expiry handler, "log out everywhere" button, account menu from `GET api/Auth/Me`.
 
 ## Design details
 See [../../03-integration/auth-guide.md](../../03-integration/auth-guide.md) and [../../02-design/workflows/authentication-and-tokens.md](../../02-design/workflows/authentication-and-tokens.md).

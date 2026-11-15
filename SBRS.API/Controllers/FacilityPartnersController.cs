@@ -10,7 +10,7 @@ using SBRS.Contracts.FacilityPartners;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/facility-partners")]
+[Route("api/FacilityPartners")]
 [Authorize(Policy = Policies.SystemAdminOnly)]
 public class FacilityPartnersController(ISender sender) : ControllerBase
 {

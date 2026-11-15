@@ -10,7 +10,7 @@ using SBRS.Contracts.Nationalities;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/nationalities")]
+[Route("api/Nationalities")]
 public class NationalitiesController(ISender sender) : ControllerBase
 {
     [HttpGet]

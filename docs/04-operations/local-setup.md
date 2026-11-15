@@ -1,5 +1,5 @@
 # SBRS Local Setup
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 How to get a development environment running from a clean clone. Placeholders only — never store real secrets.
 
@@ -55,7 +55,7 @@ dotnet run --project SBRS.API
 
 1. On startup the `IdentitySeeder` runs: 6 roles created, first SystemAdmin created (if `SeedAdmin:*` set).
 2. Open `http://localhost:5261/` (or `https://localhost:7105`) — Swagger UI is the site root.
-3. Log in via `POST api/Auth/login` using the seed admin, paste the token into Swagger's Authorize (without `Bearer `).
+3. Log in via `POST api/Auth/Login` using the seed admin, paste the token into Swagger's Authorize (without `Bearer `).
 4. Structure data does not exist until you: create lookups via the SystemAdmin APIs and/or run the (still missing) seed scripts (OQ-21).
 
 ## 7. Common startup failures

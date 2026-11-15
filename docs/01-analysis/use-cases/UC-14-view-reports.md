@@ -1,5 +1,5 @@
 # UC-14 View reports within scope
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin (all), OrganizationAdmin, BranchAdmin (own branch), ProjectCoordinator `[PLANNED]`, FacilityAdmin (own) |
 | Implementation status | `[PLANNED]` — no reporting endpoints |
 | Related rules | OQ-03 aggregated-only vs individual records; distinct-beneficiary counting; privacy rules NFR-PRV-05 |
-| Endpoints | none (planned e.g. `api/reports/*`) |
+| Endpoints | none (planned e.g. `api/Reports/*`) |
 
 ## Goal
 Give each level of the hierarchy trustworthy numbers about registrations and services, strictly within the viewer's scope.

@@ -1,5 +1,5 @@
 # UC-02 Manage organizations
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin (add), SystemAdmin + OrganizationAdmin (update own) |
 | Implementation status | `[BUILT]` (deactivate endpoint commented out — OQ-15) |
 | Related rules | BR-ORG-01, BR-ORG-02, BR-ORG-03, BR-ORG-04, BR-GEN-01…05 |
-| Endpoints | `GET api/organizations/GetAll`, `GET api/organizations/GetById/{id}`, `POST api/organizations/Add`, `PUT api/organizations/Update/{id}` |
+| Endpoints | `GET api/Organizations/GetAll`, `GET api/Organizations/GetById/{id}`, `POST api/Organizations/Add`, `PUT api/Organizations/Update/{id}` |
 
 ## Goal
 Model the top-level organizations (SARC itself and any other org owning branches) with a unique system-wide code.

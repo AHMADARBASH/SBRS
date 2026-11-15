@@ -17,28 +17,28 @@ namespace SBRS.Controllers
              => Ok(await sender.Send(new GetCountriesQuery()));
         
 
-        [HttpGet("countries/{countryId:guid}/cities")]
+        [HttpGet("Countries/{countryId:guid}/Cities")]
         public async Task<IActionResult> GetCities(
         Guid countryId, [FromQuery] bool includeInactive, CancellationToken ct)
             => Ok(await sender.Send(new GetCitiesByCountryQuery(countryId), ct));
 
 
-        [HttpGet("cities/{cityId:guid}/regions")]
+        [HttpGet("Cities/{cityId:guid}/Regions")]
         public async Task<ActionResult<List<RegionDto>>> GetRegions(
        Guid cityId, [FromQuery] bool includeInactive, CancellationToken ct)
        => Ok(await sender.Send(new GetRegionsByCityQuery(cityId), ct));
 
-        [HttpGet("cities/{cityId:guid}/areas")]
+        [HttpGet("Cities/{cityId:guid}/Areas")]
         public async Task<ActionResult<List<AreaDto>>> GetAreasByCity(
             Guid cityId, CancellationToken ct)
             => Ok(await sender.Send(new GetAreasByCityQuery(cityId), ct));
 
-        [HttpGet("regions/{regionId:guid}/districts")]
+        [HttpGet("Regions/{regionId:guid}/Districts")]
         public async Task<ActionResult<List<DistrictDto>>> GetDistricts(
             Guid regionId, [FromQuery] bool includeInactive, CancellationToken ct)
             => Ok(await sender.Send(new GetDistrictsByRegionQuery(regionId), ct));
 
-        [HttpGet("districts/{districtId:guid}/areas")]
+        [HttpGet("Districts/{districtId:guid}/Areas")]
         public async Task<ActionResult<List<AreaDto>>> GetAreas(
             Guid districtId, [FromQuery] bool includeInactive, CancellationToken ct)
             => Ok(await sender.Send(new GetAreasByDistrictQuery(districtId), ct));

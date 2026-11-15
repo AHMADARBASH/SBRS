@@ -10,7 +10,7 @@ using SBRS.Contracts.EducationTypes;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/education-types")]
+[Route("api/EducationTypes")]
 public class EducationTypesController(ISender sender) : ControllerBase
 {
     [HttpGet]

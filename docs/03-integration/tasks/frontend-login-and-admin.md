@@ -37,8 +37,8 @@ checked server-side — show buttons only for SA in this task.)
 | Dev base URL | `https://localhost:<port>` (see `launchSettings.json`; Swagger at `/swagger`) |
 | Production base URL | `https://sbrs.sarc-sy.org` (nginx → API) |
 | JSON | `camelCase` keys, dates ISO-8601 UTC (`2026-11-15T08:00:00Z`), enums as strings |
-| Auth header | `Authorization: Bearer <access token>` on every call except `login`/`refresh`/`logout` |
-| Client header | `X-Client-Type: web` on `login`, `refresh`, `logout` (switches the refresh token to the HttpOnly cookie) |
+| Auth header | `Authorization: Bearer <access token>` on every call except `Login`/`Refresh`/`Logout` |
+| Client header | `X-Client-Type: web` on `Login`, `Refresh`, `Logout` (switches the refresh token to the HttpOnly cookie) |
 | Cookies | every request: `credentials: "include"` (fetch) / `withCredentials: true` (axios) |
 | Error body | RFC 7807 problem details: `{ "type", "title", "status", "detail", "errors"?, "traceId" }` |
 
@@ -57,27 +57,27 @@ Rules that prevent most frontend bugs:
 
 ### 3.1 Flow
 
-1. `POST api/Auth/login` with `{ userName, password }`, headers `Content-Type: application/json` and
+1. `POST api/Auth/Login` with `{ userName, password }`, headers `Content-Type: application/json` and
    `X-Client-Type: web`, credentials included.
 2. On 200: keep `token` + `expiresAt` **in memory only**. The response has **no `refreshToken`** for web —
    it was set as the HttpOnly cookie `sbrs_rt` (`Path=/api/Auth`, `Secure`, `SameSite=Lax`).
-3. Immediately call `GET api/Auth/me` (Bearer token) and store the returned session object.
+3. Immediately call `GET api/Auth/Me` (Bearer token) and store the returned session object.
 4. Route by role:
    - `SystemAdmin` → the admin area (§4).
    - Every other role → their workspace placeholder; if `facility` is present, route by
      **`facility.type.code`** (see §3.3).
-5. On F5: memory is empty → call `POST api/Auth/refresh` **first** (cookie rides along); on 200 store the
+5. On F5: memory is empty → call `POST api/Auth/Refresh` **first** (cookie rides along); on 200 store the
    new token and continue; on 401 → login screen.
 
 ### 3.2 Endpoints
 
 | Method | Route | Auth | Body | Success | Notes |
 |---|---|---|---|---|---|
-| POST | `api/Auth/login` | public | `{ userName, password }` | 200 `LoginResultDto` | 401 for wrong password / inactive / locked / no role — **identical body**, show one generic message |
-| POST | `api/Auth/refresh` | public (cookie) | empty | 200 `LoginResultDto` | rotates both tokens; a **new cookie** is set |
-| POST | `api/Auth/logout` | public (cookie) | empty | 204 | revokes the refresh token and deletes the cookie |
-| POST | `api/Auth/logout-all` | logged-in | — | 204 | revokes every refresh token of the user ("log out everywhere") |
-| GET | `api/Auth/me` | logged-in | — | 200 `CurrentUserDto` | full session object (§3.3) |
+| POST | `api/Auth/Login` | public | `{ userName, password }` | 200 `LoginResultDto` | 401 for wrong password / inactive / locked / no role — **identical body**, show one generic message |
+| POST | `api/Auth/Refresh` | public (cookie) | empty | 200 `LoginResultDto` | rotates both tokens; a **new cookie** is set |
+| POST | `api/Auth/Logout` | public (cookie) | empty | 204 | revokes the refresh token and deletes the cookie |
+| POST | `api/Auth/LogoutAll` | logged-in | — | 204 | revokes every refresh token of the user ("log out everywhere") |
+| GET | `api/Auth/Me` | logged-in | — | 200 `CurrentUserDto` | full session object (§3.3) |
 
 `LoginResultDto`:
 
@@ -94,7 +94,7 @@ Rules that prevent most frontend bugs:
 }
 ```
 
-### 3.3 `GET api/Auth/me` — use it for everything after login
+### 3.3 `GET api/Auth/Me` — use it for everything after login
 
 ```json
 {
@@ -129,7 +129,7 @@ const WORKSPACE_BY_FACILITY_TYPE: Record<string, string> = {
 // unknown/missing code → neutral default workspace (never crash)
 ```
 
-Read the real type codes from `GET api/facility-types/GetAll` — do not hardcode ids or names.
+Read the real type codes from `GET api/FacilityTypes/GetAll` — do not hardcode ids or names.
 The type is read from the DB on every `me` call, so a mid-session type change is reflected on refresh.
 
 ### 3.4 Refresh handling (critical)
@@ -147,7 +147,7 @@ let refreshing: Promise<string> | null = null;
 
 async function getFreshToken(): Promise<string> {
   refreshing ??= (async () => {
-    const res = await fetch(`${BASE}/api/Auth/refresh`, {
+    const res = await fetch(`${BASE}/api/Auth/Refresh`, {
       method: "POST",
       headers: { "X-Client-Type": "web" },
       credentials: "include",
@@ -164,8 +164,8 @@ async function getFreshToken(): Promise<string> {
 
 ### 3.5 Logout
 
-`POST api/Auth/logout` (`X-Client-Type: web`, credentials included) → 204 → clear the in-memory session →
-navigate to login. Optional "log out everywhere" button → `POST api/Auth/logout-all` (needs the Bearer token).
+`POST api/Auth/Logout` (`X-Client-Type: web`, credentials included) → 204 → clear the in-memory session →
+navigate to login. Optional "log out everywhere" button → `POST api/Auth/LogoutAll` (needs the Bearer token).
 
 ---
 
@@ -182,9 +182,9 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 | GET | `Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresBranchId, requiresFacilityId }]` |
 | POST | `CreateUser` | `{ userName, password, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile }` | **201** | `UserDto` |
 | PUT | `UpdateUser` | `{ id, firstName, lastName, role, organizationId?, branchId?, facilityId?, isMobile }` | 200 | `UserDto` |
-| POST | `deactivateUser/{id}` | — | 204 | — |
-| POST | `activateUser/{id}` | — | 204 | — |
-| POST | `reset-password` | `{ id, newPassword }` | 204 | — |
+| POST | `DeactivateUser/{id}` | — | 204 | — |
+| POST | `ActivateUser/{id}` | — | 204 | — |
+| POST | `ResetPassword` | `{ id, newPassword }` | 204 | — |
 
 **List** — `GET api/Users/GetAll?page=1&pageSize=20&search=ahmad&role=FacilityAdmin`:
 
@@ -237,8 +237,8 @@ Header shows `me.firstName + me.lastName` and the logout actions.
 - Deactivation: confirm dialog; the server refuses deactivating **your own account** and the **SystemAdmin
   account** (target check), and revokes that user's sessions.
 - **Reactivation:** inactive rows (visible with `includeInactive=true`) show an "Activate" action →
-  `POST api/Users/activateUser/{id}` → 204 → refetch. Activating does not restore a forgotten password or
-  clear a lockout — those are handled by `reset-password`.
+  `POST api/Users/ActivateUser/{id}` → 204 → refetch. Activating does not restore a forgotten password or
+  clear a lockout — those are handled by `ResetPassword`.
 - Changing role/scope or resetting a password **revokes that user's sessions** server-side.
 
 `UserDto` (single-user responses):
@@ -249,7 +249,7 @@ Header shows `me.firstName + me.lastName` and the logout actions.
   "isMobile": false, "isActive": true, "createdAt": "…" }
 ```
 
-### 4.2 Organizations — `api/organizations`
+### 4.2 Organizations — `api/Organizations`
 
 | Method | Route | Body | Access | Notes |
 |---|---|---|---|---|
@@ -283,7 +283,7 @@ branch to another organization — hide the organization field when editing.
 | GET | `GetById/{id}` | — | logged-in |
 | POST | `AddFacility` | see below | SA/OA |
 | PUT | `UpdateFacility/{id}` | `{ arName, enName, addressId, typeId }` | SA/OA |
-| POST | `deactivateFacility/{id}` | — | SA/OA |
+| POST | `DeactivateFacility/{id}` | — | SA/OA |
 
 `AddFacility` body:
 
@@ -299,8 +299,8 @@ branch to another organization — hide the organization field when editing.
   a code input on create. The code is immutable; `UpdateFacility` has no code field.
 - A facility is always created **with a partner assignment**: `partnerId`, `startDate` (date only) and
   optional `projectCode` are required by the API, and this creates the facility–partner history row.
-  Populate the partner picker from `api/partners/GetAll`, and the type picker from
-  `api/facility-types/GetAll`.
+  Populate the partner picker from `api/Partners/GetAll`, and the type picker from
+  `api/FacilityTypes/GetAll`.
 - Facility create needs an `addressId` → create the address first (§4.6).
 
 `FacilityDto` returned by list/detail:
@@ -311,10 +311,10 @@ branch to another organization — hide the organization field when editing.
   "isActive": true, "typeId": "…", "createdAt": "…", "updatedAt": null }
 ```
 
-(Its `typeId` is not enriched here — resolve the type name from `api/facility-types/GetAll` if the screen
-shows it. The nested `facility.type` object exists only on `api/Auth/me`.)
+(Its `typeId` is not enriched here — resolve the type name from `api/FacilityTypes/GetAll` if the screen
+shows it. The nested `facility.type` object exists only on `api/Auth/Me`.)
 
-Optional stretch — facility partners (`api/facility-partners`, **SA only**):
+Optional stretch — facility partners (`api/FacilityPartners`, **SA only**):
 `GET GetByFacility/{facilityId}` and `POST Assign { facilityId, partnerId, projectCode?, startDate }` (201).
 
 ### 4.5 Lookup tables — one generic screen
@@ -324,13 +324,13 @@ Use a small config array; **all follow the same pattern**: `GET <base>/GetAll` (
 
 | Base route | Add/Update fields | Notes |
 |---|---|---|
-| `api/accommodation-types` | `arName`, `enName` | no code |
-| `api/disability-types` | `arName`, `enName` | no code |
-| `api/education-types` | `arName`, `enName` | no code |
-| `api/nationalities` | `arName`, `enName` | no code |
-| `api/facility-types` | `arName`, `enName`, `code` | `GetAll?includeInactive=` supported |
-| `api/identity-types` | `arName`, `enName`, `code`, **`valueRegex`** | see below |
-| `api/partners` | `arName`, `enName`, `code` | `GetAll` only on this controller |
+| `api/AccommodationTypes` | `arName`, `enName` | no code |
+| `api/DisabilityTypes` | `arName`, `enName` | no code |
+| `api/EducationTypes` | `arName`, `enName` | no code |
+| `api/Nationalities` | `arName`, `enName` | no code |
+| `api/FacilityTypes` | `arName`, `enName`, `code` | `GetAll?includeInactive=` supported |
+| `api/IdentityTypes` | `arName`, `enName`, `code`, **`valueRegex`** | see below |
+| `api/Partners` | `arName`, `enName`, `code` | `GetAll` only on this controller |
 
 **Identity types — `valueRegex` (now editable):**
 
@@ -347,8 +347,8 @@ Use a small config array; **all follow the same pattern**: `GET <base>/GetAll` (
 - Editing the regex affects future registrations immediately; existing stored values are not re-validated.
 
 **Read-only lookups (GetAll only — render no edit affordances):**
-`api/beneficiary-statuses`, `api/marital-statuses`, `api/disability-reasons`, `api/chronic-diseases`,
-`api/education-issues`. Shape `{ id, code, arName, enName }`, ordered by code.
+`api/BeneficiaryStatuses`, `api/MaritalStatuses`, `api/DisabilityReasons`, `api/ChronicDiseases`,
+`api/EducationIssues`. Shape `{ id, code, arName, enName }`, ordered by code.
 
 ### 4.6 Addresses — `api/Addresses` (used by facility create/edit)
 
@@ -363,11 +363,11 @@ Use a small config array; **all follow the same pattern**: `GET <base>/GetAll` (
 
 ```
 Countries
-countries/{countryId}/cities
-cities/{cityId}/regions
-cities/{cityId}/areas
-regions/{regionId}/districts
-districts/{districtId}/areas
+Countries/{countryId}/Cities
+Cities/{cityId}/Regions
+Cities/{cityId}/Areas
+Regions/{regionId}/Districts
+Districts/{districtId}/Areas
 ```
 
 Chain them for the address cascade (country → city → region/district → area). Do **not** cache across
@@ -452,17 +452,17 @@ Reference: `docs/03-integration/error-catalog.md`.
 ## 9. Appendix — route index
 
 ```
-POST   api/Auth/login                 POST   api/Auth/refresh
-POST   api/Auth/logout                POST   api/Auth/logout-all
-GET    api/Auth/me
+POST   api/Auth/Login                 POST   api/Auth/Refresh
+POST   api/Auth/Logout                POST   api/Auth/LogoutAll
+GET    api/Auth/Me
 
 GET    api/Users/GetAll               GET    api/Users/Roles
 POST   api/Users/CreateUser           PUT    api/Users/UpdateUser
-POST   api/Users/deactivateUser/{id}  POST   api/Users/reset-password
-POST   api/Users/activateUser/{id}
+POST   api/Users/DeactivateUser/{id}  POST   api/Users/ResetPassword
+POST   api/Users/ActivateUser/{id}
 
-GET    api/organizations/GetAll       GET    api/organizations/GetById/{id}
-POST   api/organizations/Add          PUT    api/organizations/Update/{id}
+GET    api/Organizations/GetAll       GET    api/Organizations/GetById/{id}
+POST   api/Organizations/Add          PUT    api/Organizations/Update/{id}
 
 GET    api/Branches/GetAll            GET    api/Branches/GetById/{id}
 GET    api/Branches/GetByOrganizationId/{organizationId}
@@ -471,31 +471,31 @@ POST   api/Branches/Add               PUT    api/Branches/Update/{id}
 GET    api/Facilities/GetByBranchId/{branchId}
 GET    api/Facilities/GetById/{id}
 POST   api/Facilities/AddFacility     PUT    api/Facilities/UpdateFacility/{id}
-POST   api/Facilities/deactivateFacility/{id}
+POST   api/Facilities/DeactivateFacility/{id}
 
 GET    api/Addresses/GetByAreaId/{areaId}
 GET    api/Addresses/GetById/{id}
 POST   api/Addresses/Add              PUT    api/Addresses/Update/{id}
 
 GET    api/Geography/Countries
-GET    api/Geography/countries/{countryId}/cities
-GET    api/Geography/cities/{cityId}/regions
-GET    api/Geography/cities/{cityId}/areas
-GET    api/Geography/regions/{regionId}/districts
-GET    api/Geography/districts/{districtId}/areas
+GET    api/Geography/Countries/{countryId}/Cities
+GET    api/Geography/Cities/{cityId}/Regions
+GET    api/Geography/Cities/{cityId}/Areas
+GET    api/Geography/Regions/{regionId}/Districts
+GET    api/Geography/Districts/{districtId}/Areas
 
-GET    api/accommodation-types/GetAll       POST Add   PUT Update
-GET    api/disability-types/GetAll          POST Add   PUT Update
-GET    api/education-types/GetAll           POST Add   PUT Update
-GET    api/facility-types/GetAll            POST Add   PUT Update
-GET    api/identity-types/GetAll            POST Add   PUT Update
-GET    api/nationalities/GetAll             POST Add   PUT Update
-GET    api/partners/GetAll                  POST Add   PUT Update
-GET    api/beneficiary-statuses/GetAll      (read-only)
-GET    api/marital-statuses/GetAll          (read-only)
-GET    api/disability-reasons/GetAll        (read-only)
-GET    api/chronic-diseases/GetAll          (read-only)
-GET    api/education-issues/GetAll          (read-only)
-GET    api/facility-partners/GetByFacility/{facilityId}   (SA)
-POST   api/facility-partners/Assign                        (SA)
+GET    api/AccommodationTypes/GetAll       POST Add   PUT Update
+GET    api/DisabilityTypes/GetAll          POST Add   PUT Update
+GET    api/EducationTypes/GetAll           POST Add   PUT Update
+GET    api/FacilityTypes/GetAll            POST Add   PUT Update
+GET    api/IdentityTypes/GetAll            POST Add   PUT Update
+GET    api/Nationalities/GetAll             POST Add   PUT Update
+GET    api/Partners/GetAll                  POST Add   PUT Update
+GET    api/BeneficiaryStatuses/GetAll      (read-only)
+GET    api/MaritalStatuses/GetAll          (read-only)
+GET    api/DisabilityReasons/GetAll        (read-only)
+GET    api/ChronicDiseases/GetAll          (read-only)
+GET    api/EducationIssues/GetAll          (read-only)
+GET    api/FacilityPartners/GetByFacility/{facilityId}   (SA)
+POST   api/FacilityPartners/Assign                        (SA)
 ```

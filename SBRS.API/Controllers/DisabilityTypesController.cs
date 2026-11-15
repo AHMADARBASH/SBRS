@@ -10,7 +10,7 @@ using SBRS.Contracts.DisabilityTypes;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/disability-types")]
+[Route("api/DisabilityTypes")]
 public class DisabilityTypesController(ISender sender) : ControllerBase
 {
     [HttpGet]

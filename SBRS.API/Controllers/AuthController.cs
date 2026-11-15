@@ -23,7 +23,7 @@ namespace SBRS.Controllers
         // HttpOnly cookie; all other clients (mobile/unknown) keep the token in the body.
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<ActionResult<LoginResultDto>> Login(LoginRequest body, CancellationToken ct)
         {
             var result = await sender.Send(new LoginCommand(body.UserName, body.Password), ct);
@@ -38,12 +38,12 @@ namespace SBRS.Controllers
 
         // temporary endpoint to verify tokens and the claims read by ICurrentUser
         [Authorize]
-        [HttpGet("me")]
+        [HttpGet("Me")]
         public async Task<ActionResult<CurrentUserDto>> Me(CancellationToken ct) =>
             Ok(await sender.Send(new GetMeQuery(), ct));
 
         [AllowAnonymous]
-        [HttpPost("refresh")]
+        [HttpPost("Refresh")]
         public async Task<ActionResult<LoginResultDto>> Refresh(RefreshTokenRequest? body, CancellationToken ct)
         {
             if (!clientType.IsWeb)
@@ -72,7 +72,7 @@ namespace SBRS.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("logout")]
+        [HttpPost("Logout")]
         public async Task<IActionResult> Logout(RefreshTokenRequest? body, CancellationToken ct)
         {
             if (clientType.IsWeb)
@@ -91,7 +91,7 @@ namespace SBRS.Controllers
         }
 
         [Authorize]
-        [HttpPost("logout-all")]
+        [HttpPost("LogoutAll")]
         public async Task<IActionResult> LogoutAll(CancellationToken ct)
         {
             await sender.Send(new LogoutAllCommand(), ct);

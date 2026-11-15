@@ -5,7 +5,7 @@
 Accounts carry global power (role, scope); letting org/facility admins create users widens the trust surface.
 
 ## Decision
-The whole Users controller requires `SystemAdminOnly` — create, update, deactivate, reset-password, roles `[BUILT]`. Self-service limits apply too: no self-deactivation, no self role change.
+The whole Users controller requires `SystemAdminOnly` — create, update, deactivate, ResetPassword, roles `[BUILT]`. Self-service limits apply too: no self-deactivation, no self role change.
 
 ## Consequences
 - One vetted actor for every account change; easy audit.

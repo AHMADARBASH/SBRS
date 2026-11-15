@@ -1,7 +1,7 @@
 # SBRS Endpoint Reference
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
-Generated from the controllers and contracts (not from memory). Routes are documented **exactly as implemented** — the style is inconsistent (action-style `Add`, `Update/{id}`, `GetAll` vs REST-ish `countries/{id}/cities`); tracked in [OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md#oq-06). Every route needs the bearer token unless marked **anonymous** (Auth login/refresh/logout).
+Generated from the controllers and contracts (not from memory). Routes are documented **exactly as implemented** — every segment is PascalCase with no dashes (action-style `Add`, `Update/{id}`, `GetAll`, and `Countries/{id}/Cities`); see [OQ-06](../OPEN-QUESTIONS.md#oq-06). Every route needs the bearer token unless marked **anonymous** (Auth `Login`/`Refresh`/`Logout`).
 
 Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · **PC** ProjectCoordinator · **FA** FacilityAdmin · **DE** DataEntry ("logged-in" = any authenticated user).
 
@@ -9,11 +9,11 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 
 | Method | Route | Roles | Request body | Success | Response | Errors |
 |---|---|---|---|---|---|---|
-| POST | `api/Auth/login` | **anonymous** | `userName` (req), `password` (req) | 200 | `LoginResultDto` | 400 (validation), 401 (bad credentials / inactive / locked / no role) |
-| GET | `api/Auth/me` | logged-in | — | 200 | `CurrentUserDto` — full user + flat `organizationId`/`branchId`/`facilityId` + nested `organization{}` / `facility{ type{}, branch{} }` (see [auth-guide](auth-guide.md#21-get-apiauthme--the-full-session-object)) | |
-| POST | `api/Auth/refresh` | **anonymous** (web: token from HttpOnly cookie) | `refreshToken` (mobile req; web ignored) | 200 | `LoginResultDto` (`refreshToken` null for web) | 400 (mobile empty), 401 |
-| POST | `api/Auth/logout` | **anonymous** | `refreshToken`(mobile req; web ignored) | 204 | — | 400 (mobile empty) |
-| POST | `api/Auth/logout-all` | logged-in | — | 204 | — | |
+| POST | `api/Auth/Login` | **anonymous** | `userName` (req), `password` (req) | 200 | `LoginResultDto` | 400 (validation), 401 (bad credentials / inactive / locked / no role) |
+| GET | `api/Auth/Me` | logged-in | — | 200 | `CurrentUserDto` — full user + flat `organizationId`/`branchId`/`facilityId` + nested `organization{}` / `facility{ type{}, branch{} }` (see [auth-guide](auth-guide.md#21-get-apiauthme--the-full-session-object)) | |
+| POST | `api/Auth/Refresh` | **anonymous** (web: token from HttpOnly cookie) | `refreshToken` (mobile req; web ignored) | 200 | `LoginResultDto` (`refreshToken` null for web) | 400 (mobile empty), 401 |
+| POST | `api/Auth/Logout` | **anonymous** | `refreshToken`(mobile req; web ignored) | 204 | — | 400 (mobile empty) |
+| POST | `api/Auth/LogoutAll` | logged-in | — | 204 | — | |
 
 ## 2. Users — `api/Users` (controller-level **SA only**)
 
@@ -23,21 +23,21 @@ Roles: **SA** SystemAdmin · **OA** OrganizationAdmin · **BA** BranchAdmin · *
 | GET | `api/Users/Roles` | — | 200 | `[{ role, requiresOrganizationId, requiresBranchId, requiresFacilityId }]` | |
 | POST | `api/Users/CreateUser` | `userName` (3–50, `[A-Za-z0-9._-]`), `password` (≥8), `firstName`, `lastName`, `role` (Roles constant), `organizationId?` (OrgAdmin req), `branchId?` (BranchAdmin req), `facilityId?` (FA/DE req), `isMobile` (bool) | 201 | `UserDto` | 400 (validation / role-scope rules / inactive org / branch / facility), 404 (unknown org/branch/facility), 409 (username taken) |
 | PUT | `api/Users/UpdateUser` | `id`, `firstName`, `lastName`, `role`, `organizationId?`, `branchId?`, `facilityId?`, `isMobile` | 200 | `UserDto` | 400, 404 |
-| POST | `api/Users/deactivateUser/{id}` | — | 204 | — | 400 (self-account; target is SystemAdmin), 404 |
-| POST | `api/Users/activateUser/{id}` | — | 204 | — | 404 (no-op when already active) |
-| POST | `api/Users/reset-password` | `id`, `newPassword` (≥8) | 204 | — | 400, 404 |
+| POST | `api/Users/DeactivateUser/{id}` | — | 204 | — | 400 (self-account; target is SystemAdmin), 404 |
+| POST | `api/Users/ActivateUser/{id}` | — | 204 | — | 404 (no-op when already active) |
+| POST | `api/Users/ResetPassword` | `id`, `newPassword` (≥8) | 204 | — | 400, 404 |
 
 Role change or scope change revokes the user's refresh tokens. `GetAll` is the only user-read endpoint;
 `GetById` is still absent ([OQ-10](../OPEN-QUESTIONS.md#oq-10)).
 
-## 3. Organizations — `api/organizations`
+## 3. Organizations — `api/Organizations`
 
 | Method | Route | Roles | Request | Success | Response | Errors |
 |---|---|---|---|---|---|---|
-| GET | `api/organizations/GetAll?includeInactive=` | logged-in | query | 200 | `OrganizationDto[]` (scoped: see [roles-and-permissions](../01-analysis/roles-and-permissions.md)) | |
-| GET | `api/organizations/GetById/{id}` | logged-in | — | 200 | `OrganizationDto` | 404 |
-| POST | `api/organizations/Add` | SA | `arName`, `enName`, `code` (all req, ≤50/50/10) | 201 | `OrganizationDto` | 400, 409 (code exists) |
-| PUT | `api/organizations/Update/{id}` | SA, OA | same (OA implicitly limited to own org by repository scoping) | 200 | `OrganizationDto` | 400, 404, 409 |
+| GET | `api/Organizations/GetAll?includeInactive=` | logged-in | query | 200 | `OrganizationDto[]` (scoped: see [roles-and-permissions](../01-analysis/roles-and-permissions.md)) | |
+| GET | `api/Organizations/GetById/{id}` | logged-in | — | 200 | `OrganizationDto` | 404 |
+| POST | `api/Organizations/Add` | SA | `arName`, `enName`, `code` (all req, ≤50/50/10) | 201 | `OrganizationDto` | 400, 409 (code exists) |
+| PUT | `api/Organizations/Update/{id}` | SA, OA | same (OA implicitly limited to own org by repository scoping) | 200 | `OrganizationDto` | 400, 404, 409 |
 
 Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 
@@ -59,14 +59,14 @@ Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 | GET | `api/Facilities/GetById/{id}` | logged-in (scoped) | — | 200 | `FacilityDto` | 404 |
 | POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `addressId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50) — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/address/type/partner), 409 (code generation retries exhausted) |
 | PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `addressId`, `typeId` (req), `arName`, `enName` (req) | 200 | `FacilityDto` | 400, 404 |
-| POST | `api/Facilities/deactivateFacility/{id}` | SA, OA | — | 204 | — | 400, 404 |
+| POST | `api/Facilities/DeactivateFacility/{id}` | SA, OA | — | 204 | — | 400, 404 |
 
-## 6. Facility partners (history) — `api/facility-partners` (**SA only**, controller-level)
+## 6. Facility partners (history) — `api/FacilityPartners` (**SA only**, controller-level)
 
 | Method | Route | Request | Success | Response | Errors |
 |---|---|---|---|---|---|
-| GET | `api/facility-partners/GetByFacility/{facilityId}` | — | 200 | `FacilityPartnerDto[]` (newest first) | |
-| POST | `api/facility-partners/Assign` | `facilityId`, `partnerId` (req), `projectCode?` (≤50), `startDate` (req) | 201 | `FacilityPartnerDto` | 400 (start date must be later than current), 404 (facility/partner) |
+| GET | `api/FacilityPartners/GetByFacility/{facilityId}` | — | 200 | `FacilityPartnerDto[]` (newest first) | |
+| POST | `api/FacilityPartners/Assign` | `facilityId`, `partnerId` (req), `projectCode?` (≤50), `startDate` (req) | 201 | `FacilityPartnerDto` | 400 (start date must be later than current), 404 (facility/partner) |
 
 Assign closes the current assignment with `endDate = startDate - 1` and switches the facility's current partner.
 
@@ -75,11 +75,11 @@ Assign closes the current assignment with `endDate = startDate - 1` and switches
 | Method | Route | Response |
 |---|---|---|
 | GET | `api/Geography/Countries` | `CountryDto[]` |
-| GET | `api/Geography/countries/{countryId}/cities` | `CityDto[]` (incl. `cCode`) |
-| GET | `api/Geography/cities/{cityId}/regions` | `RegionDto[]` |
-| GET | `api/Geography/cities/{cityId}/areas` | `AreaDto[]` |
-| GET | `api/Geography/regions/{regionId}/districts` | `DistrictDto[]` |
-| GET | `api/Geography/districts/{districtId}/areas` | `AreaDto[]` |
+| GET | `api/Geography/Countries/{countryId}/Cities` | `CityDto[]` (incl. `cCode`) |
+| GET | `api/Geography/Cities/{cityId}/Regions` | `RegionDto[]` |
+| GET | `api/Geography/Cities/{cityId}/Areas` | `AreaDto[]` |
+| GET | `api/Geography/Regions/{regionId}/Districts` | `DistrictDto[]` |
+| GET | `api/Geography/Districts/{districtId}/Areas` | `AreaDto[]` |
 
 DTOs carry only ids + names + code (+ `cCode` for cities). `includeInactive` params are accepted but ignored ([OQ-19](../OPEN-QUESTIONS.md#oq-19)). 404 if a parent city doesn't exist (areas by city).
 
@@ -96,11 +96,11 @@ No deactivate endpoint ([OQ-17](../OPEN-QUESTIONS.md#oq-17)).
 
 ## 9. Lookup-type controllers (same pattern)
 
-Controllers with **kebab-case route + action routes**: `api/accommodation-types`, `api/disability-types`, `api/education-types`, `api/facility-types`, `api/identity-types`, `api/nationalities`, `api/partners`:
+Controllers with **PascalCase route + action routes**: `api/AccommodationTypes`, `api/DisabilityTypes`, `api/EducationTypes`, `api/FacilityTypes`, `api/IdentityTypes`, `api/Nationalities`, `api/Partners`:
 
 | Method | Route | Roles | Request | Success | Response | Errors |
 |---|---|---|---|---|---|---|
-| GET | `<base>/GetAll` (facility-types also `?includeInactive=`) | logged-in (anonymous-visible via fallback? no — fallback requires auth) | query | 200 | `TypeDto[]` | |
+| GET | `<base>/GetAll` (FacilityTypes also `?includeInactive=`) | logged-in (anonymous-visible via fallback? no — fallback requires auth) | query | 200 | `TypeDto[]` | |
 | POST | `<base>/Add` | SA | per type below | 201 | `TypeDto` | 400, 409 (code/en-name exists) |
 | PUT | `<base>/Update` | SA | Id + fields below | 200 | `TypeDto` | 400, 404, 409 |
 

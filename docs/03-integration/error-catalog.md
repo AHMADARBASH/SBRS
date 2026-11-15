@@ -1,5 +1,5 @@
 # SBRS Error Catalog
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 All errors return RFC 7807 `application/problem+json`, produced by `SBRS/Middleware/GlobalExceptionHandler.cs` `[BUILT]`.
 
@@ -128,7 +128,7 @@ Collected from `SBRS.Domain/{Entities,Common}` and handlers `[BUILT]`; show them
 | Identity | `The identity value must be empty for an unregistered beneficiary.` | UNREGISTERED with a value |
 | Identity | `Identity type '{code}' has no validation pattern.` | unknown code |
 | Identity type | `Value regex is required.` / `Value regex is not a valid regular expression.` | admin edit |
-| Auth/refresh | `Invalid refresh token.` | unknown/revoked/expired/reused |
+| Auth/Refresh | `Invalid refresh token.` | unknown/revoked/expired/reused |
 | Search | `Provide the full code, or both first name and last name (at least 2 characters each).` | bad search input |
 | Users scope | `Users with the role '{role}' cannot be managed yet.` | ProjectCoordinator creation (BranchAdmin is supported) |
 | Fetch | `The selected area does not exist.` / `The selected nationality does not exist.` / `The selected identity type does not exist.` | register references |

@@ -1,5 +1,5 @@
 # SBRS Enums and Lookup Data
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 Every enum value and every lookup list a client needs. Values are read from the code (`SBRS.Domain/Enums`, `SBRS.Domain/Constants`) `[BUILT]`.
 
@@ -70,10 +70,10 @@ The `GET api/Users/Roles` endpoint returns these as `[{ role, requiresOrganizati
 Identity types are rows in the `identity_types` table. **The DB is the source of truth**: registration
 validates the document value against `identity_types.value_regex` (`IdentityTypeEntity.IsValidValue`),
 after trimming and converting Arabic-Indic digits to ASCII. The table below lists the **default patterns**
-the system was seeded with — read the live values from `GET api/identity-types/GetAll`, never from here.
+the system was seeded with — read the live values from `GET api/IdentityTypes/GetAll`, never from here.
 
-SystemAdmin can now maintain the rows through the API: `POST api/identity-types/Add` and
-`PUT api/identity-types/Update` take `{ arName, enName, code, valueRegex }`; `valueRegex` is required
+SystemAdmin can now maintain the rows through the API: `POST api/IdentityTypes/Add` and
+`PUT api/IdentityTypes/Update` take `{ arName, enName, code, valueRegex }`; `valueRegex` is required
 (≤200 chars, valid .NET regex, invalid → 400). Changes apply to future registrations immediately;
 already-stored values are not re-checked.
 
@@ -94,7 +94,7 @@ already-stored values are not re-checked.
 - Before the regex runs, the value is trimmed and Arabic/Persian digits are converted to ASCII (`IdentityValueNormalizer`) `[BUILT]`. The regexes are case-sensitive for `PASSPORT`.
 - The patterns are per-row data now (see above), not hardcoded constants; `IdentityValuePatterns.cs` is a legacy list and no longer the runtime source.
 - Planned Arabic names of seeded types (from the original seed plan; not verified in repo because no seeder exists): بيان عائلي, دفتر عائلة, جواز سفر, وثيقة زواج, بطاقة لقاحات, هوية وطنية, شهادة ميلاد, شهادة إعاقة, شهادة قيادة, قيد مدني, غير مسجل `[ASSUMED]`.
-- `GET api/identity-types/GetAll` returns the seeded rows with `id, arName, enName, code, valueRegex` — **read the actual list from this endpoint**, not from this table.
+- `GET api/IdentityTypes/GetAll` returns the seeded rows with `id, arName, enName, code, valueRegex` — **read the actual list from this endpoint**, not from this table.
 
 ## 7. Lookup lists (DB tables seeded outside the repo)
 
@@ -103,16 +103,16 @@ These are plain admin-managed lookup tables. In each case fetch them through the
 | Lookup | Endpoint | Fields | Managed by | Data status |
 |---|---|---|---|---|
 | Countries / Cities / Regions / Districts / Areas | `GET api/Geography/…` (hierarchical, see [endpoint-reference](endpoint-reference.md)) | `id, arName, enName, code` (+`cCode` for cities, +`cityId` on areas) | read-only; seeded from OCHA Syria admin boundaries `[PLANNED]` [ASSUMED seed source] | `[OPEN]` no seeder (OQ-21) |
-| Nationalities | `GET api/nationalities/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` |
-| Identity types | `GET api/identity-types/GetAll` | `id, arName, enName, code, valueRegex` | SystemAdmin | `[OPEN]` |
-| Facility types | `GET api/facility-types/GetAll?includeInactive=` | `id, arName, enName, code` | never deleted, only inserted; SystemAdmin can add/update | `[OPEN]` |
-| Partners | `GET api/partners/GetAll` | `id, arName, enName, code` | SystemAdmin | `[OPEN]` |
-| Accommodation types | `GET api/accommodation-types/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
-| Disability types | `GET api/disability-types/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
-| Education types | `GET api/education-types/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` |
+| Nationalities | `GET api/Nationalities/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` |
+| Identity types | `GET api/IdentityTypes/GetAll` | `id, arName, enName, code, valueRegex` | SystemAdmin | `[OPEN]` |
+| Facility types | `GET api/FacilityTypes/GetAll?includeInactive=` | `id, arName, enName, code` | never deleted, only inserted; SystemAdmin can add/update | `[OPEN]` |
+| Partners | `GET api/Partners/GetAll` | `id, arName, enName, code` | SystemAdmin | `[OPEN]` |
+| Accommodation types | `GET api/AccommodationTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
+| Disability types | `GET api/DisabilityTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
+| Education types | `GET api/EducationTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` |
 | Education issues | — | — | — | `[PLANNED]` lookup for "reason why no education" `[OPEN]` (OQ-07) — nothing built |
 
-City `cCode` values used in facility codes (DAM, ALP, RUD, … for SY01-SY14) live in the `cities` seed `[OPEN]` — read them from `GET api/Geography/countries/{id}/cities`.
+City `cCode` values used in facility codes (DAM, ALP, RUD, … for SY01-SY14) live in the `cities` seed `[OPEN]` — read them from `GET api/Geography/Countries/{id}/Cities`.
 
 ## 8. Reserved codes
 

@@ -1,5 +1,5 @@
 # UC-04 Manage facilities
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin, OrganizationAdmin |
 | Implementation status | `[BUILT]` |
 | Related rules | BR-FAC-01…10, BR-GEN-02…04, BR-GEO-01 |
-| Endpoints | `GET/POST/PUT api/Facilities/…`, `POST api/Facilities/deactivateFacility/{id}`, `api/facility-types/*`, `api/partners/*`, `api/facility-partners/*` |
+| Endpoints | `GET/POST/PUT api/Facilities/…`, `POST api/Facilities/DeactivateFacility/{id}`, `api/FacilityTypes/*`, `api/Partners/*`, `api/FacilityPartners/*` |
 
 ## Goal
 Establish and maintain service points under branches, each with a system-generated readable code, an address, a type and a current partner plus partner history.
@@ -20,11 +20,11 @@ Branch (UC-03), facility type (lookup), address (UC-06), partner all exist. Acto
 2. Form fields: `branchId`, `addressId`, `typeId`, `partnerId`, `startDate`, `arName`, `enName`, optional `projectCode`. **No code field** — the server generates `{city c_code}-{type code}-{NNN}` from the address's city (BR-FAC-02) and retries on any concurrent unique collision.
 3. `201` returns the facility with its generated `code`.
 4. Later edits change only `addressId`, `typeId`, names (`UpdateFacility/{id}`); branch and code are immutable.
-5. Partner change history: `POST api/facility-partners/Assign` closes the open assignment (`endDate = startDate − 1 day`) and opens the new one; `GET GetByFacility/{facilityId}` shows the full history, newest first `[BUILT]`.
-6. Retired facility: `POST deactivateFacility/{id}` → 204 (soft delete; list `?includeInactive=true` reveals it).
+5. Partner change history: `POST api/FacilityPartners/Assign` closes the open assignment (`endDate = startDate − 1 day`) and opens the new one; `GET GetByFacility/{facilityId}` shows the full history, newest first `[BUILT]`.
+6. Retired facility: `POST DeactivateFacility/{id}` → 204 (soft delete; list `?includeInactive=true` reveals it).
 
 ## Alternative flows
-- A1 SA manages facility types (`api/facility-types/Add`, `Update`) — insert-only lookups, never deleted.
+- A1 SA manages facility types (`api/FacilityTypes/Add`, `Update`) — insert-only lookups, never deleted.
 - A2 ProjectCode is optional; empty string is stored (BR-FAC-05).
 
 ## Errors and edge cases

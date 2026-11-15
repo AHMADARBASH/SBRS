@@ -1,5 +1,5 @@
 # UC-11 Manage clinics and doctors
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin, OrganizationAdmin |
 | Implementation status | `[PLANNED]` — no entities, endpoints or tables |
 | Related rules | (planned) extend BR-FAC: facility → 1..n clinics → doctors; scoping as per facilities |
-| Endpoints | none (planned e.g. `api/clinics`, `api/doctors`) |
+| Endpoints | none (planned e.g. `api/Clinics`, `api/Doctors`) |
 
 ## Goal
 Represent each clinical unit inside a facility (e.g. ER, vaccination room) and the doctors working there, so pharmacy transactions and reports can attach to a clinic.

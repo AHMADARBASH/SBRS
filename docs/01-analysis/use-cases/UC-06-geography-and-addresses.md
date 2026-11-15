@@ -1,5 +1,5 @@
 # UC-06 Browse geography and manage addresses
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -16,7 +16,7 @@ Give every screen consistent, read-only administrative geography (OCHA hierarchy
 Geography tables are seeded `[OPEN]` (OQ-21) — nothing ships in the repo.
 
 ## Main flow
-1. Any screen needing an address picker cascades: `Countries` → `countries/{id}/cities` → `cities/{id}/regions` (or districts) → `districts/{id}/areas` — or straight `cities/{id}/areas` (BR-GEO-02).
+1. Any screen needing an address picker cascades: `Countries` → `Countries/{id}/Cities` → `Cities/{id}/Regions` (or districts) → `Districts/{id}/Areas` — or straight `Cities/{id}/Areas` (BR-GEO-02).
 2. Within an area, list addresses `GET api/Addresses/GetByAreaId/{areaId}?includeInactive=`.
 3. If the address is new: SA/OA adds it (`areaId`, `arName`, `enName`) → 201; the address is shared system-wide (BR-GEO-03) — facilities of any organization may use it.
 4. Typo fix: `PUT api/Addresses/Update/{id}` (names only; area immutable).

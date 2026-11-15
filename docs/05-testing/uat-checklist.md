@@ -1,5 +1,5 @@
 # SBRS UAT Checklist
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 Manual acceptance pass before each release. Mark Pass/Fail per step; every step maps to a use case and business rule. Test accounts: see [../03-integration/environments-and-test-data.md](../03-integration/environments-and-test-data.md).
 
@@ -13,7 +13,7 @@ Manual acceptance pass before each release. Mark Pass/Fail per step; every step 
 | 4 | Expired access token → serialized refresh | DE | new tokens; retried request 200 | |
 | 5 | Replay used refresh token | DE | 401 + family revoked; login required | |
 | 6 | logout → replay same token | DE | 401, token family revoked | |
-| 7 | logout-all after second device login | SA | both devices re-auth needed; inactive user also kicked on refresh | |
+| 7 | LogoutAll after second device login | SA | both devices re-auth needed; inactive user also kicked on refresh | |
 
 ## UC-02/03/04 Structure management (BR-ORG, BR-BRN, BR-FAC)
 

@@ -1,5 +1,5 @@
 # UC-05 Manage users and assign role/scope
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin |
 | Implementation status | `[BUILT]` |
 | Related rules | BR-USR-01…10 |
-| Endpoints | `GET api/Users/Roles`, `POST api/Users/CreateUser`, `PUT api/Users/UpdateUser`, `POST api/Users/deactivateUser/{id}`, `POST api/Users/reset-password` |
+| Endpoints | `GET api/Users/Roles`, `POST api/Users/CreateUser`, `PUT api/Users/UpdateUser`, `POST api/Users/DeactivateUser/{id}`, `POST api/Users/ResetPassword` |
 
 ## Goal
 SystemAdmin provisions every account, binds exactly one role and the matching scope, and manages the lifecycle.
@@ -25,8 +25,8 @@ Actor is SystemAdmin; the referenced organization/facility exist.
    - `isMobile` flags mobile users.
 3. `201` returns `UserDto`.
 4. Editions: `UpdateUser` changes names, role, scope, `isMobile`; changing role/scope **revokes the user's refresh tokens** `[BUILT]`.
-5. Deactivation: `POST deactivateUser/{id}` → 204 + refresh-token revocation `[BUILT]` (but see the bug below).
-6. Password forgotten: `reset-password` sets a new password → 204.
+5. Deactivation: `POST DeactivateUser/{id}` → 204 + refresh-token revocation `[BUILT]` (but see the bug below).
+6. Password forgotten: `ResetPassword` sets a new password → 204.
 
 ## Alternative flows
 - A1 SA re-issues their own password via reset (they cannot deactivate self or change own role — BR-USR-08).

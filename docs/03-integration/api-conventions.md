@@ -1,5 +1,5 @@
 # SBRS API Conventions
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 Conventions every client (web, mobile) must follow. Verified against the code unless tagged otherwise.
 
@@ -36,8 +36,8 @@ All routes are mounted under `api/…` (with the casing exactly as listed in [en
 
 - Records are **never deleted**; deactivation sets `is_active = false` `[BUILT]`.
 - Most list endpoints return active records only; several accept `?includeInactive=true`:
-  - truly honored: `GET api/Facilities/GetByBranchId/{branchId}`, `GET api/Addresses/GetByAreaId/{areaId}`, `GET api/organizations/GetAll`
-  - accepted but currently **ignored**: `facility-types`, identity/geography subsets, `branches/GetAll` → tracked in [OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md#oq-19)
+  - truly honored: `GET api/Facilities/GetByBranchId/{branchId}`, `GET api/Addresses/GetByAreaId/{areaId}`, `GET api/Organizations/GetAll`
+  - accepted but currently **ignored**: `FacilityTypes`, identity/geography subsets, `Branches/GetAll` → tracked in [OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md#oq-19)
 - The beneficiary list never shows inactive records.
 
 ## 5. Scoping and the 404 rule
@@ -77,9 +77,9 @@ Exactly four anonymous routes (all others require the bearer token) `[BUILT]`:
 
 | Route | Purpose |
 |---|---|
-| `POST api/Auth/login` | get access + refresh token |
-| `POST api/Auth/refresh` | rotate refresh token, get a new access token |
-| `POST api/Auth/logout` | revoke one refresh token (takes it from body or cookie) |
+| `POST api/Auth/Login` | get access + refresh token |
+| `POST api/Auth/Refresh` | rotate refresh token, get a new access token |
+| `POST api/Auth/Logout` | revoke one refresh token (takes it from body or cookie) |
 | `GET /swagger/v1/swagger.json` (+ Swagger UI) | OpenAPI document |
 
-`POST api/Auth/logout-all` and `GET api/Auth/me` require authentication.
+`POST api/Auth/LogoutAll` and `GET api/Auth/Me` require authentication.

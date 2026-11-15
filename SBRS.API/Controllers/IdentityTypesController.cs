@@ -10,7 +10,7 @@ using SBRS.Contracts.IdentityTypes;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/identity-types")]
+[Route("api/IdentityTypes")]
 public class IdentityTypesController(ISender sender) : ControllerBase
 {
     [HttpGet]

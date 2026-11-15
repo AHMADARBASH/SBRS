@@ -1,5 +1,5 @@
 # SBRS Authentication Guide
-> Status: Draft | Last updated: 2026-11-06 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 For the web and mobile clients. Everything below is `[BUILT]` (verified in `AuthController`, `TokenService`, `RefreshTokenService`, `RefreshCookieService`) unless tagged.
 
@@ -7,11 +7,11 @@ For the web and mobile clients. Everything below is `[BUILT]` (verified in `Auth
 
 | Method | Route | Auth | Body | Result |
 |---|---|---|---|---|
-| POST | `api/Auth/login` | anonymous | `LoginRequest` | `LoginResultDto` (201/200) |
-| POST | `api/Auth/refresh` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `LoginResultDto` |
-| POST | `api/Auth/logout` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `204` |
-| POST | `api/Auth/logout-all` | any logged-in user | — | `204` (revokes every refresh token of the caller, incl. phones) |
-| GET | `api/Auth/me` | any logged-in user | — | `CurrentUserDto`: full user + nested `organization{}` / `facility{}` — see §2.1 |
+| POST | `api/Auth/Login` | anonymous | `LoginRequest` | `LoginResultDto` (201/200) |
+| POST | `api/Auth/Refresh` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `LoginResultDto` |
+| POST | `api/Auth/Logout` | anonymous | `RefreshTokenRequest` (web: ignored; token from cookie) | `204` |
+| POST | `api/Auth/LogoutAll` | any logged-in user | — | `204` (revokes every refresh token of the caller, incl. phones) |
+| GET | `api/Auth/Me` | any logged-in user | — | `CurrentUserDto`: full user + nested `organization{}` / `facility{}` — see §2.1 |
 
 ## 2. Login
 
@@ -44,7 +44,7 @@ Response (`LoginResultDto`) — fake values:
 - `ExpiresAt` is the **access token** expiry (240 minutes `[CONFIRMED][BUILT]`); `DateTime` UTC.
 - Login fails with `401 { "title": "Unauthorized", "detail": "Unauthorized" }` — same body for wrong password, inactive user, locked-out user, or user without a role.
 
-### 2.1 `GET api/Auth/me` — the full session object
+### 2.1 `GET api/Auth/Me` — the full session object
 
 One call that returns the **complete user plus the complete facility/organization context**, so the client
 shell needs no follow-up requests after login. The user identity part is the same shape as the login
@@ -98,7 +98,7 @@ Rules:
 
 ## 3. Web vs mobile: where the refresh token goes
 
-Send header `X-Client-Type: web` on the auth endpoints (`login`, `refresh`, `logout`) to switch the web flow. Any missing/other value behaves as mobile `[BUILT]`.
+Send header `X-Client-Type: web` on the auth endpoints (`Login`, `Refresh`, `Logout`) to switch the web flow. Any missing/other value behaves as mobile `[BUILT]`.
 
 | Client | Access token | Refresh token delivery |
 |---|---|---|
@@ -111,7 +111,7 @@ Send header `X-Client-Type: web` on the auth endpoints (`login`, `refresh`, `log
 
 ## 4. Refresh flow
 
-`POST api/Auth/refresh` returns the same `LoginResultDto` shape with a **new access token and a new refresh token** (rotation). Rules `[BUILT]`:
+`POST api/Auth/Refresh` returns the same `LoginResultDto` shape with a **new access token and a new refresh token** (rotation). Rules `[BUILT]`:
 
 - Every refresh **burns** the used refresh token (`UsedAt`) and issues a token in the same *family* (same `FamilyId`).
 - **Single use is enforced atomically** in SQL (`ExecuteUpdate ... WHERE used_at IS NULL AND revoked_at IS NULL`).
@@ -127,8 +127,8 @@ Send header `X-Client-Type: web` on the auth endpoints (`login`, `refresh`, `log
 
 ## 5. Logout
 
-- `logout` (anonymous, takes the token from body or web cookie): revokes the token **family** (all devices of that login). Web also deletes the cookie. Missing cookie on web is still `204`.
-- `logout-all` (authorized): revokes every refresh token of the user, and also deletes the web cookie.
+- `Logout` (anonymous, takes the token from body or web cookie): revokes the token **family** (all devices of that login). Web also deletes the cookie. Missing cookie on web is still `204`.
+- `LogoutAll` (authorized): revokes every refresh token of the user, and also deletes the web cookie.
 
 ## 6. Expiry and 401 handling
 
@@ -151,7 +151,7 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Note over C,A: Login
-    C->>A: POST /api/Auth/login {userName, password} (+X-Client-Type: web)
+    C->>A: POST /api/Auth/Login {userName, password} (+X-Client-Type: web)
     A->>DB: check password, lockout, active, role
     A->>DB: INSERT refresh token (family F1)
     A-->>C: 200 {token, expiresAt, user info}
@@ -162,14 +162,14 @@ sequenceDiagram
     A-->>C: 200 OK
 
     Note over C,A: Access token expired → refresh (SERIALIZED)
-    C->>A: POST /api/Auth/refresh (cookie or {refreshToken})
+    C->>A: POST /api/Auth/Refresh (cookie or {refreshToken})
     A->>DB: claim token atomically (used_at=now)
     A->>DB: insert new token (same family)
     A-->>C: 200 {token(new), expiresAt} + web: refresh cookie replaced
     C->>A: retry original request with new token
 
     Note over C,A: Reuse attack / parallel refresh (failure case)
-    C->>A: POST /api/Auth/refresh (SAME token again)
+    C->>A: POST /api/Auth/Refresh (SAME token again)
     A->>DB: claim fails (already used)
     A->>DB: revoke whole family F1
     A-->>C: 401 Unauthorized (web also clears cookie)

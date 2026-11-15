@@ -1,5 +1,5 @@
 # UC-13 Pharmacy transactions
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | Pharmacy role (name/design `[OPEN]` — OQ-01, OQ-02; ADR-015) |
 | Implementation status | `[PLANNED]` — no entities, endpoints or tables |
 | Related rules | ADR-015 pharmacy staff must never register beneficiaries; beneficiary search limitations; distinct beneficiary counting (OQ-03) |
-| Endpoints | none (planned e.g. `api/pharmacy/transactions`) |
+| Endpoints | none (planned e.g. `api/Pharmacy/Transactions`) |
 
 ## Goal
 Record dispensing of medicines to beneficiaries at a pharmacy facility, linked to the global beneficiary registry without creating beneficiaries.

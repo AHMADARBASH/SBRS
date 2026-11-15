@@ -39,7 +39,7 @@ public class FacilitiesController(ISender sender) : ControllerBase
         => Ok(await sender.Send(new UpdateFacilityCommand(id,body.addressId,body.typeId, body.ArName, body.EnName), ct));
 
     [Authorize(Policy = Policies.OrganizationLevel)]
-    [HttpPost("deactivateFacility/{id:guid}")]
+    [HttpPost("DeactivateFacility/{id:guid}")]
     public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
     {
         await sender.Send(new DeactivateFacilityCommand(id), ct);

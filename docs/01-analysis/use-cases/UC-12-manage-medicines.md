@@ -1,5 +1,5 @@
 # UC-12 Manage medicines
-> Status: Draft | Last updated: 2026-11-07 | Owner: SBRS backend
+> Status: Draft | Last updated: 2026-11-15 | Owner: SBRS backend
 
 | Item | Value |
 |---|---|
@@ -7,7 +7,7 @@
 | Primary actor | SystemAdmin (global catalogue), OrganizationAdmin (propose/accept) |
 | Implementation status | `[PLANNED]` — no entities, endpoints or tables |
 | Related rules | (planned) catalogue with approval workflow; separation from beneficiary data |
-| Endpoints | none (planned e.g. `api/medicines`) |
+| Endpoints | none (planned e.g. `api/Medicines`) |
 
 ## Goal
 Maintain a shared catalogue of medicines (and related supplies) that pharmacy transactions (UC-13) can reference, with a controlled add/remove/accept lifecycle.

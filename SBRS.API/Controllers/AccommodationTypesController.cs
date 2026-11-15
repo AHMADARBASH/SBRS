@@ -10,7 +10,7 @@ using SBRS.Contracts.AccommodationTypes;
 namespace SBRS.Controllers;
 
 [ApiController]
-[Route("api/accommodation-types")]
+[Route("api/AccommodationTypes")]
 public class AccommodationTypesController(ISender sender) : ControllerBase
 {
     [HttpGet]
