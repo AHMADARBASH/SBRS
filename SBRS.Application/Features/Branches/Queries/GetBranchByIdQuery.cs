@@ -10,18 +10,18 @@ using System.Text;
 
 namespace SBRS.Application.Features.Branches.Queries
 {
-    public record GetBranchByIdQuery(Guid Id) : IRequest<List<BranchDto>>;
+    public record GetBranchByIdQuery(Guid Id) : IRequest<BranchDto>;
 
-    public class GetBranchByIdHandler(IBranchRepository branches) : IRequestHandler<GetBranchByIdQuery, List<BranchDto>>
+    public class GetBranchByIdHandler(IBranchRepository branches) : IRequestHandler<GetBranchByIdQuery, BranchDto>
     {
-        public async Task<List<BranchDto>> Handle(GetBranchByIdQuery request, CancellationToken ct)
+        public async Task<BranchDto> Handle(GetBranchByIdQuery request, CancellationToken ct)
         {
             var entity = await branches.GetByIdAsync(request.Id, ct);
             if (entity == null)
             {
                 throw new NotFoundException(nameof(BranchEntity), request.Id);
             }
-            return new List<BranchDto> { entity.ToDto() };
+            return entity.ToDto();
         }
     }
 

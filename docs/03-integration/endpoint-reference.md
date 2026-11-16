@@ -46,7 +46,7 @@ Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 | Method | Route | Roles | Request | Success | Response | Errors |
 |---|---|---|---|---|---|---|
 | GET | `api/Branches/GetAll?includeInactive=` | logged-in (scoped) | query | 200 | `BranchDto[]` | |
-| GET | `api/Branches/GetById/{id}` | logged-in (scoped) | — | 200 | `BranchDto[]` (single-element list; [OQ-26](../OPEN-QUESTIONS.md#oq-26)) | 404 |
+| GET | `api/Branches/GetById/{id}` | logged-in (scoped) | — | 200 | `BranchDto` | 404 |
 | GET | `api/Branches/GetByOrganizationId/{organizationId}` | logged-in (scoped) | — | 200 | `BranchDto[]` | |
 | POST | `api/Branches/Add` | SA, OA | `organizationId` (req), `arName`, `enName` (≤50) | 201 | `BranchDto` | 400, 404 (org) |
 | PUT | `api/Branches/Update/{id}` | SA, OA | `arName`, `enName` | 200 | `BranchDto` | 400, 404 |

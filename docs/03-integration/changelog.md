@@ -39,6 +39,8 @@ Documentation release: the whole `docs/` tree was created; no API code changed w
 
 ### Changed
 
+- **BREAKING (no client yet):** `GET api/Branches/GetById/{id}` now returns a single `BranchDto` object
+  (404 when not found) instead of a one-element `BranchDto[]` (OQ-26).
 - **BREAKING (no client yet):** every route segment and action name is now PascalCase with no dashes:
   `api/AccommodationTypes`, `api/DisabilityTypes`, `api/EducationTypes`, `api/FacilityTypes`,
   `api/IdentityTypes`, `api/Nationalities`, `api/Organizations`, `api/Partners`,

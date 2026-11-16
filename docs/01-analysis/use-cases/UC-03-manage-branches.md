@@ -31,7 +31,7 @@ At least one organization exists (UC-02). Actor: SA anywhere, OA within their ow
 | Duplicate branch code | not possible today — no code column exists (OQ-34) |
 | Update deactivated branch | `400` "A deactivated branch cannot be updated." |
 | Deactivate with active facilities | guard exists (`HasActiveFacilitiesAsync`) but **no endpoint** (OQ-16) → impossible today |
-| `GetById/{id}` response shape | returns a **single-element list** `[BUILT]` (OQ-26) |
+| `GetById/{id}` response shape | returns a single `BranchDto` object `[BUILT]` (OQ-26 resolved 2026-11-16) |
 
 ## Postconditions
 - Branch visible in the org tree; facilities can be added (UC-04).

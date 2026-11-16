@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SBRS.Application.Features.Branches.Commands;
+using SBRS.Application.Features.Branches.DTOs;
 using SBRS.Application.Features.Branches.Queries;
 using SBRS.Application.Features.Branches.Queries.GetBranchesByOrganization;
 using SBRS.Authorization;
@@ -24,7 +25,7 @@ namespace SBRS.Controllers
 
         [Authorize]
         [HttpGet("GetById/{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        public async Task<ActionResult<BranchDto>> GetById(Guid id, CancellationToken ct)
         => Ok(await sender.Send(new GetBranchByIdQuery(id), ct));
 
 
