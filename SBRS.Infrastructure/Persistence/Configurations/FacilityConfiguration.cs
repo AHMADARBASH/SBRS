@@ -39,10 +39,16 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
                 .HasForeignKey(x => x.PartnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(x => x.Category)
+                .WithMany()
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.BranchId);
         builder.HasIndex(x => x.AddressId);
         builder.HasIndex(f => f.TypeId);
         builder.HasIndex(x => x.PartnerId);
+        builder.HasIndex(x => x.CategoryId);
     }
 }

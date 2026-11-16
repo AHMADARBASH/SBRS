@@ -3,7 +3,7 @@
 
 Every enum value and every lookup list a client needs. Values are read from the code (`SBRS.Domain/Enums`, `SBRS.Domain/Constants`) `[BUILT]`.
 
-> ⚠ **Lookups are not seeded in the repository.** No SQL or EF seeder exists for geography, nationalities, identity types, facility types, partners, accommodation/disability/education types (see [OQ-21](../OPEN-QUESTIONS.md#oq-21) and `IdentityTypeCodes`/regexes above). These DTO/API tables provide the data — until seed data is added, item counts are unknown `[OPEN]`.
+> ⚠ **Most lookups are not seeded in the repository.** No SQL or EF seeder exists for geography, nationalities, identity types, facility types, partners, accommodation/education types (see [OQ-21](../OPEN-QUESTIONS.md#oq-21) and `IdentityTypeCodes`/regexes above). Disability types **are** seeded at startup from code (`ReferenceDataSeeder`, six rows, idempotent). These DTO/API tables provide the data — for the rest, item counts are unknown `[OPEN]`.
 
 ## 1. Gender
 
@@ -110,6 +110,7 @@ These are plain admin-managed lookup tables. In each case fetch them through the
 | Accommodation types | `GET api/AccommodationTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
 | Disability types | `GET api/DisabilityTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` — not consumed yet (OQ-32) |
 | Education types | `GET api/EducationTypes/GetAll` | `id, arName, enName` | SystemAdmin | `[OPEN]` |
+| Facility categories | `GET api/FacilityCategories/GetAll` (also `GetById/{id}`) | `id, arName, enName, code` | SystemAdmin (`Add`/`Update`; SA-only) | `[BUILT]` table + migration; empty until the SA adds rows |
 | Education issues | — | — | — | `[PLANNED]` lookup for "reason why no education" `[OPEN]` (OQ-07) — nothing built |
 
 City `cCode` values used in facility codes (DAM, ALP, RUD, … for SY01-SY14) live in the `cities` seed `[OPEN]` — read them from `GET api/Geography/Countries/{id}/Cities`.

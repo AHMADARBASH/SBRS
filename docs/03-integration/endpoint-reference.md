@@ -114,6 +114,21 @@ Type-specific fields:
 | IdentityTypes | `arName`, `enName` (≤100), `code` (req ≤30), `valueRegex` (req, valid .NET regex ≤200) | `id`, `arName`, `enName`, `code`, `valueRegex` |
 | Partners | `arName`, `enName` (≤100), `code` (req, ≤10) | `id`, `arName`, `enName`, `code` |
 
+### Facility categories — `api/FacilityCategories` `[BUILT]`
+
+Same `{ arName, enName, code }` shape as the other lookups, but no `includeInactive` and no
+deactivate. Reads are available to any logged-in user; writes are SA-only.
+
+| Method | Route | Roles | Request | Success | Response | Errors |
+|---|---|---|---|---|---|---|
+| GET | `api/FacilityCategories/GetAll` | logged-in | — | 200 | `FacilityCategoryDto[]` (ordered by `enName`) | |
+| GET | `api/FacilityCategories/GetById/{id}` | logged-in | — | 200 | `FacilityCategoryDto` | 404 |
+| POST | `api/FacilityCategories/Add` | SA | `arName`, `enName` (req, ≤100), `code` (req, ≤50) | 201 | `FacilityCategoryDto` | 400, 409 (en-name or code exists) |
+| PUT | `api/FacilityCategories/Update/{id}` | SA | `arName`, `enName` (req, ≤100), `code` (req, ≤50) | 200 | `FacilityCategoryDto` | 400, 404, 409 (en-name or code exists) |
+
+`FacilityCategoryDto` = `{ id, arName, enName, code }`. `facilities.categoryId` is nullable and is not
+accepted by the facility `Add/Update` yet — the category picker is the next step.
+
 ## 10. Beneficiaries — `api/Beneficiaries`
 
 | Method | Route | Policy roles | Request | Success | Response | Errors |
@@ -139,7 +154,7 @@ Type-specific fields:
 | `UserListItemDto` | `id, userName, firstName, lastName, role, isMobile, isActive, createdAt, organization?, branch?, facility?` |
 | `OrganizationDto` | `id, arName, enName, code, isActive, createdAt, updatedAt?` |
 | `BranchDto` | `id, arName, enName, organizationId, isActive, createdAt, updatedAt?` |
-| `FacilityDto` | `id, branchId, addressId, arName, enName, code, isActive, typeId, createdAt, updatedAt?` |
+| `FacilityDto` | `id, branchId, addressId, arName, enName, code, isActive, typeId, categoryId?, createdAt, updatedAt?` |
 | `FacilityPartnerDto` | `id, facilityId, partnerId, partnerArName, partnerEnName, projectCode, startDate, endDate?, isCurrent` |
 | `AddressDto` | `id, areaId, arName, enName, isActive, createdAt, updatedAt?` |
 | `BeneficiarySearchItemDto` | `id, fullCode, firstName, fatherName, lastName, birthDate, isBirthDateEstimated, gender, identityTypeCode` (no identity value, no mother name) |

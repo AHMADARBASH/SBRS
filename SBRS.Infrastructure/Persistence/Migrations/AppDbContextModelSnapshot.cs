@@ -1395,6 +1395,61 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("education_types", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityCategoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_facility_categories");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_facility_categories_code");
+
+                    b.HasIndex("EnName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_facility_categories_en_name");
+
+                    b.ToTable("facility_categories", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1415,6 +1470,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid")
                         .HasColumnName("branch_id");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -1464,6 +1523,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("BranchId")
                         .HasDatabaseName("ix_facilities_branch_id");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_facilities_category_id");
 
                     b.HasIndex("Code")
                         .IsUnique()
@@ -2315,6 +2377,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_facilities_branches_branch_id");
 
+                    b.HasOne("SBRS.Domain.Entities.FacilityCategoryEntity", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_facilities_facility_categories_category_id");
+
                     b.HasOne("SBRS.Domain.Entities.PartnerEntity", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId")
@@ -2332,6 +2400,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.Navigation("Address");
 
                     b.Navigation("Branch");
+
+                    b.Navigation("Category");
 
                     b.Navigation("FacilityType");
 

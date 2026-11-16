@@ -7,7 +7,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/) style — sections `Adde
 
 ## Unreleased
 
-Documentation release: the whole `docs/` tree was created; no API code changed while writing it.
+### Added
+
+- Facility categories:
+  - new lookup `facility_categories` (`ar_name`, `en_name` unique, `code` unique; no
+    `is_active`) with `GET api/FacilityCategories/GetAll`, `GET api/FacilityCategories/GetById/{id}`,
+    `POST api/FacilityCategories/Add` and `PUT api/FacilityCategories/Update/{id}`
+    (Add/Update SA only);
+  - nullable `facilities.category_id` (FK → `facility_categories`, Restrict, indexed), surfaced as
+    `categoryId?` on `FacilityDto`. Facility create/update still ignore it;
+  - migration `AddFacilityCategories` (generated, not yet applied).
+- Disability types are now seeded at startup from code (six rows, Arabic + English; idempotent,
+  keyed on the unique `en_name`).
+
+Documentation release: the whole `docs/` tree was created; no other API code changed while writing it.
 
 - Added — this documentation set; see [README](../README.md).
 

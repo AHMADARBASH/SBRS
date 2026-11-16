@@ -79,10 +79,22 @@ Indexes: unique `(beneficiary_id, identity_type_id)` (one document per type); `(
 | `branch_id` | uuid | NOT NULL | FK → branches (Restrict), indexed |
 | `address_id` | uuid | NOT NULL | FK → addresses (Restrict), indexed |
 | `type_id` | uuid | NOT NULL | FK → facility_types (Restrict), indexed |
+| `category_id` | uuid | NULL | FK → facility_categories (Restrict), indexed — `[BUILT]` (migration `AddFacilityCategories`), always NULL until the facility form accepts it |
 | `partner_id` | uuid | NOT NULL | FK → partners (Restrict) — current partner, indexed |
 | `is_active` | boolean | NOT NULL | |
 
 The facility's start date from `AddFacility` is not a `facilities` column — it is persisted as the **initial partner assignment** (`facilities_partners.start_date`) `[BUILT]`.
+
+## facility_categories (lookup) `[BUILT]`
+
+| Column | Type | Null | Notes |
+|---|---|---|---|
+| `ar_name` | varchar(100) | NOT NULL | |
+| `en_name` | varchar(100) | NOT NULL | **unique** `ix_facility_categories_en_name` |
+| `code` | varchar(50) | NOT NULL | **unique** `ix_facility_categories_code` |
+
+No `is_active` — the shape mirrors `education_types` plus a code. Managed through
+`api/FacilityCategories` (SA can Add/Update); rows can also be inserted directly in the DB.
 
 ## facilities_partners (partner history)
 

@@ -180,6 +180,11 @@ profile lookups** `api/BeneficiaryStatuses`, `api/MaritalStatuses`, `api/Disabil
 | POST | `Add` | **SA only** |
 | PUT | `Update` | **SA only** |
 
+`api/FacilityCategories` follows the same lookup pattern: `GET GetAll`, `GET GetById/{id}`,
+`POST Add` and `PUT Update/{id}` — Add/Update are **SA only**. Update fields:
+`{ arName, enName, code }` (`code` ≤50, unique). `facilities.categoryId` is nullable and not
+settable through the facility endpoints yet.
+
 Editable fields: `{ arName, enName }` for accommodation/disability/education types and nationalities;
 `{ arName, enName, code }` for facility types and partners; **`{ arName, enName, code, valueRegex }` for
 identity types** — `valueRegex` is required, ≤200 chars, a valid .NET regex, and is the pattern registration

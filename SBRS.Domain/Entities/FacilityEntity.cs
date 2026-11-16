@@ -11,6 +11,8 @@ public class FacilityEntity : BaseEntity
     public AddressEntity Address { get; private set; } = default!;
     public Guid TypeId { get; private set; }
     public FacilityTypeEntity FacilityType { get; private set; } = default!;
+    public Guid? CategoryId { get; private set; }
+    public FacilityCategoryEntity? Category { get; private set; }
     public Guid PartnerId { get; private set; }
     public PartnerEntity Partner { get; private set; } = default!;
     public string ArName { get; private set; } = default!;

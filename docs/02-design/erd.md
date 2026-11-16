@@ -54,6 +54,7 @@ erDiagram
     BRANCHES ||--o{ FACILITIES : "branch_id"
     AREAS ||--o{ FACILITIES : "address_id"
     FACILITY_TYPES ||--o{ FACILITIES : "type_id"
+    FACILITY_CATEGORIES |o--o{ FACILITIES : "category_id (optional)"
     PARTNERS ||--o{ FACILITIES : "partner_id (current)"
     PARTNERS ||--o{ FACILITIES_PARTNERS : "partner_id"
     FACILITIES ||--o{ FACILITIES_PARTNERS : "facility_id"
@@ -80,6 +81,7 @@ erDiagram
         uuid branch_id FK
         uuid address_id FK
         uuid type_id FK
+        uuid category_id FK "optional"
         uuid partner_id FK
         citext code "unique, generated"
         varchar ar_name "100"
@@ -91,6 +93,12 @@ erDiagram
         varchar code "unique, 10"
         varchar ar_name
         varchar en_name
+    }
+    FACILITY_CATEGORIES {
+        uuid id PK
+        varchar ar_name "100"
+        varchar en_name "100, unique"
+        varchar code "50, unique"
     }
     PARTNERS {
         uuid id PK

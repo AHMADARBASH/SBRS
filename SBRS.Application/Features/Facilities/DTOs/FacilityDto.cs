@@ -9,5 +9,6 @@ public record FacilityDto(
     string Code,
     bool IsActive,
     Guid typeId,
+    Guid? CategoryId,
     DateTime CreatedAt,
     DateTime? UpdatedAt);
