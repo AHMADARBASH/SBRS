@@ -7,9 +7,10 @@ using SBRS.Infrastructure.Persistence;
 namespace SBRS.Infrastructure.Persistence.Seed;
 
 /// <summary>
-/// Idempotent reference data for the beneficiary profile step: upsert by Code —
-/// missing rows are inserted, ArName/EnName of existing rows are refreshed from code,
-/// nothing is ever deleted. Running the app twice never creates duplicates.
+/// Idempotent reference data for the beneficiary profile step: upsert by Code (or by
+/// EnName where the lookup has no Code) — missing rows are inserted, the display names
+/// of existing rows are refreshed from the seed, nothing is ever deleted. Running the
+/// app twice never creates duplicates.
 /// </summary>
 public class ReferenceDataSeeder(AppDbContext db, ILogger<ReferenceDataSeeder> logger)
 {
@@ -20,6 +21,7 @@ public class ReferenceDataSeeder(AppDbContext db, ILogger<ReferenceDataSeeder> l
         await UpsertMaritalStatusesAsync(ct);
         await UpsertDisabilityReasonsAsync(ct);
         await UpsertChronicDiseasesAsync(ct);
+        await UpsertDisabilityTypesAsync(ct);
 
         await db.SaveChangesAsync(ct);
     }
@@ -102,6 +104,32 @@ public class ReferenceDataSeeder(AppDbContext db, ILogger<ReferenceDataSeeder> l
         }
 
         Log(nameof(ChronicDiseaseEntity), inserted, ChronicDiseaseSeed.Rows.Count);
+    }
+
+    /// <summary>
+    /// Disability types have no Code column, so the unique English name is the natural key:
+    /// existing rows only get their Arabic name refreshed, missing rows are inserted.
+    /// </summary>
+    private async Task UpsertDisabilityTypesAsync(CancellationToken ct)
+    {
+        var byEnName = (await db.DisabilityTypes.ToListAsync(ct))
+            .ToDictionary(d => d.EnName, StringComparer.OrdinalIgnoreCase);
+        var inserted = 0;
+
+        foreach (var (ar, en) in DisabilityTypeSeed.Rows)
+        {
+            if (byEnName.TryGetValue(en, out var row))
+            {
+                if (row.ArName != ar)
+                    row.Update(ar, en);
+                continue;
+            }
+
+            db.DisabilityTypes.Add(new DisabilityTypeEntity(ar, en));
+            inserted++;
+        }
+
+        Log(nameof(DisabilityTypeEntity), inserted, DisabilityTypeSeed.Rows.Count);
     }
 
     /// <summary>Existing rows keep their generated id; only the display names follow the code definition.</summary>
@@ -188,5 +216,22 @@ public static class ChronicDiseaseSeed
         ("CHRONIC_ANEMIA", "فقر الدم المزمن", "Chronic anemia"),
         ("EPILEPSY", "الصرع", "Epilepsy"),
         ("ALZHEIMERS", "الزهايمر", "Alzheimer's disease"),
+    ];
+}
+
+/// <summary>
+/// Disability types are a flat lookup (ArName/EnName, unique English name, no Code),
+/// so the English name below is the stable key used by the idempotent upsert.
+/// </summary>
+public static class DisabilityTypeSeed
+{
+    public static readonly IReadOnlyList<(string ArName, string EnName)> Rows =
+    [
+        ("صعوبات في التواصل", "Communication difficulties"),
+        ("الصم أو ضعف السمع", "Deaf or hard of hearing"),
+        ("إعاقة ذهنية", "Mental disability"),
+        ("إعاقة جسدية", "Physical disability"),
+        ("صعوبات في العناية الذاتية", "Self-care difficulties"),
+        ("ضعف البصر", "Vision impairment"),
     ];
 }
