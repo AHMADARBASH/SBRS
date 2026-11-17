@@ -7,8 +7,8 @@ public class FacilityEntity : BaseEntity
 {
     public Guid BranchId { get; private set; }
     public BranchEntity Branch { get; private set; } = default!;
-    public Guid AddressId { get; private set; }
-    public AddressEntity Address { get; private set; } = default!;
+    public Guid AreaId { get; private set; }
+    public AreaEntity Area { get; private set; } = default!;
     public Guid TypeId { get; private set; }
     public FacilityTypeEntity FacilityType { get; private set; } = default!;
     public Guid? CategoryId { get; private set; }
@@ -22,17 +22,17 @@ public class FacilityEntity : BaseEntity
 
     private FacilityEntity() { }   // EF Core
 
-    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId,Guid partnerId, string arName, string enName, string code, Guid? categoryId = null)
+    public FacilityEntity(Guid branchId, Guid areaId, Guid typeId,Guid partnerId, string arName, string enName, string code, Guid? categoryId = null)
     {
         if (branchId == Guid.Empty) throw new DomainException("Branch is required.");
-        if (addressId == Guid.Empty) throw new DomainException("Address is required.");
+        if (areaId == Guid.Empty) throw new DomainException("Area is required.");
         if (typeId == Guid.Empty) throw new DomainException("Facility type is required.");
         if (partnerId == Guid.Empty) throw new DomainException("Partner is required.");
         if (string.IsNullOrWhiteSpace(code)) throw new DomainException("Facility code is required.");
         if (categoryId == Guid.Empty) throw new DomainException("Facility category is invalid.");
 
         BranchId = branchId;
-        AddressId = addressId;
+        AreaId = areaId;
         ArName = arName.Trim();
         EnName = enName.Trim();
         Code = code.Trim();
@@ -43,17 +43,17 @@ public class FacilityEntity : BaseEntity
 
     /// <summary>
     /// The code is generated at creation and is immutable: it is never recomputed
-    /// when the facility is edited, even if its type, address or city changes,
+    /// when the facility is edited, even if its type, area or city changes,
     /// because beneficiary FullCodes are built from it.
     /// </summary>
-    public void Update(string arName, string enName, Guid addressId, Guid typeId, Guid? categoryId)
+    public void Update(string arName, string enName, Guid areaId, Guid typeId, Guid? categoryId)
     {
         if (!IsActive)
             throw new DomainException("A deactivated facility cannot be updated.");
         if (categoryId == Guid.Empty)
             throw new DomainException("Facility category is invalid.");
 
-        AddressId = addressId;
+        AreaId = areaId;
         ArName = arName.Trim();
         EnName = enName.Trim();
         TypeId = typeId;
@@ -66,6 +66,14 @@ public class FacilityEntity : BaseEntity
             throw new DomainException("The facility is already deactivated.");
 
         IsActive = false;
+    }
+
+    public void Activate()
+    {
+        if (IsActive)
+            throw new DomainException("The facility is already activated.");
+
+        IsActive = true;
     }
 
     public void ChangePartner(Guid partnerId)

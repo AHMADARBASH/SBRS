@@ -18,7 +18,7 @@
    - **Users** — list, filter, create, edit, deactivate, reset password, assign role/scope.
    - **Organizations** — list, create, edit.
    - **Branches** — list per organization, create, edit.
-   - **Facilities** — list by branch, create (address first), edit, deactivate.
+   - **Facilities** — list by branch, create (pick an area), edit, deactivate/activate.
    - **Lookup tables** — one generic screen for the editable lookup endpoints + read-only lists.
 
 **Out of scope (separate tasks):** beneficiary registration/search/match review, beneficiary profile,
@@ -282,14 +282,15 @@ branch to another organization — hide the organization field when editing.
 | GET | `GetByBranchId/{branchId}?includeInactive=` | — | logged-in (scoped: SA all, OA its org, BA its own branch, FA/DE own facility, PC nothing) |
 | GET | `GetById/{id}` | — | logged-in |
 | POST | `AddFacility` | see below | SA/OA |
-| PUT | `UpdateFacility/{id}` | `{ arName, enName, addressId, typeId, categoryId? }` | SA/OA |
+| PUT | `UpdateFacility/{id}` | `{ arName, enName, areaId, typeId, categoryId? }` | SA/OA |
 | POST | `DeactivateFacility/{id}` | — | SA/OA |
+| POST | `ActivateFacility/{id}` | — | SA/OA |
 
 `AddFacility` body:
 
 ```json
 {
-  "branchId": "…", "addressId": "…", "typeId": "…",
+  "branchId": "…", "areaId": "…", "typeId": "…",
   "partnerId": "…", "startDate": "2026-11-15", "projectCode": "PRJ-01",
   "arName": "…", "enName": "…", "categoryId": "…"
 }
@@ -304,12 +305,12 @@ branch to another organization — hide the organization field when editing.
   optional `projectCode` are required by the API, and this creates the facility–partner history row.
   Populate the partner picker from `api/Partners/GetAll`, and the type picker from
   `api/FacilityTypes/GetAll`.
-- Facility create needs an `addressId` → create the address first (§4.6).
+- Facility create needs an `areaId` → pick it directly from the geography cascade (§4.7); facilities no longer reference addresses.
 
 `FacilityDto` returned by list/detail:
 
 ```json
-{ "id": "…", "branchId": "…", "addressId": "…",
+{ "id": "…", "branchId": "…", "areaId": "…",
   "arName": "…", "enName": "…", "code": "DAM-PHC-000012",
   "isActive": true, "typeId": "…", "createdAt": "…", "updatedAt": null }
 ```
@@ -353,7 +354,7 @@ Use a small config array; **all follow the same pattern**: `GET <base>/GetAll` (
 `api/BeneficiaryStatuses`, `api/MaritalStatuses`, `api/DisabilityReasons`, `api/ChronicDiseases`,
 `api/EducationIssues`. Shape `{ id, code, arName, enName }`, ordered by code.
 
-### 4.6 Addresses — `api/Addresses` (used by facility create/edit)
+### 4.6 Addresses — `api/Addresses`
 
 | Method | Route | Body | Access |
 |---|---|---|---|
@@ -392,7 +393,7 @@ sessions in a way that prevents new areas from appearing.
 | Address | `arName`, `enName` | required |
 | Address | `areaId` | required on create |
 | Facility | `arName`, `enName` | required, ≤200 (DB caps at 100 — stay ≤100) |
-| Facility | `branchId`, `addressId`, `typeId`, `partnerId`, `startDate` | required on create |
+| Facility | `branchId`, `areaId`, `typeId`, `partnerId`, `startDate` | required on create |
 | Facility | `code` | **server-generated, read-only** |
 | Lookup (all) | `arName`, `enName` | required, ≤100 |
 | Lookup with code | `code` | required, ≤30 (partners ≤10), unique (409) |
@@ -443,7 +444,7 @@ Reference: `docs/03-integration/error-catalog.md`.
 - [ ] SA can create a user for every role with the correct required id (including a BranchAdmin whose
       organization is derived from the chosen branch); reset a password; deactivate a user;
       and reactivate a deactivated user (reappears as active in the list).
-- [ ] SA can add/edit organizations, branches, facilities (with address + partner), and deactivate a facility.
+- [ ] SA can add/edit organizations, branches, facilities (with area + partner), and deactivate/activate a facility.
 - [ ] SA can add/edit every editable lookup; identity type form includes `valueRegex` with client-side
       regex validation and server 400 shown on invalid patterns.
 - [ ] Read-only lookups and Organizations render no edit affordances.

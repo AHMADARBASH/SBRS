@@ -58,7 +58,7 @@ To exercise the beneficiary flow end-to-end you need, in order:
 
 1. Roles (auto at startup).
 2. SystemAdmin (auto at startup).
-3. One organization → one branch → facility type → partner → geography rows for one city → one address → **one facility** (its `code` is needed by beneficiary codes).
+3. One organization → one branch → facility type → partner → geography rows for one city → one area → **one facility** (its `code` is needed by beneficiary codes).
 4. Nationalities + identity types (at least `NATIONAL_ID` and `UNREGISTERED`).
 5. Two users per facility (FA + DE) from section 3.
 6. The known tricky cases to keep as fixtures:

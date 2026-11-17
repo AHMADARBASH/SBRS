@@ -25,7 +25,7 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 | Branch add / update | add branch (incl. HQ), rename | SA, OA | `POST api/Branches/Add`, `PUT api/Branches/Update/{id}` | `[BUILT]` |
 | Branch deactivate | disable branch (guard: active facilities) | SA, OA | — (no endpoint, OQ-16) | `[PLANNED]` |
 | Facility list (by branch) | browse facilities | SA, OA, BA (own branch), PC (scope), FA/DE (own) | `GET api/Facilities/GetByBranchId/{branchId}` | `[BUILT]` |
-| Facility add / update | create facility (auto code, address, type, partner) | SA, OA | `POST api/Facilities/AddFacility`, `PUT …/UpdateFacility/{id}` | `[BUILT]` |
+| Facility add / update | create facility (auto code, area, type, partner) | SA, OA | `POST api/Facilities/AddFacility`, `PUT …/UpdateFacility/{id}` | `[BUILT]` |
 | Facility deactivate | disable facility | SA, OA | `POST api/Facilities/DeactivateFacility/{id}` | `[BUILT]` |
 | Facility partner history | view partner assignments, assign a new partner | SA | `GET api/FacilityPartners/GetByFacility/{facilityId}`, `POST …/Assign` | `[BUILT]` |
 
@@ -46,7 +46,7 @@ Screen visibility is derived from the authorization policies in `SBRS/Authorizat
 | Geography browser (country → city → region/district → areas) | read-only cascading selects used in all address pickers | all logged-in | `GET api/Geography/Countries`, `Countries/{id}/Cities`, `Cities/{id}/Regions`, `Cities/{id}/Areas`, `Regions/{id}/Districts`, `Districts/{id}/Areas` | `[BUILT]` |
 | Address list (per area) | find an existing address, incl. inactive filter | all logged-in | `GET api/Addresses/GetByAreaId/{areaId}?includeInactive=` | `[BUILT]` |
 | Address add / update | add a shared address, fix names | SA, OA | `POST api/Addresses/Add`, `PUT api/Addresses/Update/{id}` | `[BUILT]` |
-| Address deactivate | disable (guard: active facilities) | SA, OA | — (no endpoint, OQ-17) | `[PLANNED]` |
+| Address deactivate | disable (no facility guard: facilities use areas) | SA, OA | — (no endpoint, OQ-17) | `[PLANNED]` |
 | Mobile working-location picker | choose the facility's working address for the day | FA, DE (mobile users) | — (WorkingAddresses table `[PLANNED]`) | `[PLANNED]` |
 
 ## 5. User administration

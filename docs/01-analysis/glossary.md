@@ -15,7 +15,7 @@ Terms | Arabic | Definition, and where the concept lives (table / endpoint).
 | Match review | مراجعة التطابق | The FacilityAdmin decision over a PendingReview record: merge into an existing person or ConfirmDistinct | `beneficiaries.match_review_status` |
 | Identity document | وثيقة هوية | One document per person per type (national id, passport, …) with a validated value | `beneficiary_identities`, `api/Beneficiaries/{id}/Identities` |
 | Registration facility | مركز التسجيل | The facility whose DataEntry registered the person; defines their scope/code basis (`RegistrationFacilityId`) until `FacilityBeneficiary` exists | `beneficiaries.registration_facility_id` |
-| Facility | مركز / منشأة | A service point (hospital, PHC, SARC branch HQ…) of one branch; has a generated code, one address, one type, one current partner | `facilities` |
+| Facility | مركز / منشأة | A service point (hospital, PHC, SARC branch HQ…) of one branch; has a generated code, one area, one type, one current partner | `facilities` |
 | Branch | فرع | A SARC branch of one organization; the HQ is a branch like any other | `branches` |
 | Organization | منظمة / جمعية | A top-level entity (e.g. SARC itself or a partner org owning branches) | `organizations` |
 | Partner | شريك / جهة داعمة | A supporting organization assigned to facilities, with history | `partners`, `facilities_partners` |

@@ -28,7 +28,7 @@ public class FacilitiesController(ISender sender) : ControllerBase
     [HttpPost("AddFacility")]
     public async Task<ActionResult<FacilityDto>> Add(AddFacilityRequest body, CancellationToken ct)
     {
-        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.addressId,body.typeId,body.partnerId,body.ProjectCode,body.StartDate, body.ArName, body.EnName, body.CategoryId), ct);
+        var dto = await sender.Send(new AddFacilityCommand(body.branchId,body.areaId,body.typeId,body.partnerId,body.ProjectCode,body.StartDate, body.ArName, body.EnName, body.CategoryId), ct);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 
@@ -36,13 +36,21 @@ public class FacilitiesController(ISender sender) : ControllerBase
     [HttpPut("UpdateFacility/{id:guid}")]
     public async Task<ActionResult<FacilityDto>> Update(
         Guid id, UpdateFacilityRequest body, CancellationToken ct)
-        => Ok(await sender.Send(new UpdateFacilityCommand(id,body.addressId,body.typeId, body.ArName, body.EnName, body.CategoryId), ct));
+        => Ok(await sender.Send(new UpdateFacilityCommand(id,body.areaId,body.typeId, body.ArName, body.EnName, body.CategoryId), ct));
 
     [Authorize(Policy = Policies.OrganizationLevel)]
     [HttpPost("DeactivateFacility/{id:guid}")]
     public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
     {
         await sender.Send(new DeactivateFacilityCommand(id), ct);
+        return NoContent();
+    }
+
+    [Authorize(Policy = Policies.OrganizationLevel)]
+    [HttpPost("ActivateFacility/{id:guid}")]
+    public async Task<IActionResult> Activate(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new ActivateFacilityCommand(id), ct);
         return NoContent();
     }
 }

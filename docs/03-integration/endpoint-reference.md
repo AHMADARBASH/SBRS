@@ -57,9 +57,10 @@ Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 |---|---|---|---|---|---|---|
 | GET | `api/Facilities/GetByBranchId/{branchId}?includeInactive=` | logged-in (scoped) | query | 200 | `FacilityDto[]` | |
 | GET | `api/Facilities/GetById/{id}` | logged-in (scoped) | — | 200 | `FacilityDto` | 404 |
-| POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `addressId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50), `categoryId?` — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/address/type/partner/category), 409 (code generation retries exhausted) |
-| PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `addressId`, `typeId` (req), `arName`, `enName` (req), `categoryId?` (null clears it) | 200 | `FacilityDto` | 400, 404 (facility/address/category) |
+| POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `areaId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50), `categoryId?` — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/area/type/partner/category), 409 (code generation retries exhausted) |
+| PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `areaId`, `typeId` (req), `arName`, `enName` (req), `categoryId?` (null clears it) | 200 | `FacilityDto` | 400, 404 (facility/area/category) |
 | POST | `api/Facilities/DeactivateFacility/{id}` | SA, OA | — | 204 | — | 400, 404 |
+| POST | `api/Facilities/ActivateFacility/{id}` | SA, OA | — | 204 | — | 400 (branch deactivated / already active), 404 |
 
 ## 6. Facility partners (history) — `api/FacilityPartners` (**SA only**, controller-level)
 
@@ -154,7 +155,7 @@ accepted as an optional `categoryId` by `api/Facilities/AddFacility` and `Update
 | `UserListItemDto` | `id, userName, firstName, lastName, role, isMobile, isActive, createdAt, organization?, branch?, facility?` |
 | `OrganizationDto` | `id, arName, enName, code, isActive, createdAt, updatedAt?` |
 | `BranchDto` | `id, arName, enName, organizationId, isActive, createdAt, updatedAt?` |
-| `FacilityDto` | `id, branchId, addressId, arName, enName, code, isActive, typeId, categoryId?, createdAt, updatedAt?` |
+| `FacilityDto` | `id, branchId, areaId, arName, enName, code, isActive, typeId, categoryId?, createdAt, updatedAt?` |
 | `FacilityPartnerDto` | `id, facilityId, partnerId, partnerArName, partnerEnName, projectCode, startDate, endDate?, isCurrent` |
 | `AddressDto` | `id, areaId, arName, enName, isActive, createdAt, updatedAt?` |
 | `BeneficiarySearchItemDto` | `id, fullCode, firstName, fatherName, lastName, birthDate, isBirthDateEstimated, gender, identityTypeCode` (no identity value, no mother name) |

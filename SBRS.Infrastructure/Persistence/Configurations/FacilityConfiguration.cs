@@ -13,7 +13,7 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
         builder.Property(x => x.ArName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.EnName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.Code).IsRequired().HasMaxLength(50).HasColumnType("citext");
-        builder.Property(x => x.AddressId).IsRequired();
+        builder.Property(x => x.AreaId).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
         builder.Property(f => f.TypeId).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
@@ -24,9 +24,9 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
                .HasForeignKey(x => x.BranchId)
                .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(x => x.Address)
+        builder.HasOne(x => x.Area)
                .WithMany()
-               .HasForeignKey(x => x.AddressId)
+               .HasForeignKey(x => x.AreaId)
                .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.FacilityType)
@@ -46,7 +46,7 @@ public class FacilityConfiguration : IEntityTypeConfiguration<FacilityEntity>
 
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.BranchId);
-        builder.HasIndex(x => x.AddressId);
+        builder.HasIndex(x => x.AreaId);
         builder.HasIndex(f => f.TypeId);
         builder.HasIndex(x => x.PartnerId);
         builder.HasIndex(x => x.CategoryId);

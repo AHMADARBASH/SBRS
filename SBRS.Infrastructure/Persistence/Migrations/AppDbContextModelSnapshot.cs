@@ -1457,15 +1457,15 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AddressId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("address_id");
-
                     b.Property<string>("ArName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("ar_name");
+
+                    b.Property<Guid>("AreaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("area_id");
 
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid")
@@ -1518,8 +1518,8 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_facilities");
 
-                    b.HasIndex("AddressId")
-                        .HasDatabaseName("ix_facilities_address_id");
+                    b.HasIndex("AreaId")
+                        .HasDatabaseName("ix_facilities_area_id");
 
                     b.HasIndex("BranchId")
                         .HasDatabaseName("ix_facilities_branch_id");
@@ -2363,12 +2363,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>
                 {
-                    b.HasOne("SBRS.Domain.Entities.AddressEntity", "Address")
+                    b.HasOne("AreaEntity", "Area")
                         .WithMany()
-                        .HasForeignKey("AddressId")
+                        .HasForeignKey("AreaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_facilities_addresses_address_id");
+                        .HasConstraintName("fk_facilities_areas_area_id");
 
                     b.HasOne("SBRS.Domain.Entities.BranchEntity", "Branch")
                         .WithMany()
@@ -2397,7 +2397,7 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_facilities_facility_types_type_id");
 
-                    b.Navigation("Address");
+                    b.Navigation("Area");
 
                     b.Navigation("Branch");
 

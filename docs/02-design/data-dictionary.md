@@ -77,7 +77,7 @@ Indexes: unique `(beneficiary_id, identity_type_id)` (one document per type); `(
 | `en_name` | varchar(100) | NOT NULL | |
 | `code` | citext(50) | NOT NULL | **unique** `ix_facilities_code`; generated `{c_code}-{type}-{NNN}` |
 | `branch_id` | uuid | NOT NULL | FK → branches (Restrict), indexed |
-| `address_id` | uuid | NOT NULL | FK → addresses (Restrict), indexed |
+| `area_id` | uuid | NOT NULL | FK → areas (Restrict), indexed — migration `FacilityUsesAreaId` |
 | `type_id` | uuid | NOT NULL | FK → facility_types (Restrict), indexed |
 | `category_id` | uuid | NULL | FK → facility_categories (Restrict), indexed — `[BUILT]` (migration `AddFacilityCategories`), accepted as optional `categoryId` by `AddFacility` / `UpdateFacility` |
 | `partner_id` | uuid | NOT NULL | FK → partners (Restrict) — current partner, indexed |

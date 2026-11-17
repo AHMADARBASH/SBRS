@@ -41,13 +41,13 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 
 | ID | Rule | Status | Enforced in |
 |---|---|---|---|
-| BR-FAC-01 | A facility belongs to one branch, has one required address and one required facility type | `[CONFIRMED]` `[BUILT]` | `AddFacilityCommand` (all NotEmpty) + `FacilityConfiguration` required FKs |
+| BR-FAC-01 | A facility belongs to one branch, has one required area and one required facility type | `[CONFIRMED]` `[BUILT]` | `AddFacilityCommand` (all NotEmpty) + `FacilityConfiguration` required FKs |
 | BR-FAC-02 | Facility code format `{city c_code}-{facility type code}-{3-digit sequence}`; sequence = (count of facilities of that city) + 1, no counter column. City c_codes (DAM, ALP, RUD, …) live in `cities` seed `[OPEN: seed missing, OQ-21]` | `[CONFIRMED]` `[BUILT]` | `FacilityCodeBuilder`, `AddFacilityCommandHandler` (query count + insert) |
 | BR-FAC-03 | Facility code is unique system-wide (`facilities.code` is `citext`, max 50, unique index) | `[CONFIRMED]` `[BUILT]` | unique index `ix_facilities_code`; unique-violation → 409 |
 | BR-FAC-04 | A facility has a current partner (`PartnerId`) plus full history in `facilities_partners` (StartDate, EndDate, ProjectCode); assigning a new partner closes the old assignment with `EndDate = StartDate - 1 day` | `[CONFIRMED]` `[BUILT]` | `FacilityPartnerDomain.Assign/Close`, `AssignFacilityPartnerCommandHandler` |
 | BR-FAC-05 | `ProjectCode` is optional in the API but stored NOT NULL with an empty-string default (max 50) | `[CONFIRMED]` `[BUILT]` | `FacilityPartnerConfiguration.HasDefaultValue("")` |
 | BR-FAC-06 | Add/update facilities: SystemAdmin and OrganizationAdmin (scope: SA all, OA by the facility's organization). **BR-FAC-06 intended FA/DE "own facility" rights, but code restricts to OrganizationLevel** | `[CONFIRMED]` intent / `[BUILT]` code mismatch | `Policies.OrganizationLevel` on controller (OQ-33) |
-| BR-FAC-07 | A facility cannot be added to a deactivated branch; deactivated facilities cannot be updated, get a new partner, or be deactivated twice | `[CONFIRMED]` `[BUILT]` | `BranchEntity`/`FacilityEntity` guard methods (DomainException → 400) |
+| BR-FAC-07 | A facility cannot be added to a deactivated branch; deactivated facilities cannot be updated, get a new partner, or be deactivated twice; a facility can only be activated while its branch is active | `[CONFIRMED]` `[BUILT]` | `BranchEntity`/`FacilityEntity` guard methods + `ActivateFacilityCommandHandler` (DomainException → 400) |
 | BR-FAC-08 | Facility start date is required (assignment of the facility's operations), stored as `date` | `[CONFIRMED]` `[BUILT]` | `AddFacilityCommand.StartDate` NotEmpty + `facilities.start_date` |
 | BR-FAC-09 | A new partner assignment must start later than the currently open assignment's start date | `[CONFIRMED]` `[BUILT]` | `FacilityPartnerDomain.Assign` (DomainException) |
 | BR-FAC-10 | Partner end date cannot precede its start date | `[CONFIRMED]` `[BUILT]` | `FacilityPartnerDomain.Close` restriction |
@@ -59,7 +59,7 @@ Cross-references: use cases [use-cases/README.md](use-cases/README.md), endpoint
 | BR-GEO-01 | Hierarchy Country → City → Region → District → Area; read-only lookups (no write endpoints) seeded from OCHA Syria admin boundaries + populated places; `Code` is the OCHA pcode, unique within its parent | `[CONFIRMED]` [BUILT hierarchy/FKs] / `[OPEN]` seeding (OQ-21) | `GeographyConfiguration`, `api/Geography` GET-only controller |
 | BR-GEO-02 | Areas also carry `CityId` so a client can fetch all areas of a selected city | `[CONFIRMED]` `[BUILT]` | `AreaEntity.CityId`, `GET api/Geography/Cities/{cityId}/Areas` |
 | BR-GEO-03 | Addresses are unique per (AreaId, ArName) and per (AreaId, EnName); no Code; shared system-wide data readable by every logged-in user | `[CONFIRMED]` `[BUILT]` | composite unique indexes in `AddressConfiguration`; read endpoints under fallback policy |
-| BR-GEO-04 | An address cannot be deactivated while an active facility uses it | `[CONFIRMED]` ⚠ guard **not implemented**, no deactivate endpoint | — (OQ-17) |
+| BR-GEO-04 | ~~An address cannot be deactivated while an active facility uses it~~ | `[REMOVED]` 2026-11-17 — facilities now reference areas directly, not addresses | — (OQ-17 closed) |
 | BR-GEO-05 | Mobile users choose a working location (address) saved per facility (`WorkingAddresses`) | `[PLANNED]` | — |
 | BR-GEO-06 | Address names are mutable (Update) but `AreaId` is immutable | `[CONFIRMED]` `[BUILT]` | `UpdateAddressRequest` has no areaId; `AddressEntity.Update` |
 

@@ -24,7 +24,7 @@ Manual acceptance pass before each release. Mark Pass/Fail per step; every step 
 | 10 | OA updates own organization title; attempts foreign org update | OA | 200; 404 (foreign) | |
 | 11 | SA adds branch to new org; OA adds branch to own org; OA adds to foreign | SA/OA | 201/201/404 | |
 | 12 | Deactivated org update attempt | SA | 400 "cannot be updated" | |
-| 13 | Create facility: pick branch, address, type, partner (+project code) | SA/OA | 201 with generated code `{c_code}-{type}-{NNN}` | |
+| 13 | Create facility: pick branch, area, type, partner (+project code) | SA/OA | 201 with generated code `{c_code}-{type}-{NNN}` | |
 | 14 | Facility code collides/repeats city count sanity | SA/OA | unique codes in list | |
 | 15 | Assign new partner earlier than open start | SA | 400 (start date rule) | |
 | 16 | Assign new partner (valid) → history shows old row closed `end_date = new_start − 1` | SA | GetByFacility ordering correct | |

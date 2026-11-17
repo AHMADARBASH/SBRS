@@ -3,7 +3,7 @@
 public record FacilityDto(
     Guid Id,
     Guid BranchId,
-    Guid AddressId,
+    Guid AreaId,
     string ArName,
     string EnName,
     string Code,

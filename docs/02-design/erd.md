@@ -52,7 +52,7 @@ erDiagram
 erDiagram
     ORGANIZATIONS ||--o{ BRANCHES : "organization_id"
     BRANCHES ||--o{ FACILITIES : "branch_id"
-    AREAS ||--o{ FACILITIES : "address_id"
+    AREAS ||--o{ FACILITIES : "area_id"
     FACILITY_TYPES ||--o{ FACILITIES : "type_id"
     FACILITY_CATEGORIES |o--o{ FACILITIES : "category_id (optional)"
     PARTNERS ||--o{ FACILITIES : "partner_id (current)"
@@ -79,7 +79,7 @@ erDiagram
     FACILITIES {
         uuid id PK
         uuid branch_id FK
-        uuid address_id FK
+        uuid area_id FK
         uuid type_id FK
         uuid category_id FK "optional"
         uuid partner_id FK
