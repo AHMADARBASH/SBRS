@@ -79,7 +79,7 @@ Indexes: unique `(beneficiary_id, identity_type_id)` (one document per type); `(
 | `branch_id` | uuid | NOT NULL | FK → branches (Restrict), indexed |
 | `address_id` | uuid | NOT NULL | FK → addresses (Restrict), indexed |
 | `type_id` | uuid | NOT NULL | FK → facility_types (Restrict), indexed |
-| `category_id` | uuid | NULL | FK → facility_categories (Restrict), indexed — `[BUILT]` (migration `AddFacilityCategories`), always NULL until the facility form accepts it |
+| `category_id` | uuid | NULL | FK → facility_categories (Restrict), indexed — `[BUILT]` (migration `AddFacilityCategories`), accepted as optional `categoryId` by `AddFacility` / `UpdateFacility` |
 | `partner_id` | uuid | NOT NULL | FK → partners (Restrict) — current partner, indexed |
 | `is_active` | boolean | NOT NULL | |
 

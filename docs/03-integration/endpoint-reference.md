@@ -57,8 +57,8 @@ Deactivate endpoint is commented out ([OQ-15](../OPEN-QUESTIONS.md#oq-15)).
 |---|---|---|---|---|---|---|
 | GET | `api/Facilities/GetByBranchId/{branchId}?includeInactive=` | logged-in (scoped) | query | 200 | `FacilityDto[]` | |
 | GET | `api/Facilities/GetById/{id}` | logged-in (scoped) | — | 200 | `FacilityDto` | 404 |
-| POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `addressId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50) — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/address/type/partner), 409 (code generation retries exhausted) |
-| PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `addressId`, `typeId` (req), `arName`, `enName` (req) | 200 | `FacilityDto` | 400, 404 |
+| POST | `api/Facilities/AddFacility` | SA, OA | `branchId`, `addressId`, `typeId`, `partnerId` (all req), `startDate` (req), `arName`, `enName` (req, ≤200), `projectCode?` (≤50), `categoryId?` — **no code** (server generates) | 201 | `FacilityDto` | 400 (domain), 404 (branch/address/type/partner/category), 409 (code generation retries exhausted) |
+| PUT | `api/Facilities/UpdateFacility/{id}` | SA, OA | `addressId`, `typeId` (req), `arName`, `enName` (req), `categoryId?` (null clears it) | 200 | `FacilityDto` | 400, 404 (facility/address/category) |
 | POST | `api/Facilities/DeactivateFacility/{id}` | SA, OA | — | 204 | — | 400, 404 |
 
 ## 6. Facility partners (history) — `api/FacilityPartners` (**SA only**, controller-level)
@@ -126,8 +126,8 @@ deactivate. Reads are available to any logged-in user; writes are SA-only.
 | POST | `api/FacilityCategories/Add` | SA | `arName`, `enName` (req, ≤100), `code` (req, ≤50) | 201 | `FacilityCategoryDto` | 400, 409 (en-name or code exists) |
 | PUT | `api/FacilityCategories/Update/{id}` | SA | `arName`, `enName` (req, ≤100), `code` (req, ≤50) | 200 | `FacilityCategoryDto` | 400, 404, 409 (en-name or code exists) |
 
-`FacilityCategoryDto` = `{ id, arName, enName, code }`. `facilities.categoryId` is nullable and is not
-accepted by the facility `Add/Update` yet — the category picker is the next step.
+`FacilityCategoryDto` = `{ id, arName, enName, code }`. `facilities.categoryId` is nullable and is
+accepted as an optional `categoryId` by `api/Facilities/AddFacility` and `UpdateFacility/{id}`.
 
 ## 10. Beneficiaries — `api/Beneficiaries`
 

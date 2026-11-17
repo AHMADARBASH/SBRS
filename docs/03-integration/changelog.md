@@ -15,7 +15,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/) style — sections `Adde
     `POST api/FacilityCategories/Add` and `PUT api/FacilityCategories/Update/{id}`
     (Add/Update SA only);
   - nullable `facilities.category_id` (FK → `facility_categories`, Restrict, indexed), surfaced as
-    `categoryId?` on `FacilityDto`. Facility create/update still ignore it;
+    `categoryId?` on `FacilityDto` and accepted as an optional `categoryId` by
+    `POST api/Facilities/AddFacility` and `PUT api/Facilities/UpdateFacility/{id}` (unknown id → 404;
+    `null` on update clears the category);
   - migration `AddFacilityCategories` (generated, not yet applied).
 - Disability types are now seeded at startup from code (six rows, Arabic + English; idempotent,
   keyed on the unique `en_name`).

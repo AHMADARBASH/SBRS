@@ -22,13 +22,14 @@ public class FacilityEntity : BaseEntity
 
     private FacilityEntity() { }   // EF Core
 
-    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId,Guid partnerId, string arName, string enName, string code)
+    public FacilityEntity(Guid branchId, Guid addressId, Guid typeId,Guid partnerId, string arName, string enName, string code, Guid? categoryId = null)
     {
         if (branchId == Guid.Empty) throw new DomainException("Branch is required.");
         if (addressId == Guid.Empty) throw new DomainException("Address is required.");
         if (typeId == Guid.Empty) throw new DomainException("Facility type is required.");
         if (partnerId == Guid.Empty) throw new DomainException("Partner is required.");
         if (string.IsNullOrWhiteSpace(code)) throw new DomainException("Facility code is required.");
+        if (categoryId == Guid.Empty) throw new DomainException("Facility category is invalid.");
 
         BranchId = branchId;
         AddressId = addressId;
@@ -37,6 +38,7 @@ public class FacilityEntity : BaseEntity
         Code = code.Trim();
         TypeId = typeId;
         PartnerId = partnerId;
+        CategoryId = categoryId;
     }
 
     /// <summary>
@@ -44,15 +46,18 @@ public class FacilityEntity : BaseEntity
     /// when the facility is edited, even if its type, address or city changes,
     /// because beneficiary FullCodes are built from it.
     /// </summary>
-    public void Update(string arName, string enName, Guid addressId, Guid typeId)
+    public void Update(string arName, string enName, Guid addressId, Guid typeId, Guid? categoryId)
     {
         if (!IsActive)
             throw new DomainException("A deactivated facility cannot be updated.");
+        if (categoryId == Guid.Empty)
+            throw new DomainException("Facility category is invalid.");
 
         AddressId = addressId;
         ArName = arName.Trim();
         EnName = enName.Trim();
         TypeId = typeId;
+        CategoryId = categoryId;
     }
 
     public void Deactivate()

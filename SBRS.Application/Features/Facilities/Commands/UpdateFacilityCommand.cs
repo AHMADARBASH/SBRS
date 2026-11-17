@@ -11,7 +11,7 @@ using System.Net;
 namespace SBRS.Application.Features.Facilities.Commands;
 
 // No Code here: the generated code is immutable, it is never recomputed on edit.
-public record UpdateFacilityCommand(Guid Id, Guid AddressId, Guid typeId, string ArName, string EnName)
+public record UpdateFacilityCommand(Guid Id, Guid AddressId, Guid typeId, string ArName, string EnName, Guid? CategoryId = null)
     : IRequest<FacilityDto>;
 
 public class UpdateFacilityCommandValidator : AbstractValidator<UpdateFacilityCommand>
@@ -23,12 +23,14 @@ public class UpdateFacilityCommandValidator : AbstractValidator<UpdateFacilityCo
         RuleFor(x => x.ArName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.EnName).NotEmpty().MaximumLength(200);
         RuleFor(x=>x.typeId).NotEmpty();
+        RuleFor(x => x.CategoryId).NotEmpty();   // optional; rejects Guid.Empty when supplied
     }
 }
 
 public class UpdateFacilityCommandHandler(
     IFacilityRepository facilities,
     IAddressRepository addresses,
+    IFacilityCategoryRepository facilityCategories,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateFacilityCommand, FacilityDto>
 {
@@ -44,8 +46,12 @@ public class UpdateFacilityCommandHandler(
         if (!address.IsActive && address.Id != entity.AddressId)
             throw new DomainException("Cannot use a deactivated address.");
 
+        if (request.CategoryId is { } categoryId &&
+            await facilityCategories.GetByIdAsync(categoryId, ct) is null)
+            throw new NotFoundException(nameof(FacilityCategoryEntity), categoryId);
+
         // the code is not touched: it is immutable because beneficiary FullCodes are built from it
-        entity.Update(request.ArName, request.EnName, address.Id, request.typeId);
+        entity.Update(request.ArName, request.EnName, address.Id, request.typeId, request.CategoryId);
         await unitOfWork.SaveChangesAsync(ct);
 
         return entity.ToDto();

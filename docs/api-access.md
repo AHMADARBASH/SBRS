@@ -182,8 +182,8 @@ profile lookups** `api/BeneficiaryStatuses`, `api/MaritalStatuses`, `api/Disabil
 
 `api/FacilityCategories` follows the same lookup pattern: `GET GetAll`, `GET GetById/{id}`,
 `POST Add` and `PUT Update/{id}` — Add/Update are **SA only**. Update fields:
-`{ arName, enName, code }` (`code` ≤50, unique). `facilities.categoryId` is nullable and not
-settable through the facility endpoints yet.
+`{ arName, enName, code }` (`code` ≤50, unique). `facilities.categoryId` is nullable and is set
+through the optional `categoryId` field on `AddFacility` / `UpdateFacility`.
 
 Editable fields: `{ arName, enName }` for accommodation/disability/education types and nationalities;
 `{ arName, enName, code }` for facility types and partners; **`{ arName, enName, code, valueRegex }` for
