@@ -7,6 +7,6 @@ namespace SBRS.Application.Features.Branches.Mappings
     public static class BranchMapping
     {
         public static BranchDto ToDto(this BranchEntity b)
-            => new(b.Id, b.ArName, b.EnName,b.organizationId, b.IsActive, b.CreatedAt, b.UpdatedAt);
+            => new(b.Id, b.Code, b.ArName, b.EnName,b.organizationId, b.IsActive, b.CreatedAt, b.UpdatedAt);
     }
 }

@@ -10,10 +10,10 @@ public interface IFacilityRepository
     Task<bool> HasActiveFacilitiesAsync(Guid branchId, CancellationToken ct = default);
 
     /// <summary>
-    /// How many facilities exist in the given city, including inactive ones
-    /// (used to generate the next per-city sequence).
+    /// How many facilities exist in the given branch, including inactive ones
+    /// (used to generate the next per-branch sequence).
     /// </summary>
-    Task<int> CountByCityAsync(Guid cityId, CancellationToken ct = default);
+    Task<int> CountByBranchAsync(Guid branchId, CancellationToken ct = default);
 
     /// <summary>Removes an unsaved (staged) row from the unit of work; used by the code-generation retry.</summary>
     void RemoveStaged(FacilityEntity facility);

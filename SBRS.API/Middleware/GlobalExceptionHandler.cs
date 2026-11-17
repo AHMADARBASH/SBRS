@@ -38,6 +38,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 status = StatusCodes.Status400BadRequest;
                 title = "Business rule violated";
                 break;
+            case UniqueViolationException:
+                // Unique index race (e.g. two branch codes created at the same moment).
+                status = StatusCodes.Status409Conflict;
+                title = "This record was just created by someone else. Retry with a different value.";
+                break;
             case DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } }:
                 // Unique index race (e.g. two simultaneous registrations of the same person).
                 status = StatusCodes.Status409Conflict;

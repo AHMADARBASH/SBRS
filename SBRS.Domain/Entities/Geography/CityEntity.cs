@@ -5,7 +5,7 @@ public class CityEntity : LookupEntity
 {
     public Guid CountryId { get; private set; }
 
-    /// <summary>Three-letter city code used to build facility codes, e.g. DAM.</summary>
+    /// <summary>Three-letter city code retained for geography; facility codes now use the branch code.</summary>
     public string C_Code { get; private set; } = default!;
 
     private CityEntity() { }   // EF Core

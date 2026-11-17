@@ -56,6 +56,7 @@ using (var scope = app.Services.CreateScope())
     // Identity bootstrap (roles + seed admin), then the idempotent reference data.
     await scope.ServiceProvider.GetRequiredService<IdentitySeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<ReferenceDataSeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<BranchSeeder>().SeedAsync();
 }
 
 // Configure the HTTP request pipeline.

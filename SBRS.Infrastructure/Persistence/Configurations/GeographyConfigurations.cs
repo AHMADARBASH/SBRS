@@ -21,7 +21,7 @@ public class CityConfiguration : LookupConfiguration<CityEntity>
         b.HasOne<CountryEntity>().WithMany().HasForeignKey(x => x.CountryId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => new { x.CountryId, x.Code }).IsUnique();
 
-        // c_code is the 3-letter city code used to build facility codes (e.g. DAM), unique per system
+        // c_code is retained for geography and old facility codes; new facility codes use the branch code
         b.Property(x => x.C_Code).HasColumnName("c_code").IsRequired().HasMaxLength(3);
         b.HasIndex(x => x.C_Code).IsUnique();
     }

@@ -16,6 +16,10 @@ namespace SBRS.Infrastructure.Persistence.Configurations
             builder.Property(b => b.organizationId)
                 .IsRequired();
 
+            builder.Property(b => b.Code)
+                .IsRequired()
+                .HasMaxLength(10);
+
             builder.Property(b => b.ArName)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -27,6 +31,8 @@ namespace SBRS.Infrastructure.Persistence.Configurations
             builder.Property(b => b.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);
+
+            builder.HasIndex(b => new { b.organizationId, b.Code }).IsUnique();
 
             builder.HasOne<OrganizationEntity>()
                 .WithMany()

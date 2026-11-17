@@ -52,14 +52,10 @@ public class FacilityRepository(AppDbContext db, ICurrentUser currentUser) : IFa
     /// <summary>
     /// Count used to generate the next sequence. NOT scoped and NOT filtered by IsActive:
     /// facilities are never hard-deleted (they are deactivated instead), so every facility
-    /// ever created in the city still owns its code and the sequence must keep growing.
-    /// The facility's city comes from its area: facilities.area_id -> areas.city_id.
+    /// ever created in the branch still owns its code and the sequence must keep growing.
     /// </summary>
-    public Task<int> CountByCityAsync(Guid cityId, CancellationToken ct = default)
-        => db.Facilities.IgnoreQueryFilters()
-            .Join(db.Areas.IgnoreQueryFilters(),
-                  f => f.AreaId, a => a.Id, (f, a) => a.CityId)
-            .CountAsync(city => city == cityId, ct);
+    public Task<int> CountByBranchAsync(Guid branchId, CancellationToken ct = default)
+        => db.Facilities.IgnoreQueryFilters().CountAsync(f => f.BranchId == branchId, ct);
 
     public void RemoveStaged(FacilityEntity facility)
         => db.Entry(facility).State = EntityState.Detached;

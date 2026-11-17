@@ -1099,6 +1099,12 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("ar_name");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("code");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -1134,8 +1140,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_branches");
 
-                    b.HasIndex("organizationId")
-                        .HasDatabaseName("ix_branches_organization_id");
+                    b.HasIndex("organizationId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_branches_organization_id_code");
 
                     b.ToTable("branches", (string)null);
                 });

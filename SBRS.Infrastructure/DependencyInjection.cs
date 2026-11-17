@@ -67,6 +67,7 @@ services.AddScoped<IFacilityCategoryRepository, FacilityCategoryRepository>();
         services.AddScoped<IChronicDiseaseRepository, ChronicDiseaseRepository>();
         services.AddScoped<IEducationIssueRepository, EducationIssueRepository>();
         services.AddScoped<ReferenceDataSeeder>();
+        services.AddScoped<BranchSeeder>();
         services.AddScoped<IPartnerRepository, PartnerRepository>();
         services.AddScoped<IFacilityPartnerRepository, FacilityPartnerRepository>();
 

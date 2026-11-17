@@ -38,7 +38,7 @@ namespace SBRS.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Add(AddBranchRequest body, CancellationToken ct)
         {
-            var dto = await sender.Send(new AddBranchCommand(body.OrganizationId,body.ArName, body.EnName), ct);
+            var dto = await sender.Send(new AddBranchCommand(body.OrganizationId,body.ArName, body.EnName, body.Code), ct);
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
         }
 
@@ -46,7 +46,7 @@ namespace SBRS.Controllers
         [HttpPut("Update/{id:guid}")]
         public async Task<IActionResult> Update(
         Guid id, UpdateBranchRequest body, CancellationToken ct)
-        => Ok(await sender.Send(new UpdateBranchCommand(id, body.ArName, body.EnName), ct));
+        => Ok(await sender.Send(new UpdateBranchCommand(id, body.ArName, body.EnName, body.Code), ct));
 
 
     }

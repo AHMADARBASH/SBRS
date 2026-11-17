@@ -47,6 +47,13 @@ namespace SBRS.Infrastructure.Persistence.Repositories
             return await branch.ToListAsync(ct);
         }
 
+        // NOT scoped on purpose: a code must be unique inside its organization, whichever branch is checked
+        public Task<bool> CodeExistsAsync(Guid organizationId, string code, Guid? excludeId, CancellationToken ct = default)
+            => db.Branches.AnyAsync(
+                   b => b.organizationId == organizationId
+                        && b.Code == code
+                        && (excludeId == null || b.Id != excludeId), ct);
+
         public async Task AddAsync(BranchEntity branch, CancellationToken ct = default)
         {
             await db.Branches.AddAsync(branch,ct);
