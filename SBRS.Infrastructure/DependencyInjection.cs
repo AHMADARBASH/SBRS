@@ -39,7 +39,10 @@ public static class DependencyInjection
                 options.Password.RequireLowercase = true;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+            // AddIdentityCore does not register token providers; without this every
+            // GeneratePasswordResetTokenAsync call throws NotSupportedException (HTTP 500).
+            .AddDefaultTokenProviders();
         services.AddScoped<IdentitySeeder>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
