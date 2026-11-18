@@ -102,6 +102,8 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
         db.Database.ExecuteSqlAsync(
             $"SELECT 1 FROM facilities WHERE id = {facilityId} FOR UPDATE", ct);
 
+    // The review belongs to the facility where the record was registered (it owns the code and
+    // the duplicate), so this stays on RegistrationFacilityId and is not driven by enrollments.
     public async Task<IReadOnlyList<BeneficiaryEntity>> GetPendingReviewAsync(Guid? facilityId, CancellationToken ct) =>
         await db.Beneficiaries.AsNoTracking()
             .Where(x => x.MatchReviewStatus == BeneficiaryMatchReviewStatus.PendingReview && x.IsActive &&
@@ -127,16 +129,26 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
     public async Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
         Guid facilityId, int page, int pageSize, CancellationToken ct)
     {
-        var query = db.Beneficiaries.AsNoTracking()
-            .Where(x => x.RegistrationFacilityId == facilityId && x.IsActive);
+        // The roster is driven by enrollments, not by RegistrationFacilityId: a person enrolled
+        // at two facilities appears in both lists. Inactive enrollments and inactive/merged
+        // beneficiaries stay hidden. One join, no per-row queries.
+        var query =
+            from enrollment in db.FacilityBeneficiaries.AsNoTracking()
+            join beneficiary in db.Beneficiaries.AsNoTracking()
+                on enrollment.BeneficiaryId equals beneficiary.Id
+            where enrollment.FacilityId == facilityId && enrollment.IsActive && beneficiary.IsActive
+            select new { Enrollment = enrollment, Beneficiary = beneficiary };
 
+        // computed on the same joined query, so the total matches what the pages contain
         var totalCount = await query.CountAsync(ct);
 
         var items = await query
-            .OrderByDescending(x => x.CreatedAt)
-            .ThenBy(x => x.Id)
+            .OrderByDescending(x => x.Enrollment.EnrolledOn)
+            .ThenByDescending(x => x.Beneficiary.CreatedAt)
+            .ThenBy(x => x.Enrollment.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Select(x => x.Beneficiary)
             .ToListAsync(ct);
 
         return (items, totalCount);

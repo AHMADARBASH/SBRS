@@ -43,6 +43,8 @@ public sealed class GetBeneficiariesQueryHandler(
                 ?? throw new ForbiddenException("No facility is assigned to this user.");
         }
 
+        // The repository lists through FacilityBeneficiaries: the roster is enrollment-driven,
+        // so a person enrolled at two facilities appears in both.
         var (items, totalCount) = await repository.GetPagedByFacilityAsync(
             facilityId, request.Page, PageSize, cancellationToken);
 

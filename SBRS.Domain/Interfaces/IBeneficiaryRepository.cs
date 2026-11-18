@@ -56,8 +56,9 @@ public interface IBeneficiaryRepository
         string normalizedLastName, int take, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Active beneficiaries registered at the facility, newest first (CreatedAt descending, then Id).
-    /// page is 1-based. Returns the page items and the total number of matching rows.
+    /// Active beneficiaries enrolled at the facility, newest enrollment first (EnrolledOn descending,
+    /// then beneficiary CreatedAt descending). page is 1-based. Returns the page items and the
+    /// total number of matching rows computed on the same enrollment join.
     /// </summary>
     Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
         Guid facilityId, int page, int pageSize, CancellationToken cancellationToken);

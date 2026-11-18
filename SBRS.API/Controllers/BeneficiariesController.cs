@@ -33,6 +33,15 @@ public class BeneficiariesController(ISender sender) : ControllerBase
             request.Gender, request.EnrollmentDate, request.AreaId, request.NationalityId,
             request.IdentityTypeId, request.IdentityValue), ct));
 
+    // No body: the facility is always the caller's facility, never supplied by the client.
+    [HttpPost("{id:guid}/EnrollHere")]
+    [Authorize(Policy = Policies.EnrollBeneficiaries)]
+    public async Task<IActionResult> EnrollHere(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new EnrollBeneficiaryHereCommand(id), ct);
+        return NoContent();
+    }
+
     [HttpGet]
     [Route("GetAll")]
     [Authorize(Policy = Policies.ViewFacilityBeneficiaries)]

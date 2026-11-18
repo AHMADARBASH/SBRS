@@ -24,6 +24,8 @@ public sealed class GetMatchCandidatesQueryHandler(
     {
         var beneficiary = await repository.GetByIdAsync(request.Id, cancellationToken);
 
+        // Review stays with the registering facility (it owns the record and its code);
+        // enrollment-driven scope is deliberately not used for the review queue.
         // Out-of-scope records look like missing ones (same rule as the other features).
         if (beneficiary is null ||
             (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId))

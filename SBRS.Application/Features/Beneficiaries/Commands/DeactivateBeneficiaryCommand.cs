@@ -11,14 +11,21 @@ public sealed record DeactivateBeneficiaryCommand(Guid Id) : IRequest;
 
 public sealed class DeactivateBeneficiaryCommandHandler(
     IBeneficiaryRepository repository,
+    IFacilityBeneficiaryRepository enrollments,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork) : IRequestHandler<DeactivateBeneficiaryCommand>
 {
     public async Task Handle(DeactivateBeneficiaryCommand request, CancellationToken cancellationToken)
     {
         var beneficiary = await repository.GetByIdAsync(request.Id, cancellationToken);
-        if (beneficiary is null ||
-            (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId))
+
+        // Deletion follows the roster: the person is visible to a facility through its enrollment,
+        // not only through the facility where he was originally registered.
+        var isInScope = currentUser.IsSystemAdmin ||
+                        (currentUser.FacilityId is { } facilityId &&
+                         await enrollments.IsEnrolledAsync(request.Id, facilityId, cancellationToken));
+
+        if (beneficiary is null || !isInScope)
         {
             // Out-of-scope records look like missing ones (same rule as the other features).
             throw new NotFoundException(nameof(BeneficiaryEntity), request.Id);

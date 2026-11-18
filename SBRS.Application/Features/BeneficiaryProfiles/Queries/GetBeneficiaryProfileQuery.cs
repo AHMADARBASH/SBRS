@@ -17,6 +17,7 @@ public sealed record GetBeneficiaryProfileQuery(Guid BeneficiaryId) : IRequest<B
 public sealed class GetBeneficiaryProfileQueryHandler(
     IBeneficiaryRepository beneficiaries,
     IBeneficiaryProfileRepository profiles,
+    IFacilityBeneficiaryRepository enrollments,
     ICurrentUser currentUser)
     : IRequestHandler<GetBeneficiaryProfileQuery, BeneficiaryProfileDto>
 {
@@ -24,8 +25,13 @@ public sealed class GetBeneficiaryProfileQueryHandler(
         CancellationToken cancellationToken)
     {
         var beneficiary = await beneficiaries.GetByIdAsync(request.BeneficiaryId, cancellationToken);
-        if (beneficiary is null ||
-            (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId))
+
+        // Any facility that enrolled the person may read the profile; registration is irrelevant.
+        var isInScope = currentUser.IsSystemAdmin ||
+                        (currentUser.FacilityId is { } facilityId &&
+                         await enrollments.IsEnrolledAsync(request.BeneficiaryId, facilityId, cancellationToken));
+
+        if (beneficiary is null || !isInScope)
             throw new NotFoundException(nameof(BeneficiaryEntity), request.BeneficiaryId);
 
         var profile = await profiles.GetByBeneficiaryIdAsync(beneficiary.Id, cancellationToken);

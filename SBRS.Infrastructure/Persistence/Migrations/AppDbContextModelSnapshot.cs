@@ -1402,6 +1402,60 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("education_types", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityBeneficiaryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("EnrolledOn")
+                        .HasColumnType("date")
+                        .HasColumnName("enrolled_on");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_facility_beneficiaries");
+
+                    b.HasIndex("BeneficiaryId")
+                        .HasDatabaseName("ix_facility_beneficiaries_beneficiary_id");
+
+                    b.HasIndex("FacilityId", "BeneficiaryId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_facility_beneficiaries_facility_id_beneficiary_id");
+
+                    b.ToTable("facility_beneficiaries", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityCategoryEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2366,6 +2420,23 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_branches_organizations_organization_id");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.FacilityBeneficiaryEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_facility_beneficiaries_beneficiaries_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_facility_beneficiaries_facilities_facility_id");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityEntity", b =>

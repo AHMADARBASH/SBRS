@@ -15,4 +15,7 @@ public sealed record BeneficiarySearchItemDto(
     bool Gender,
 
     /// <summary>The type of the beneficiary's identity; the value is not shown (cross-facility search).</summary>
-    string IdentityTypeCode);
+    string IdentityTypeCode,
+
+    /// <summary>True when the caller's facility already has an active enrollment (false for SystemAdmin: no facility).</summary>
+    bool IsEnrolledInMyFacility);

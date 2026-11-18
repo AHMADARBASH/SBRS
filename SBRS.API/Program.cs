@@ -54,7 +54,10 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Identity bootstrap (roles + seed admin), then the idempotent reference data.
+    // The organization comes before the branches: branches are attached to SARC and the
+    // branch seeder skips everything when no organization can be resolved.
     await scope.ServiceProvider.GetRequiredService<IdentitySeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<OrganizationSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<ReferenceDataSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<BranchSeeder>().SeedAsync();
 }

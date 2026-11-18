@@ -16,6 +16,7 @@ public static class Policies
     public const string SearchBeneficiaries = "SearchBeneficiaries";     // DataEntry, FacilityAdmin, SystemAdmin
     public const string ReviewBeneficiaryMatches = "ReviewBeneficiaryMatches"; // FacilityAdmin, SystemAdmin
     public const string ViewFacilityBeneficiaries = "ViewFacilityBeneficiaries"; // DataEntry, FacilityAdmin, SystemAdmin
+    public const string EnrollBeneficiaries = "EnrollBeneficiaries";           // DataEntry, FacilityAdmin (enroll at own facility)
     public const string DeactivateBeneficiaries = "DeactivateBeneficiaries";   // DataEntry, FacilityAdmin, SystemAdmin (soft delete)
     public const string ManageBeneficiaryProfiles = "ManageBeneficiaryProfiles"; // DataEntry, FacilityAdmin, SystemAdmin (profile create/update; reads also allow the trio)
 
@@ -48,6 +49,11 @@ public static class Policies
 
         options.AddPolicy(ViewFacilityBeneficiaries, p => p.RequireRole(
             Roles.DataEntry, Roles.FacilityAdmin, Roles.SystemAdmin));
+
+        // DataEntry and FacilityAdmin enroll at their own facility. SystemAdmin has no facility
+        // claim. Pharmacy/report roles do not exist yet; when added they must not be included.
+        options.AddPolicy(EnrollBeneficiaries, p => p.RequireRole(
+            Roles.DataEntry, Roles.FacilityAdmin));
 
         options.AddPolicy(DeactivateBeneficiaries, p => p.RequireRole(
             Roles.DataEntry, Roles.FacilityAdmin, Roles.SystemAdmin));

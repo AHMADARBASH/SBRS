@@ -64,6 +64,7 @@ public sealed class RegisterBeneficiaryCommandHandler(
     IIdentityTypeRepository identityTypes,
     INationalityRepository nationalities,
     IBeneficiaryIdentityRepository identities,
+    IFacilityBeneficiaryRepository enrollments,
     IBeneficiaryMatchService matchService,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork) : IRequestHandler<RegisterBeneficiaryCommand, RegisterBeneficiaryResultDto>
@@ -136,6 +137,11 @@ public sealed class RegisterBeneficiaryCommandHandler(
             // saved in the same SaveChangesAsync call as the beneficiary (the id is assigned on AddAsync)
             var identity = new BeneficiaryIdentityEntity(beneficiary.Id, identityType, identityValue);
             await identities.AddAsync(identity, cancellationToken);
+
+            // Registration is also the first enrollment, including PendingReview cases: the person
+            // is registered at this facility even while a duplicate match is being reviewed.
+            var enrollment = new FacilityBeneficiaryEntity(beneficiary.Id, facilityId, request.EnrollmentDate);
+            await enrollments.AddAsync(enrollment, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);

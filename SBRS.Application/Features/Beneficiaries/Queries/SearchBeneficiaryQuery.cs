@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Mappings;
 using SBRS.Domain.Common;
@@ -31,7 +32,8 @@ public sealed class SearchBeneficiaryQueryValidator : AbstractValidator<SearchBe
 }
 
 public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository repository,
-    IBeneficiaryIdentityRepository identityRepository)
+    IBeneficiaryIdentityRepository identityRepository, IFacilityBeneficiaryRepository enrollments,
+    ICurrentUser currentUser)
     : IRequestHandler<SearchBeneficiaryQuery, BeneficiarySearchResultDto>
 {
     private const int MaxResults = 20;
@@ -56,7 +58,10 @@ public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository reposit
                 return new BeneficiarySearchResultDto(Array.Empty<BeneficiarySearchItemDto>(), false);
 
             var identity = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(new[] { found.Id }, cancellationToken);
-            return new BeneficiarySearchResultDto(new[] { found.ToSearchItemDto(identity.RequireIdentity(found)) }, false);
+            var isEnrolled = currentUser.FacilityId is { } exactFacilityId &&
+                             await enrollments.IsEnrolledAsync(found.Id, exactFacilityId, cancellationToken);
+            return new BeneficiarySearchResultDto(
+                new[] { found.ToSearchItemDto(identity.RequireIdentity(found), isEnrolled) }, false);
         }
 
         var firstName = ArabicTextNormalizer.Normalize(request.FirstName);
@@ -68,8 +73,16 @@ public sealed class SearchBeneficiaryQueryHandler(IBeneficiaryRepository reposit
         var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
             matches.Select(b => b.Id).ToList(), cancellationToken);
 
+        // one batched enrollment lookup; SystemAdmin has no facility claim, so the flag is false
+        var enrolledIds = currentUser.FacilityId is { } facilityId
+            ? await enrollments.GetEnrolledBeneficiaryIdsAsync(
+                matches.Select(b => b.Id).ToList(), facilityId, cancellationToken)
+            : new HashSet<Guid>();
+
         return new BeneficiarySearchResultDto(
-            matches.Take(MaxResults).Select(b => b.ToSearchItemDto(identities.RequireIdentity(b))).ToList(),
+            matches.Take(MaxResults)
+                .Select(b => b.ToSearchItemDto(identities.RequireIdentity(b), enrolledIds.Contains(b.Id)))
+                .ToList(),
             matches.Count > MaxResults);
     }
 }

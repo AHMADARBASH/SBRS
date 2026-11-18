@@ -140,6 +140,7 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
 public sealed class SaveBeneficiaryProfileCommandHandler(
     IBeneficiaryRepository beneficiaries,
     IBeneficiaryProfileRepository profiles,
+    IFacilityBeneficiaryRepository enrollments,
     IGeographyRepository geography,
     IAccommodationTypeRepository accommodationTypes,
     IEducationTypeRepository educationTypes,
@@ -166,9 +167,13 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
         var beneficiary = await beneficiaries.GetByIdAsync(command.BeneficiaryId, cancellationToken)
             ?? throw new NotFoundException(nameof(BeneficiaryEntity), command.BeneficiaryId);
 
+        // Same roster scope as the read: any facility with an active enrollment may edit the profile.
+        var isInScope = currentUser.IsSystemAdmin ||
+                        (currentUser.FacilityId is { } facilityId &&
+                         await enrollments.IsEnrolledAsync(beneficiary.Id, facilityId, cancellationToken));
+
         // Out-of-scope and deactivated/merged records look like missing ones (same rule as the other features).
-        if (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId ||
-            !beneficiary.IsActive || beneficiary.MergedIntoBeneficiaryId is not null)
+        if (!isInScope || !beneficiary.IsActive || beneficiary.MergedIntoBeneficiaryId is not null)
             throw new NotFoundException(nameof(BeneficiaryEntity), command.BeneficiaryId);
 
         // Lookup existence: a sent id must exist (400); omitted simply stays null ("not known yet").

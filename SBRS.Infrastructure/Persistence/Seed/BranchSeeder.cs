@@ -19,7 +19,7 @@ public class BranchSeeder(
     IConfiguration configuration,
     ILogger<BranchSeeder> logger)
 {
-    private const string SarcOrganizationCode = "SARC";
+    private const string SarcOrganizationCode = OrganizationSeed.Code;
 
     public async Task SeedAsync(CancellationToken ct = default)
     {

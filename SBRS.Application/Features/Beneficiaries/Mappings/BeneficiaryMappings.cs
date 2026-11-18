@@ -33,9 +33,11 @@ public static class BeneficiaryMappings
             m.Reasons,
             identity.ToDto());
 
-    public static BeneficiarySearchItemDto ToSearchItemDto(this BeneficiaryEntity b, BeneficiaryIdentityEntity identity) =>
+    public static BeneficiarySearchItemDto ToSearchItemDto(this BeneficiaryEntity b,
+        BeneficiaryIdentityEntity identity, bool isEnrolledInMyFacility) =>
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName,
-            b.BirthDate, b.IsBirthDateEstimated, b.Gender, identity.IdentityType.Code);
+            b.BirthDate, b.IsBirthDateEstimated, b.Gender, identity.IdentityType.Code,
+            isEnrolledInMyFacility);
 
     public static PendingBeneficiaryDto ToPendingDto(this BeneficiaryEntity b, BeneficiaryIdentityEntity identity) =>
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,

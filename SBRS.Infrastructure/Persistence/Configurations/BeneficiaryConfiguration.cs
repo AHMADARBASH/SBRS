@@ -42,7 +42,7 @@ public class BeneficiaryConfiguration : IEntityTypeConfiguration<BeneficiaryEnti
             .HasForeignKey(x => x.NationalityId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.NationalityId); // filters and reports by nationality
-        builder.HasIndex(x => new { x.RegistrationFacilityId, x.CreatedAt }); // facility list, newest first
+        builder.HasIndex(x => new { x.RegistrationFacilityId, x.CreatedAt }); // registration-based reads / history
 
         builder.HasOne<FacilityEntity>().WithMany()
             .HasForeignKey(x => x.RegistrationFacilityId)

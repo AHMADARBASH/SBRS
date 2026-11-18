@@ -25,6 +25,8 @@ public sealed class ConfirmBeneficiaryNotAMatchCommandHandler(
 {
     public async Task Handle(ConfirmBeneficiaryNotAMatchCommand request, CancellationToken cancellationToken)
     {
+        // Review stays with the registering facility (it owns the record and its code);
+        // enrollment-driven scope is deliberately not used for the review queue.
         var beneficiary = await repository.GetByIdAsync(request.Id, cancellationToken);
         if (beneficiary is null ||
             (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId))

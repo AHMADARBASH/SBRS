@@ -24,11 +24,14 @@ public sealed class ConfirmBeneficiarySameCommandValidator : AbstractValidator<C
 
 public sealed class ConfirmBeneficiarySameCommandHandler(
     IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository,
-    IBeneficiaryMatchService matchService, ICurrentUser currentUser, IUnitOfWork unitOfWork)
+    IFacilityBeneficiaryRepository enrollments, IBeneficiaryMatchService matchService,
+    ICurrentUser currentUser, IUnitOfWork unitOfWork)
     : IRequestHandler<ConfirmBeneficiarySameCommand>
 {
     public async Task Handle(ConfirmBeneficiarySameCommand request, CancellationToken cancellationToken)
     {
+        // Review stays with the registering facility (it owns the record and its code);
+        // enrollment-driven scope is deliberately not used for the review queue.
         var beneficiary = await repository.GetByIdAsync(request.Id, cancellationToken);
         if (beneficiary is null ||
             (!currentUser.IsSystemAdmin && beneficiary.RegistrationFacilityId != currentUser.FacilityId))
@@ -52,7 +55,42 @@ public sealed class ConfirmBeneficiarySameCommandHandler(
         if (!result.Matches.Any(m => m.Beneficiary.Id == request.ExistingBeneficiaryId))
             throw new DomainException("The selected beneficiary is not one of the match candidates.");
 
+        await MoveEnrollmentsToSurvivorAsync(beneficiary.Id, request.ExistingBeneficiaryId, cancellationToken);
+
         beneficiary.MergeInto(request.ExistingBeneficiaryId, currentUser.UserId!.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// One person, one enrollment row per facility. A facility where only the duplicate was
+    /// enrolled gets a moved row; a facility where the survivor already had a row keeps that row
+    /// and reactivates it. Everything is staged in the same SaveChanges as the merge.
+    /// </summary>
+    private async Task MoveEnrollmentsToSurvivorAsync(Guid duplicateId, Guid survivorId,
+        CancellationToken ct)
+    {
+        var duplicateEnrollments = await enrollments.GetByBeneficiaryIdAsync(duplicateId, ct);
+        if (duplicateEnrollments.Count == 0) return;
+
+        var survivorByFacility = (await enrollments.GetByBeneficiaryIdAsync(survivorId, ct))
+            .ToDictionary(x => x.FacilityId);
+
+        foreach (var duplicate in duplicateEnrollments)
+        {
+            if (survivorByFacility.TryGetValue(duplicate.FacilityId, out var survivorEnrollment))
+            {
+                if (!survivorEnrollment.IsActive) survivorEnrollment.Activate();
+            }
+            else
+            {
+                var moved = new FacilityBeneficiaryEntity(
+                    survivorId, duplicate.FacilityId, duplicate.EnrolledOn);
+                if (!duplicate.IsActive) moved.Deactivate();
+                await enrollments.AddAsync(moved, ct);
+                survivorByFacility[duplicate.FacilityId] = moved;
+            }
+
+            enrollments.Remove(duplicate);
+        }
     }
 }
