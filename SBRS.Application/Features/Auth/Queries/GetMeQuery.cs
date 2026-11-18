@@ -60,7 +60,7 @@ public sealed class GetMeQueryHandler(
                     facilityEntity.Code,
                     facilityEntity.IsActive,
                     new FacilityTypeSummaryDto(type.Id, type.Code, type.ArName, type.EnName),
-                    new BranchSummaryDto(branch.Id, branch.ArName, branch.EnName));
+                    new BranchSummaryDto(branch.Id, branch.Code, branch.ArName, branch.EnName, branch.IsActive));
             }
         }
 

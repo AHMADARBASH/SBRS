@@ -202,7 +202,7 @@ public class UserAdminService(
             ? new Dictionary<Guid, BranchSummaryDto>()
             : (await db.Branches.AsNoTracking()
                     .Where(b => branchIds.Contains(b.Id))
-                    .Select(b => new BranchSummaryDto(b.Id, b.ArName, b.EnName))
+                    .Select(b => new BranchSummaryDto(b.Id, b.Code, b.ArName, b.EnName, b.IsActive))
                     .ToListAsync(ct))
                 .ToDictionary(b => b.Id);
 
@@ -289,13 +289,15 @@ public class UserAdminService(
 
                     var facility = await db.Set<FacilityEntity>().AsNoTracking()
                         .Where(f => f.Id == facilityId)
-                        .Select(f => new { f.IsActive, f.Branch.organizationId })
+                        .Select(f => new { f.IsActive, f.BranchId, f.Branch.organizationId })
                         .FirstOrDefaultAsync(ct);
 
                     if (facility is null) throw new NotFoundException(nameof(FacilityEntity), facilityId.Value.ToString());
                     if (!facility.IsActive) throw new DomainException("The facility is inactive.");
 
-                    return (facility.organizationId, null, facilityId);
+                    // Branch and organization are derived from the facility, never trusted from
+                    // the client: a facility-level user always lives in the facility's branch.
+                    return (facility.organizationId, facility.BranchId, facilityId);
                 }
 
             default:
