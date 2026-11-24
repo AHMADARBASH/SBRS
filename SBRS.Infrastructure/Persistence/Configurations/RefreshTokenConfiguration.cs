@@ -17,6 +17,10 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.FamilyId);
 
+        // The cleanup job deletes by expiry only (used/revoked rows are kept until they expire,
+        // because reuse detection still needs them).
+        builder.HasIndex(x => x.ExpiresAt);
+
         builder.HasOne<ApplicationUser>()
                .WithMany()
                .HasForeignKey(x => x.UserId)

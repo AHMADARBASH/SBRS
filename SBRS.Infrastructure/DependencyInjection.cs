@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SBRS.Application.Common.Interfaces;
 using SBRS.Domain.Interfaces;
+using SBRS.Infrastructure.BackgroundJobs;
 using SBRS.Infrastructure.Identity;
 using SBRS.Infrastructure.Persistence;
 using SBRS.Infrastructure.Persistence.Repositories;
@@ -50,6 +51,12 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+        // Expired refresh tokens are pruned by a hosted service (section "RefreshTokenCleanup").
+        services.Configure<RefreshTokenCleanupSettings>(
+            configuration.GetSection(RefreshTokenCleanupSettings.SectionName));
+        services.AddHostedService<RefreshTokenCleanupService>();
+
         services.AddScoped<IBranchRepository, BranchRepository>();
         services.AddScoped<IFacilityRepository, FacilityRepository>();
         services.AddScoped<IAddressRepository, AddressRepository>();
