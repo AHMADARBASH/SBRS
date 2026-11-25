@@ -111,7 +111,10 @@ public class AddFacilityCommandHandler(
                 continue;
             }
 
-            return facility.ToDto();
+            // Reload with branch/area/type/category so the response embeds the full references.
+            return (await facilities.GetByIdWithDetailsAsync(facility.Id, ct)
+                    ?? throw new NotFoundException(nameof(FacilityEntity), facility.Id))
+                   .ToDto();
         }
 
         // unreachable: the loop either returns or throws

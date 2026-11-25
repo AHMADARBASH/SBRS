@@ -5,6 +5,13 @@ namespace SBRS.Domain.Interfaces;
 public interface IFacilityRepository
 {
     Task<FacilityEntity?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Same scope as <see cref="GetByIdAsync"/> but loads the branch, area, type and
+    /// category navigations (read-only) so responses can embed the full references.
+    /// </summary>
+    Task<FacilityEntity?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default);
+
     Task<List<FacilityEntity>> GetByBranchAsync(Guid branchId, bool includeInactive, CancellationToken ct = default);
     Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct = default);
     Task<bool> HasActiveFacilitiesAsync(Guid branchId, CancellationToken ct = default);

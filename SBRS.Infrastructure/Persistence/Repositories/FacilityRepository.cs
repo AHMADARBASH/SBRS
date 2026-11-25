@@ -34,11 +34,22 @@ public class FacilityRepository(AppDbContext db, ICurrentUser currentUser) : IFa
     public Task<FacilityEntity?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => Scoped().FirstOrDefaultAsync(f => f.Id == id, ct);
 
+    public Task<FacilityEntity?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
+        => WithDetails(Scoped()).AsNoTracking()
+                                .FirstOrDefaultAsync(f => f.Id == id, ct);
+
     public Task<List<FacilityEntity>> GetByBranchAsync(Guid branchId, bool includeInactive, CancellationToken ct = default)
-        => Scoped().AsNoTracking()
+        => WithDetails(Scoped()).AsNoTracking()
                    .Where(f => f.BranchId == branchId && (includeInactive || f.IsActive))
                    .OrderBy(f => f.EnName)
                    .ToListAsync(ct);
+
+    // objects embedded in FacilityDto must be loaded explicitly: lazy loading is not enabled
+    private static IQueryable<FacilityEntity> WithDetails(IQueryable<FacilityEntity> query)
+        => query.Include(f => f.Branch)
+                .Include(f => f.Area)
+                .Include(f => f.FacilityType)
+                .Include(f => f.Category);
 
     // NOT scoped on purpose: codes must be unique across the whole system
     public Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct = default)

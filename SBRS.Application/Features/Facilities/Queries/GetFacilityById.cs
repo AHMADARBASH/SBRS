@@ -14,7 +14,7 @@ public class GetFacilityByIdQueryHandler(IFacilityRepository facilities)
 {
     public async Task<FacilityDto> Handle(GetFacilityByIdQuery request, CancellationToken ct)
     {
-        var entity = await facilities.GetByIdAsync(request.Id, ct)
+        var entity = await facilities.GetByIdWithDetailsAsync(request.Id, ct)
                      ?? throw new NotFoundException(nameof(FacilityEntity), request.Id);
 
         return entity.ToDto();

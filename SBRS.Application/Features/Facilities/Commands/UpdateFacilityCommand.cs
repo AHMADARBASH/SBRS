@@ -49,6 +49,10 @@ public class UpdateFacilityCommandHandler(
         entity.Update(request.ArName, request.EnName, area.Id, request.typeId, request.CategoryId);
         await unitOfWork.SaveChangesAsync(ct);
 
-        return entity.ToDto();
+        // The update changed the area/type/category ids, so reload with the related objects
+        // instead of using the stale navigations of the tracked entity.
+        return (await facilities.GetByIdWithDetailsAsync(entity.Id, ct)
+                ?? throw new NotFoundException(nameof(FacilityEntity), entity.Id))
+               .ToDto();
     }
 }

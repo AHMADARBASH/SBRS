@@ -1,4 +1,6 @@
-﻿namespace SBRS.Application.Features.Facilities.DTOs;
+﻿using SBRS.Application.Common.DTOs;
+
+namespace SBRS.Application.Features.Facilities.DTOs;
 
 public record FacilityDto(
     Guid Id,
@@ -8,7 +10,11 @@ public record FacilityDto(
     string EnName,
     string Code,
     bool IsActive,
-    Guid typeId,
+    Guid TypeId,
     Guid? CategoryId,
     DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    BranchSummaryDto Branch,
+    AreaSummaryDto Area,
+    FacilityTypeSummaryDto Type,
+    FacilityCategorySummaryDto? Category);
