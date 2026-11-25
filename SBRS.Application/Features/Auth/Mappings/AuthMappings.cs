@@ -5,9 +5,12 @@ namespace SBRS.Application.Features.Auth.Mappings;
 
 public static class AuthMappings
 {
+    /// <summary>Login/Refresh = access token + the Me payload, so both responses match.</summary>
     public static LoginResultDto ToLoginResult(
-        this AuthenticatedUser u, TokenResult access, string refreshToken)
+        this CurrentUserDto user, TokenResult access, string refreshToken)
         => new(access.Token, refreshToken, access.ExpiresAt,
-               u.Id, u.UserName, u.FirstName, u.LastName, u.Role,
-               u.OrganizationId, u.BranchId, u.FacilityId, u.IsMobile);
+               user.UserId, user.UserName, user.FirstName, user.LastName, user.Role,
+               user.IsSystemAdmin, user.IsMobile,
+               user.OrganizationId, user.BranchId, user.FacilityId,
+               user.Organization, user.Facility);
 }

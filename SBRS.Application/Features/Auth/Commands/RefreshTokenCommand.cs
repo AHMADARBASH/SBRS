@@ -14,7 +14,8 @@ public record RefreshTokenCommand(string RefreshToken) : IRequest<LoginResultDto
 public class RefreshTokenCommandHandler(
     IRefreshTokenService refreshTokens,
     IIdentityService identityService,
-    ITokenService tokenService)
+    ITokenService tokenService,
+    IUserSessionService session)
     : IRequestHandler<RefreshTokenCommand, LoginResultDto>
 {
     public async Task<LoginResultDto> Handle(RefreshTokenCommand request, CancellationToken ct)
@@ -29,6 +30,10 @@ public class RefreshTokenCommandHandler(
         }
 
         var access = tokenService.CreateToken(user);
-        return user.ToLoginResult(access, rotation.RefreshToken);
+
+        // Same payload as Me, so a refresh also refreshes the whole session object.
+        var currentUser = await session.BuildAsync(user, ct);
+
+        return currentUser.ToLoginResult(access, rotation.RefreshToken);
     }
 }

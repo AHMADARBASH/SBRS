@@ -21,7 +21,8 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 public class LoginCommandHandler(
     IIdentityService identityService,
     ITokenService tokenService,
-    IRefreshTokenService refreshTokens)
+    IRefreshTokenService refreshTokens,
+    IUserSessionService session)
     : IRequestHandler<LoginCommand, LoginResultDto>
 {
     public async Task<LoginResultDto> Handle(LoginCommand request, CancellationToken ct)
@@ -32,6 +33,9 @@ public class LoginCommandHandler(
         var access = tokenService.CreateToken(user);
         var refresh = await refreshTokens.IssueAsync(user.Id, ct);
 
-        return user.ToLoginResult(access, refresh);
+        // Same payload as Me: the client shell does not need a second call after login.
+        var currentUser = await session.BuildAsync(user, ct);
+
+        return currentUser.ToLoginResult(access, refresh);
     }
 }

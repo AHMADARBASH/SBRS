@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
         // Expired refresh tokens are pruned by a hosted service (section "RefreshTokenCleanup").
