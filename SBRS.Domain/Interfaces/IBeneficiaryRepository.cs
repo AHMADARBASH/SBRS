@@ -49,11 +49,14 @@ public interface IBeneficiaryRepository
     Task<BeneficiaryEntity?> GetByFullCodeAsync(string fullCode, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Starts-with search on the normalized first and last name, merged duplicates excluded,
-    /// ordered by last name, first name, birth date. The caller passes take = limit + 1 to detect "has more".
+    /// Cross-facility search: every provided key is applied with AND. Names are starts-with
+    /// on the normalized columns, FullCode is exact (case-insensitive) and resolves a merged
+    /// duplicate to its survivor, and birth date is an exact date match. Merged duplicates are
+    /// excluded and the ordering is last name, first name, birth date. The caller passes
+    /// take = limit + 1 to detect "has more".
     /// </summary>
-    Task<IReadOnlyList<BeneficiaryEntity>> SearchByNameAsync(string normalizedFirstName,
-        string normalizedLastName, int take, CancellationToken cancellationToken);
+    Task<IReadOnlyList<BeneficiaryEntity>> SearchAsync(BeneficiarySearchCriteria criteria, int take,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Active beneficiaries enrolled at the facility, newest enrollment first (EnrolledOn descending,

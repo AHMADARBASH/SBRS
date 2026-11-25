@@ -9,6 +9,9 @@
          only the project file/folder is renamed, so nothing else has to change -->
     <RootNamespace>SBRS</RootNamespace>
     <AssemblyName>SBRS</AssemblyName>
+    <!-- XML comments feed Swagger; missing comments on unrelated public members are not errors. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

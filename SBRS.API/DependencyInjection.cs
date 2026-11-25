@@ -72,6 +72,13 @@ namespace SBRS
                 });
 
                 options.OperationFilter<ClientTypeHeaderFilter>();
+
+                // Controllers/contracts carry XML docs (e.g. the beneficiary search contract).
+                var xmlPath = Path.Combine(
+                    AppContext.BaseDirectory,
+                    $"{typeof(DependencyInjection).Assembly.GetName().Name}.xml");
+                if (File.Exists(xmlPath))
+                    options.IncludeXmlComments(xmlPath);
             });
 
             return services;

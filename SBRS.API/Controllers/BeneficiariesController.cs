@@ -18,11 +18,18 @@ namespace SBRS.Controllers;
 public class BeneficiariesController(ISender sender) : ControllerBase
 {
     // POST on purpose: names and birth dates must never appear in URLs or logs.
+    /// <summary>
+    /// Cross-facility beneficiary search. Every key is optional, but at least one is required;
+    /// provided keys are combined with AND (FullCode exact, names starts-with after Arabic
+    /// normalization, birth date exact). Results are capped at 20 with a hasMore flag.
+    /// </summary>
     [HttpPost]
     [Route("Search")]
     [Authorize(Policy = Policies.SearchBeneficiaries)]
     public async Task<ActionResult<BeneficiarySearchResultDto>> Search(SearchBeneficiaryRequest request, CancellationToken ct) =>
-        Ok(await sender.Send(new SearchBeneficiaryQuery(request.FullCode, request.FirstName, request.LastName), ct));
+        Ok(await sender.Send(new SearchBeneficiaryQuery(
+            request.FullCode, request.FirstName, request.FatherName, request.LastName,
+            request.MotherName, request.BirthDate), ct));
 
     [HttpPost]
     [Route("Register")]

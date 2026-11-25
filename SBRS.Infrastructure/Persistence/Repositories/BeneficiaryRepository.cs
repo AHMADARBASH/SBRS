@@ -114,17 +114,43 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
     public Task<BeneficiaryEntity?> GetByFullCodeAsync(string fullCode, CancellationToken ct) =>
         db.Beneficiaries.AsNoTracking().FirstOrDefaultAsync(x => x.FullCode == fullCode, ct);
 
-    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchByNameAsync(string normalizedFirstName,
-        string normalizedLastName, int take, CancellationToken ct) =>
-        await db.Beneficiaries.AsNoTracking()
-            .Where(x => x.MatchReviewStatus != BeneficiaryMatchReviewStatus.MergedIntoExisting &&
-                        x.NormalizedLastName.StartsWith(normalizedLastName) &&
-                        x.NormalizedFirstName.StartsWith(normalizedFirstName))
+    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchAsync(BeneficiarySearchCriteria criteria, int take,
+        CancellationToken ct)
+    {
+        var query = db.Beneficiaries.AsNoTracking()
+            .Where(x => x.MatchReviewStatus != BeneficiaryMatchReviewStatus.MergedIntoExisting);
+
+        if (criteria.FullCode is { } fullCode)
+        {
+            // Exact code, or the survivor a merged duplicate with that code was merged into.
+            // FullCode is citext, so the comparison is case-insensitive on PostgreSQL.
+            query = query.Where(x =>
+                x.FullCode == fullCode ||
+                db.Beneficiaries.Any(m =>
+                    m.FullCode == fullCode &&
+                    m.MatchReviewStatus == BeneficiaryMatchReviewStatus.MergedIntoExisting &&
+                    m.MergedIntoBeneficiaryId == x.Id));
+        }
+
+        // Every provided key narrows the same query (AND); null keys are ignored.
+        if (criteria.NormalizedFirstName is { } firstName)
+            query = query.Where(x => x.NormalizedFirstName.StartsWith(firstName));
+        if (criteria.NormalizedFatherName is { } fatherName)
+            query = query.Where(x => x.NormalizedFatherName.StartsWith(fatherName));
+        if (criteria.NormalizedLastName is { } lastName)
+            query = query.Where(x => x.NormalizedLastName.StartsWith(lastName));
+        if (criteria.NormalizedMotherName is { } motherName)
+            query = query.Where(x => x.NormalizedMotherName.StartsWith(motherName));
+        if (criteria.BirthDate is { } birthDate)
+            query = query.Where(x => x.BirthDate == birthDate);
+
+        return await query
             .OrderBy(x => x.NormalizedLastName)
             .ThenBy(x => x.NormalizedFirstName)
             .ThenBy(x => x.BirthDate)
             .Take(take)
             .ToListAsync(ct);
+    }
 
     public async Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
         Guid facilityId, int page, int pageSize, CancellationToken ct)
