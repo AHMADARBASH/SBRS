@@ -62,6 +62,7 @@ using (var scope = app.Services.CreateScope())
     await scope.ServiceProvider.GetRequiredService<IdentityTypeSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<ClinicTypeSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<DiseaseSeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<AddressTypeSeeder>().SeedAsync();
     await scope.ServiceProvider.GetRequiredService<BranchSeeder>().SeedAsync();
 }
 

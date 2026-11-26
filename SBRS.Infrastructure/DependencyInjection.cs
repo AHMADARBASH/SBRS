@@ -93,6 +93,7 @@ services.AddScoped<IFacilityCategoryRepository, FacilityCategoryRepository>();
         services.AddScoped<IDiseaseCategoryRepository, DiseaseCategoryRepository>();
         services.AddScoped<IDiseaseRepository, DiseaseRepository>();
         services.AddScoped<DiseaseSeeder>();
+        services.AddScoped<AddressTypeSeeder>();
         services.AddScoped<IAddressTypeRepository, AddressTypeRepository>();
         services.AddScoped<IWorkingAddressRepository, WorkingAddressRepository>();
         services.AddScoped<ClinicTypeSeeder>();
