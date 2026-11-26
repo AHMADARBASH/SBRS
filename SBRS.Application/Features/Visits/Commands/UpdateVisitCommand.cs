@@ -52,6 +52,11 @@ public sealed class UpdateVisitCommandHandler(
         VisitRules.EnsureVisitDate(visitDate, beneficiary);
         VisitRules.EnsurePregnancy(beneficiary, c.IsPregnant);
 
+        if (await visits.ExistsActiveOnDateAsync(
+                c.FacilityId, visit.BeneficiaryId, visitDate, c.Id, ct))
+            throw new ConflictException(
+                $"A visit already exists for this beneficiary at this facility on {visitDate:yyyy-MM-dd}.");
+
         visit.Update(visitDate, c.Weight, c.Height, c.IsPregnant);
         await unitOfWork.SaveChangesAsync(ct);
 

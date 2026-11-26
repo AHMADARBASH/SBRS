@@ -2512,7 +2512,9 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_visits_facility_id");
 
                     b.HasIndex("FacilityId", "BeneficiaryId", "VisitDate")
-                        .HasDatabaseName("ix_visits_facility_id_beneficiary_id_visit_date");
+                        .IsUnique()
+                        .HasDatabaseName("ix_visits_facility_id_beneficiary_id_visit_date")
+                        .HasFilter("is_active = true");
 
                     b.ToTable("visits", (string)null);
                 });

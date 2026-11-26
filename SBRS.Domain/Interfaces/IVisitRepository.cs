@@ -10,5 +10,9 @@ public interface IVisitRepository
     Task<(IReadOnlyList<VisitEntity> Items, int TotalCount)> GetPagedAsync(Guid facilityId,
         Guid? beneficiaryId, int page, int pageSize, CancellationToken ct);
 
+    /// <summary>True when this beneficiary already has an active visit at the facility on that date.</summary>
+    Task<bool> ExistsActiveOnDateAsync(Guid facilityId, Guid beneficiaryId, DateOnly visitDate,
+        Guid? excludeId, CancellationToken ct);
+
     Task AddAsync(VisitEntity visit, CancellationToken ct);
 }

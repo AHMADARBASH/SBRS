@@ -26,7 +26,10 @@ public class VisitConfiguration : IEntityTypeConfiguration<VisitEntity>
             .HasForeignKey(x => x.BeneficiaryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(x => new { x.FacilityId, x.BeneficiaryId, x.VisitDate });
+        // One active visit per beneficiary/facility/day; deactivated visits free the day again.
+        builder.HasIndex(x => new { x.FacilityId, x.BeneficiaryId, x.VisitDate })
+            .IsUnique()
+            .HasFilter("is_active = true");
         builder.HasIndex(x => x.FacilityId);
         builder.HasIndex(x => x.BeneficiaryId);
     }

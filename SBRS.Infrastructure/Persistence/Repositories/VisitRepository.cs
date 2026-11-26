@@ -31,6 +31,12 @@ public class VisitRepository(AppDbContext db) : IVisitRepository
         return (items, totalCount);
     }
 
+    public Task<bool> ExistsActiveOnDateAsync(Guid facilityId, Guid beneficiaryId, DateOnly visitDate,
+        Guid? excludeId, CancellationToken ct) =>
+        db.Visits.AnyAsync(v => v.FacilityId == facilityId && v.BeneficiaryId == beneficiaryId &&
+                                v.VisitDate == visitDate && v.IsActive &&
+                                (excludeId == null || v.Id != excludeId), ct);
+
     public async Task AddAsync(VisitEntity visit, CancellationToken ct) =>
         await db.Visits.AddAsync(visit, ct);
 }

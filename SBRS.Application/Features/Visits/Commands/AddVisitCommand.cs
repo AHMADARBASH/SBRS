@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Features.Visits.DTOs;
 using SBRS.Application.Features.Visits.Mappings;
 using SBRS.Domain.Entities;
@@ -47,6 +48,10 @@ public sealed class AddVisitCommandHandler(
 
         VisitRules.EnsureVisitDate(visitDate, beneficiary);
         VisitRules.EnsurePregnancy(beneficiary, c.IsPregnant);
+
+        if (await visits.ExistsActiveOnDateAsync(c.FacilityId, beneficiary.Id, visitDate, null, ct))
+            throw new ConflictException(
+                $"A visit already exists for this beneficiary at this facility on {visitDate:yyyy-MM-dd}.");
 
         var visit = new VisitEntity(c.FacilityId, beneficiary.Id, visitDate, c.Weight, c.Height, c.IsPregnant);
         await visits.AddAsync(visit, ct);
