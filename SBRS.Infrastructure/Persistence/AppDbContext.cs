@@ -56,6 +56,8 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<DiseaseCategoryEntity> DiseaseCategories => Set<DiseaseCategoryEntity>();
         public DbSet<DiseaseEntity> Diseases => Set<DiseaseEntity>();
         public DbSet<BeneficiaryConsultationDetailEntity> BeneficiaryConsultationDetails => Set<BeneficiaryConsultationDetailEntity>();
+        public DbSet<AddressTypeEntity> AddressTypes => Set<AddressTypeEntity>();
+        public DbSet<WorkingAddressEntity> WorkingAddresses => Set<WorkingAddressEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

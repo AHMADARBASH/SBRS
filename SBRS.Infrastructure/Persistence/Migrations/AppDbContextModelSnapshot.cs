@@ -575,6 +575,50 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("addresses", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.AddressTypeEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_address_types");
+
+                    b.HasIndex("EnName")
+                        .HasDatabaseName("ix_address_types_en_name");
+
+                    b.ToTable("address_types", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryChronicDiseaseEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2469,6 +2513,64 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("visits", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.WorkingAddressEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AddressId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("address_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("TypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("type_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("WorkingDate")
+                        .HasColumnType("date")
+                        .HasColumnName("working_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_working_addresses");
+
+                    b.HasIndex("AddressId")
+                        .HasDatabaseName("ix_working_addresses_address_id");
+
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("ix_working_addresses_type_id");
+
+                    b.HasIndex("FacilityId", "WorkingDate")
+                        .HasDatabaseName("ix_working_addresses_facility_id_working_date");
+
+                    b.ToTable("working_addresses", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3131,6 +3233,34 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_visits_facilities_facility_id");
 
                     b.Navigation("Beneficiary");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.WorkingAddressEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.AddressEntity", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_working_addresses_addresses_address_id");
+
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_working_addresses_facilities_facility_id");
+
+                    b.HasOne("SBRS.Domain.Entities.AddressTypeEntity", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_working_addresses_address_types_type_id");
+
+                    b.Navigation("Address");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>

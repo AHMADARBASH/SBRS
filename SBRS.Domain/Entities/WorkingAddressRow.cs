@@ -1,0 +1,30 @@
+namespace SBRS.Domain.Entities;
+
+/// <summary>Flat read model of a working address with the full geography chain, filled by one projection.</summary>
+public sealed record WorkingAddressRow(
+    Guid Id,
+    Guid FacilityId,
+    DateOnly WorkingDate,
+    bool IsActive,
+    DateTime CreatedAt,
+    Guid TypeId,
+    string TypeArName,
+    string TypeEnName,
+    Guid AddressId,
+    string AddressArName,
+    string AddressEnName,
+    Guid AreaId,
+    string AreaArName,
+    string AreaEnName,
+    Guid DistrictId,
+    string DistrictArName,
+    string DistrictEnName,
+    Guid RegionId,
+    string RegionArName,
+    string RegionEnName,
+    Guid CityId,
+    string CityArName,
+    string CityEnName,
+    Guid CountryId,
+    string CountryArName,
+    string CountryEnName);
