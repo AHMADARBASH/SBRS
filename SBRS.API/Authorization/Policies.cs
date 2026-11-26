@@ -20,6 +20,11 @@ public static class Policies
     public const string EnrollBeneficiaries = "EnrollBeneficiaries";           // DataEntry, FacilityAdmin (enroll at own facility)
     public const string DeactivateBeneficiaries = "DeactivateBeneficiaries";   // DataEntry, FacilityAdmin, SystemAdmin (soft delete)
     public const string ManageBeneficiaryProfiles = "ManageBeneficiaryProfiles"; // DataEntry, FacilityAdmin, SystemAdmin (profile create/update; reads also allow the trio)
+    public const string ManageClinicTypes = "ManageClinicTypes";       // SystemAdmin
+    public const string ManageClinics = "ManageClinics";               // SystemAdmin, FacilityAdmin
+    public const string ManageDoctors = "ManageDoctors";               // SystemAdmin, FacilityAdmin
+    public const string ViewClinics = "ViewClinics";                   // SystemAdmin, FacilityAdmin, DataEntry
+    public const string ViewDoctors = "ViewDoctors";                   // SystemAdmin, FacilityAdmin, DataEntry
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -63,6 +68,18 @@ public static class Policies
 
         options.AddPolicy(ManageBeneficiaryProfiles, p => p.RequireRole(
             Roles.DataEntry, Roles.FacilityAdmin, Roles.SystemAdmin));
+
+        options.AddPolicy(ManageClinicTypes, p => p.RequireRole(Roles.SystemAdmin));
+
+        options.AddPolicy(ManageClinics, p => p.RequireRole(Roles.SystemAdmin, Roles.FacilityAdmin));
+
+        options.AddPolicy(ManageDoctors, p => p.RequireRole(Roles.SystemAdmin, Roles.FacilityAdmin));
+
+        options.AddPolicy(ViewClinics, p => p.RequireRole(
+            Roles.SystemAdmin, Roles.FacilityAdmin, Roles.DataEntry));
+
+        options.AddPolicy(ViewDoctors, p => p.RequireRole(
+            Roles.SystemAdmin, Roles.FacilityAdmin, Roles.DataEntry));
 
         // More policies are added as modules are built, for example:
         // ManageUsers, ManageClinics, ManageMedicines, EnterPatientData, ViewReports

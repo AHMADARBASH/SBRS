@@ -47,6 +47,10 @@ namespace SBRS.Infrastructure.Persistence
         public DbSet<DisabilityReasonEntity> DisabilityReasons => Set<DisabilityReasonEntity>();
         public DbSet<ChronicDiseaseEntity> ChronicDiseases => Set<ChronicDiseaseEntity>();
         public DbSet<EducationIssueEntity> EducationIssues => Set<EducationIssueEntity>();
+        public DbSet<ClinicTypeEntity> ClinicTypes => Set<ClinicTypeEntity>();
+        public DbSet<ClinicEntity> Clinics => Set<ClinicEntity>();
+        public DbSet<DoctorEntity> Doctors => Set<DoctorEntity>();
+        public DbSet<ClinicDoctorEntity> ClinicDoctors => Set<ClinicDoctorEntity>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

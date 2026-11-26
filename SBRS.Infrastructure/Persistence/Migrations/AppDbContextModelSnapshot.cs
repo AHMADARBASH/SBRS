@@ -1202,6 +1202,159 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("chronic_diseases", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.ClinicDoctorEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClinicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clinic_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("doctor_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_clinic_doctors");
+
+                    b.HasIndex("ClinicId")
+                        .HasDatabaseName("ix_clinic_doctors_clinic_id");
+
+                    b.HasIndex("DoctorId")
+                        .HasDatabaseName("ix_clinic_doctors_doctor_id");
+
+                    b.HasIndex("ClinicId", "DoctorId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_clinic_doctors_clinic_id_doctor_id");
+
+                    b.ToTable("clinic_doctors", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.ClinicEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClinicTypeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clinic_type_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_clinics");
+
+                    b.HasIndex("ClinicTypeId")
+                        .HasDatabaseName("ix_clinics_clinic_type_id");
+
+                    b.HasIndex("FacilityId")
+                        .HasDatabaseName("ix_clinics_facility_id");
+
+                    b.HasIndex("FacilityId", "ClinicTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_clinics_facility_id_clinic_type_id");
+
+                    b.ToTable("clinics", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.ClinicTypeEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ArName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ar_name");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EnName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("en_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_clinic_types");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_clinic_types_code");
+
+                    b.ToTable("clinic_types", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.DisabilityReasonEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1300,6 +1453,61 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_disability_types_en_name");
 
                     b.ToTable("disability_types", (string)null);
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.DoctorEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_doctors");
+
+                    b.HasIndex("FacilityId")
+                        .HasDatabaseName("ix_doctors_facility_id");
+
+                    b.HasIndex("LastName")
+                        .HasDatabaseName("ix_doctors_last_name");
+
+                    b.ToTable("doctors", (string)null);
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.EducationIssueEntity", b =>
@@ -2425,6 +2633,56 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_branches_organizations_organization_id");
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.ClinicDoctorEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.ClinicEntity", "Clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_clinic_doctors_clinics_clinic_id");
+
+                    b.HasOne("SBRS.Domain.Entities.DoctorEntity", "Doctor")
+                        .WithMany("ClinicDoctors")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_clinic_doctors_doctors_doctor_id");
+
+                    b.Navigation("Clinic");
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.ClinicEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.ClinicTypeEntity", "ClinicType")
+                        .WithMany()
+                        .HasForeignKey("ClinicTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_clinics_clinic_types_clinic_type_id");
+
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_clinics_facilities_facility_id");
+
+                    b.Navigation("ClinicType");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.DoctorEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_doctors_facilities_facility_id");
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.FacilityBeneficiaryEntity", b =>
                 {
                     b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", null)
@@ -2539,6 +2797,11 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_asp_net_users_user_id");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.DoctorEntity", b =>
+                {
+                    b.Navigation("ClinicDoctors");
                 });
 #pragma warning restore 612, 618
         }
