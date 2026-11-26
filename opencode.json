@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    { "action": "*", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": "docs/*", "effect": "deny" },
+    { "action": "read", "resource": "docs/**", "effect": "deny" },
+    { "action": "read", "resource": "*.md", "effect": "deny" },
+    { "action": "read", "resource": "**/*.md", "effect": "deny" },
+    { "action": "read", "resource": "*openapi*.json", "effect": "deny" },
+    { "action": "read", "resource": "*swagger*.json", "effect": "deny" },
+    { "action": "edit", "resource": "docs/*", "effect": "deny" },
+    { "action": "edit", "resource": "docs/**", "effect": "deny" },
+    { "action": "edit", "resource": "*.md", "effect": "deny" },
+    { "action": "edit", "resource": "**/*.md", "effect": "deny" },
+    { "action": "edit", "resource": "*openapi*.json", "effect": "deny" },
+    { "action": "edit", "resource": "*swagger*.json", "effect": "deny" },
+    { "action": "read", "resource": "AGENTS.md", "effect": "allow" },
+    { "action": "read", "resource": ".opencode/skills/*", "effect": "allow" },
+    { "action": "edit", "resource": "AGENTS.md", "effect": "allow" },
+    { "action": "edit", "resource": ".opencode/skills/*", "effect": "allow" }
+  ]
+}

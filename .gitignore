@@ -24,6 +24,9 @@ secrets.json
 # Logs
 *.log
 
+# Generated project map (tooling output, not tracked)
+.opencode/project-map/
+
 #local assets
 local Assets/
 
