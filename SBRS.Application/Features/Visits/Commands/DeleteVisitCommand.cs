@@ -31,6 +31,8 @@ public sealed class DeleteVisitCommandHandler(
         visit.Deactivate();
         foreach (var consultation in await consultations.GetActiveByVisitIdAsync(c.Id, ct))
             consultation.Deactivate();
+        foreach (var detail in await consultations.GetActiveDetailsByVisitIdAsync(c.Id, ct))
+            detail.Deactivate();
 
         await unitOfWork.SaveChangesAsync(ct);
     }

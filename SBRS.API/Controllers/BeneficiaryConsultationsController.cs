@@ -25,7 +25,8 @@ public class BeneficiaryConsultationsController(ISender sender, ICurrentUser cur
         CancellationToken ct)
     {
         var dto = await sender.Send(new AddBeneficiaryConsultationCommand(
-            FacilityId, body.ConsultationDate, body.VisitId, body.ClinicId, body.DoctorId), ct);
+            FacilityId, body.ConsultationDate, body.VisitId, body.ClinicId, body.DoctorId,
+            body.DiseaseIds), ct);
         return StatusCode(StatusCodes.Status201Created, dto);
     }
 
@@ -34,7 +35,8 @@ public class BeneficiaryConsultationsController(ISender sender, ICurrentUser cur
     public async Task<ActionResult<BeneficiaryConsultationDto>> Update(UpdateBeneficiaryConsultationRequest body,
         CancellationToken ct) =>
         Ok(await sender.Send(new UpdateBeneficiaryConsultationCommand(
-            body.Id, FacilityId, body.ConsultationDate, body.ClinicId, body.DoctorId), ct));
+            body.Id, FacilityId, body.ConsultationDate, body.ClinicId, body.DoctorId,
+            body.DiseaseIds), ct));
 
     [Authorize(Policy = Policies.DeleteConsultations)]
     [HttpDelete("Delete/{id:guid}")]

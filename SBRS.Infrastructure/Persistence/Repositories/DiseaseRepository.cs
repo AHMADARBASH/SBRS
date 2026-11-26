@@ -9,6 +9,18 @@ public class DiseaseRepository(AppDbContext db) : IDiseaseRepository
     public Task<DiseaseEntity?> GetByIdAsync(Guid id, CancellationToken ct) =>
         db.Diseases.Include(d => d.DiseaseCategory).FirstOrDefaultAsync(d => d.Id == id, ct);
 
+    public async Task<IReadOnlyList<DiseaseEntity>> GetByIdsAsync(IReadOnlyCollection<Guid> ids,
+        CancellationToken ct)
+    {
+        if (ids.Count == 0) return [];
+
+        var idList = ids.Distinct().ToList();
+        return await db.Diseases.AsNoTracking()
+            .Include(d => d.DiseaseCategory)
+            .Where(d => idList.Contains(d.Id))
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<DiseaseEntity>> GetAllAsync(Guid? diseaseCategoryId, CancellationToken ct) =>
         await db.Diseases.AsNoTracking()
             .Include(d => d.DiseaseCategory)

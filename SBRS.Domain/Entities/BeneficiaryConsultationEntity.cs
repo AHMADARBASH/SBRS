@@ -28,6 +28,10 @@ public class BeneficiaryConsultationEntity : BaseEntity
     public ClinicEntity Clinic { get; private set; } = default!;
     public DoctorEntity Doctor { get; private set; } = default!;
 
+    // Loaded with Include only where a query needs the diseases of the consultation.
+    public ICollection<BeneficiaryConsultationDetailEntity> ConsultationDetails { get; private set; }
+        = new List<BeneficiaryConsultationDetailEntity>();
+
     public void Update(DateTime consultationDate, Guid clinicId, Guid doctorId) =>
         SetValues(consultationDate, clinicId, doctorId);
 

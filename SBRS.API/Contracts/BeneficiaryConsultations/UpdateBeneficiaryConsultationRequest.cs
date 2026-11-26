@@ -4,4 +4,5 @@ public sealed record UpdateBeneficiaryConsultationRequest(
     Guid Id,
     DateTime ConsultationDate,
     Guid ClinicId,
-    Guid DoctorId);
+    Guid DoctorId,
+    IReadOnlyList<Guid>? DiseaseIds);

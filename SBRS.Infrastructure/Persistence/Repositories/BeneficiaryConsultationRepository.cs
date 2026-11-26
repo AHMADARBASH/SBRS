@@ -9,7 +9,9 @@ public class BeneficiaryConsultationRepository(AppDbContext db) : IBeneficiaryCo
     private static IQueryable<BeneficiaryConsultationEntity> WithDetails(
         IQueryable<BeneficiaryConsultationEntity> query) =>
         query.Include(c => c.Clinic).ThenInclude(cl => cl.ClinicType)
-             .Include(c => c.Doctor);
+             .Include(c => c.Doctor)
+             .Include(c => c.ConsultationDetails.Where(d => d.IsActive))
+                .ThenInclude(d => d.Disease).ThenInclude(d => d.DiseaseCategory);
 
     private IQueryable<BeneficiaryConsultationEntity> Scoped(Guid facilityId) =>
         db.BeneficiaryConsultations.Where(c =>
@@ -62,4 +64,20 @@ public class BeneficiaryConsultationRepository(AppDbContext db) : IBeneficiaryCo
 
     public async Task AddAsync(BeneficiaryConsultationEntity consultation, CancellationToken ct) =>
         await db.BeneficiaryConsultations.AddAsync(consultation, ct);
+
+    public async Task<IReadOnlyList<BeneficiaryConsultationDetailEntity>> GetDetailsByConsultationIdAsync(
+        Guid consultationId, CancellationToken ct) =>
+        await db.BeneficiaryConsultationDetails
+            .Where(d => d.BeneficiaryConsultationId == consultationId)
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<BeneficiaryConsultationDetailEntity>> GetActiveDetailsByVisitIdAsync(
+        Guid visitId, CancellationToken ct) =>
+        await db.BeneficiaryConsultationDetails
+            .Where(d => d.IsActive && db.BeneficiaryConsultations.Any(
+                c => c.Id == d.BeneficiaryConsultationId && c.VisitId == visitId))
+            .ToListAsync(ct);
+
+    public async Task AddDetailAsync(BeneficiaryConsultationDetailEntity detail, CancellationToken ct) =>
+        await db.BeneficiaryConsultationDetails.AddAsync(detail, ct);
 }

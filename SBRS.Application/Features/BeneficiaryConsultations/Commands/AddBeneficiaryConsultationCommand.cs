@@ -3,6 +3,7 @@ using MediatR;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Features.BeneficiaryConsultations.DTOs;
 using SBRS.Application.Features.BeneficiaryConsultations.Mappings;
+using SBRS.Application.Features.Diseases.Mappings;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 
@@ -13,7 +14,8 @@ public sealed record AddBeneficiaryConsultationCommand(
     DateTime ConsultationDate,
     Guid VisitId,
     Guid ClinicId,
-    Guid DoctorId) : IRequest<BeneficiaryConsultationDto>;
+    Guid DoctorId,
+    IReadOnlyList<Guid>? DiseaseIds) : IRequest<BeneficiaryConsultationDto>;
 
 public sealed class AddBeneficiaryConsultationCommandValidator
     : AbstractValidator<AddBeneficiaryConsultationCommand>
@@ -25,6 +27,12 @@ public sealed class AddBeneficiaryConsultationCommandValidator
         RuleFor(x => x.ClinicId).NotEmpty();
         RuleFor(x => x.DoctorId).NotEmpty();
         RuleFor(x => x.ConsultationDate).NotEmpty();
+        RuleFor(x => x.DiseaseIds)
+            .Must(ids => ids is null || ids.Distinct().Count() == ids.Count)
+            .WithMessage("The same disease cannot be listed twice.");
+        RuleForEach(x => x.DiseaseIds)
+            .Must(id => id != Guid.Empty)
+            .WithMessage("Disease id cannot be empty.");
     }
 }
 
@@ -33,6 +41,7 @@ public sealed class AddBeneficiaryConsultationCommandHandler(
     IClinicRepository clinics,
     IDoctorRepository doctors,
     IClinicDoctorRepository links,
+    IDiseaseRepository diseaseRepository,
     IBeneficiaryConsultationRepository consultations,
     IUnitOfWork unitOfWork) : IRequestHandler<AddBeneficiaryConsultationCommand, BeneficiaryConsultationDto>
 {
@@ -47,11 +56,18 @@ public sealed class AddBeneficiaryConsultationCommandHandler(
         if (await consultations.ExistsAsync(visit.Id, clinic.Id, doctor.Id, null, ct))
             throw new ConflictException("This consultation already exists for the visit, clinic and doctor.");
 
+        var diseases = await ConsultationRules.GetDiseasesAsync(c.DiseaseIds ?? [], diseaseRepository, ct);
+
         var consultation = new BeneficiaryConsultationEntity(
             c.ConsultationDate, visit.Id, clinic.Id, doctor.Id);
         await consultations.AddAsync(consultation, ct);
+
+        foreach (var disease in diseases)
+            await consultations.AddDetailAsync(
+                new BeneficiaryConsultationDetailEntity(consultation.Id, disease.Id), ct);
+
         await unitOfWork.SaveChangesAsync(ct);
 
-        return consultation.ToDto(clinic, doctor);
+        return consultation.ToDto(clinic, doctor, diseases.Select(d => d.ToDto()).ToList());
     }
 }

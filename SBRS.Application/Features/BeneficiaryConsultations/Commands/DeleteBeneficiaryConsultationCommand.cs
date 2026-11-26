@@ -28,6 +28,12 @@ public sealed class DeleteBeneficiaryConsultationCommandHandler(
                            ?? throw new NotFoundException(nameof(BeneficiaryConsultationEntity), c.Id);
 
         consultation.Deactivate();
+        foreach (var detail in await consultations.GetDetailsByConsultationIdAsync(c.Id, ct))
+        {
+            if (detail.IsActive)
+                detail.Deactivate();
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
     }
 }

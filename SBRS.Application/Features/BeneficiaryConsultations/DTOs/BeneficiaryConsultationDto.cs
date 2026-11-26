@@ -1,3 +1,5 @@
+using SBRS.Application.Features.Diseases.DTOs;
+
 namespace SBRS.Application.Features.BeneficiaryConsultations.DTOs;
 
 public sealed record BeneficiaryConsultationDto(
@@ -10,4 +12,5 @@ public sealed record BeneficiaryConsultationDto(
     string ClinicEnName,
     Guid DoctorId,
     string DoctorFirstName,
-    string DoctorLastName);
+    string DoctorLastName,
+    IReadOnlyList<DiseaseDto> Diseases);

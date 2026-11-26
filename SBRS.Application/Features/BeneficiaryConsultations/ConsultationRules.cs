@@ -29,4 +29,20 @@ public static class ConsultationRules
 
         return (clinic, doctor);
     }
+
+    public static async Task<IReadOnlyList<DiseaseEntity>> GetDiseasesAsync(IReadOnlyList<Guid> ids,
+        IDiseaseRepository diseases, CancellationToken ct)
+    {
+        var distinct = ids.Distinct().ToList();
+        var found = await diseases.GetByIdsAsync(distinct, ct);
+        var byId = found.ToDictionary(d => d.Id);
+
+        foreach (var id in distinct)
+        {
+            if (!byId.ContainsKey(id))
+                throw new NotFoundException(nameof(DiseaseEntity), id);
+        }
+
+        return found.OrderBy(d => d.Code).ToList();
+    }
 }

@@ -20,4 +20,14 @@ public interface IBeneficiaryConsultationRepository
     Task<bool> ExistsAsync(Guid visitId, Guid clinicId, Guid doctorId, Guid? excludeId, CancellationToken ct);
 
     Task AddAsync(BeneficiaryConsultationEntity consultation, CancellationToken ct);
+
+    /// <summary>Tracked links (active and inactive) of one consultation.</summary>
+    Task<IReadOnlyList<BeneficiaryConsultationDetailEntity>> GetDetailsByConsultationIdAsync(
+        Guid consultationId, CancellationToken ct);
+
+    /// <summary>Tracked active links of all consultations of a visit (used by the visit soft delete).</summary>
+    Task<IReadOnlyList<BeneficiaryConsultationDetailEntity>> GetActiveDetailsByVisitIdAsync(
+        Guid visitId, CancellationToken ct);
+
+    Task AddDetailAsync(BeneficiaryConsultationDetailEntity detail, CancellationToken ct);
 }
