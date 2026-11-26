@@ -27,4 +27,17 @@ public class BeneficiaryIdentityEntity : BaseEntity
         IdentityTypeId = identityType.Id;
         Value = normalized;
     }
+
+    // Updates the primary identity row in place; the type's regex is applied to the normalized value.
+    public void Update(IdentityTypeEntity identityType, string? value)
+    {
+        ArgumentNullException.ThrowIfNull(identityType);
+
+        var normalized = IdentityValueNormalizer.Normalize(value);
+        if (!identityType.IsValidValue(normalized))
+            throw new DomainException($"The identity value is not valid for the identity type {identityType.Code}.");
+
+        IdentityTypeId = identityType.Id;
+        Value = normalized;
+    }
 }

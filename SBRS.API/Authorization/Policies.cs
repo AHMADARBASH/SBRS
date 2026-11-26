@@ -13,6 +13,7 @@ public static class Policies
     public const string DataEntry = "DataEntry"; // everyone who can register/search patients
 
     public const string RegisterBeneficiaries = "RegisterBeneficiaries"; // DataEntry only (SystemAdmin has no facility)
+    public const string UpdateBeneficiaryRegistration = "UpdateBeneficiaryRegistration"; // DataEntry only (own facility)
     public const string SearchBeneficiaries = "SearchBeneficiaries";     // DataEntry, FacilityAdmin, SystemAdmin
     public const string ReviewBeneficiaryMatches = "ReviewBeneficiaryMatches"; // FacilityAdmin, SystemAdmin
     public const string ViewFacilityBeneficiaries = "ViewFacilityBeneficiaries"; // DataEntry, FacilityAdmin, SystemAdmin
@@ -40,6 +41,8 @@ public static class Policies
             Roles.ProjectCoordinator, Roles.FacilityAdmin, Roles.DataEntry));
 
         options.AddPolicy(RegisterBeneficiaries, p => p.RequireRole(Roles.DataEntry));
+
+        options.AddPolicy(UpdateBeneficiaryRegistration, p => p.RequireRole(Roles.DataEntry));
 
         options.AddPolicy(SearchBeneficiaries, p => p.RequireRole(
             Roles.DataEntry, Roles.FacilityAdmin, Roles.SystemAdmin));

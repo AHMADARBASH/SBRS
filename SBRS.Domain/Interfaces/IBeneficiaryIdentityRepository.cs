@@ -16,4 +16,9 @@ public interface IBeneficiaryIdentityRepository
         IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken cancellationToken);
 
     Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken cancellationToken);
+
+    // Tracked primary identity (the oldest row) of a beneficiary, so it can be updated in place.
+    // Returns null when the beneficiary has no identity row yet.
+    Task<BeneficiaryIdentityEntity?> GetPrimaryForUpdateAsync(Guid beneficiaryId,
+        CancellationToken cancellationToken);
 }

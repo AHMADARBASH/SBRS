@@ -40,6 +40,17 @@ public class BeneficiariesController(ISender sender) : ControllerBase
             request.Gender, request.EnrollmentDate, request.AreaId, request.NationalityId,
             request.IdentityTypeId, request.IdentityValue), ct));
 
+    // Registration data is editable by DataEntry at their own facility; the code and match data
+    // are never accepted from the client. Same response shape as Register.
+    [HttpPut("{id:guid}/Registration")]
+    [Authorize(Policy = Policies.UpdateBeneficiaryRegistration)]
+    public async Task<ActionResult<RegisterBeneficiaryResultDto>> UpdateRegistration(
+        Guid id, [FromBody] UpdateBeneficiaryRegistrationRequest request, CancellationToken ct) =>
+        Ok(await sender.Send(new UpdateBeneficiaryRegistrationCommand(id, request.FirstName,
+            request.FatherName, request.LastName, request.MotherName, request.BirthDate,
+            request.IsBirthDateEstimated, request.Gender, request.AreaId, request.NationalityId,
+            request.IdentityTypeId, request.IdentityValue), ct));
+
     // No body: the facility is always the caller's facility, never supplied by the client.
     [HttpPost("{id:guid}/EnrollHere")]
     [Authorize(Policy = Policies.EnrollBeneficiaries)]

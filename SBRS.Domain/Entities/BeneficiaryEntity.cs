@@ -98,6 +98,38 @@ public class BeneficiaryEntity : BaseEntity
         MatchKey = key.MatchKey;
     }
 
+    // Editable registration form fields. Code, FullCode, RegistrationFacilityId, EnrollmentDate and
+    // audit columns are immutable; match data is never accepted from outside.
+    public void Update(string firstName, string fatherName, string lastName, string motherName,
+        DateOnly birthDate, bool isBirthDateEstimated, bool gender, Guid areaId, Guid nationalityId)
+    {
+        if (MergedIntoBeneficiaryId is not null) throw new DomainException("A merged duplicate cannot be updated.");
+        if (!IsActive) throw new DomainException("A deactivated beneficiary cannot be updated.");
+        if (areaId == Guid.Empty) throw new DomainException("Area is required.");
+        if (nationalityId == Guid.Empty) throw new DomainException("Nationality is required.");
+
+        AreaId = areaId;
+        NationalityId = nationalityId;
+        UpdateIdentity(firstName, fatherName, lastName, motherName, birthDate, isBirthDateEstimated, gender);
+    }
+
+    // Replaces the derived match data after the identity fields changed. Clears any previous review
+    // decision so the new data is checked again.
+    public void SetMatchReview(BeneficiaryMatchReviewStatus status, int disambiguator)
+    {
+        if (status is not (BeneficiaryMatchReviewStatus.NoMatchFound or BeneficiaryMatchReviewStatus.PendingReview))
+            throw new DomainException("An updated beneficiary must be NoMatchFound or PendingReview.");
+        if (disambiguator < 0) throw new DomainException("Disambiguator cannot be negative.");
+        if (disambiguator > 0 && status != BeneficiaryMatchReviewStatus.PendingReview)
+            throw new DomainException("A beneficiary with the same identity key as another one must be PendingReview.");
+
+        MatchReviewStatus = status;
+        Disambiguator = disambiguator;
+        DistinctReason = null;
+        ReviewedAt = null;
+        ReviewedBy = null;
+    }
+
     /// <summary>The facility admin checked the candidates and this is a different person.</summary>
     public void ConfirmNotAMatch(string? reason, Guid reviewedBy)
     {

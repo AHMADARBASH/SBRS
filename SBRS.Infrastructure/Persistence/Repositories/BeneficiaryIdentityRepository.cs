@@ -32,4 +32,12 @@ public class BeneficiaryIdentityRepository(AppDbContext db) : IBeneficiaryIdenti
 
     public async Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken ct) =>
         await db.BeneficiaryIdentities.AddAsync(identity, ct);
+
+    // tracked on purpose: the registration update rewrites the primary row in place
+    public Task<BeneficiaryIdentityEntity?> GetPrimaryForUpdateAsync(Guid beneficiaryId,
+        CancellationToken ct) =>
+        db.BeneficiaryIdentities
+            .Where(x => x.BeneficiaryId == beneficiaryId)
+            .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+            .FirstOrDefaultAsync(ct);
 }

@@ -24,7 +24,9 @@ internal sealed class FakeBeneficiaryRepository : IBeneficiaryRepository
     }
 
     public Task<BeneficiaryEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+        Task.FromResult(ById is not null && ById.Id == id ? ById : null);
+
+    public BeneficiaryEntity? ById { get; set; }
 
     public Task<IReadOnlyList<BeneficiaryEntity>> GetByMatchKeyAsync(string matchKey,
         CancellationToken cancellationToken) => throw new NotSupportedException();
@@ -33,7 +35,9 @@ internal sealed class FakeBeneficiaryRepository : IBeneficiaryRepository
         CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task<int> GetNextDisambiguatorAsync(string matchKey, CancellationToken ct) =>
-        throw new NotSupportedException();
+        Task.FromResult(NextDisambiguator);
+
+    public int NextDisambiguator { get; set; }
 
     public Task<IReadOnlyList<BeneficiaryEntity>> GetByExactIdentityAsync(
         IReadOnlyCollection<(Guid IdentityTypeId, string Value)> identities, Guid? excludeBeneficiaryId,
@@ -75,8 +79,15 @@ internal sealed class FakeIdentityRepository : IBeneficiaryIdentityRepository
         Task.FromResult<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>>(
             beneficiaryIds.Where(_items.ContainsKey).ToDictionary(id => id, id => _items[id]));
 
-    public Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken cancellationToken) =>
-        throw new NotSupportedException();
+    public Task<BeneficiaryIdentityEntity?> GetPrimaryForUpdateAsync(Guid beneficiaryId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(_items.TryGetValue(beneficiaryId, out var identity) ? identity : null);
+
+    public Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken cancellationToken)
+    {
+        _items[identity.BeneficiaryId] = identity;
+        return Task.CompletedTask;
+    }
 }
 
 internal sealed class FakeEnrollmentRepository : IFacilityBeneficiaryRepository
