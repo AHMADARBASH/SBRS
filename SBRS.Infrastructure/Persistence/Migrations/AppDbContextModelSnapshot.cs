@@ -2186,6 +2186,74 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("partners", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.VisitEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BeneficiaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("beneficiary_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("FacilityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("facility_id");
+
+                    b.Property<decimal?>("Height")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("height");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool?>("IsPregnant")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_pregnant");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateOnly>("VisitDate")
+                        .HasColumnType("date")
+                        .HasColumnName("visit_date");
+
+                    b.Property<decimal?>("Weight")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("weight");
+
+                    b.HasKey("Id")
+                        .HasName("pk_visits");
+
+                    b.HasIndex("BeneficiaryId")
+                        .HasDatabaseName("ix_visits_beneficiary_id");
+
+                    b.HasIndex("FacilityId")
+                        .HasDatabaseName("ix_visits_facility_id");
+
+                    b.HasIndex("FacilityId", "BeneficiaryId", "VisitDate")
+                        .HasDatabaseName("ix_visits_facility_id_beneficiary_id_visit_date");
+
+                    b.ToTable("visits", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2766,6 +2834,25 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.Navigation("Facility");
 
                     b.Navigation("Partner");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.VisitEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.BeneficiaryEntity", "Beneficiary")
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_visits_beneficiaries_beneficiary_id");
+
+                    b.HasOne("SBRS.Domain.Entities.FacilityEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_visits_facilities_facility_id");
+
+                    b.Navigation("Beneficiary");
                 });
 
             modelBuilder.Entity("SBRS.Infrastructure.Identity.ApplicationUser", b =>
