@@ -2,9 +2,11 @@ using FluentValidation;
 using MediatR;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
+using SBRS.Application.Common.Validation;
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Services;
 using SBRS.Domain.Common;
+using SBRS.Domain.Constants;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Enums;
 using SBRS.Domain.Exceptions;
@@ -19,7 +21,7 @@ public sealed record RegisterBeneficiaryCommand(
     string MotherName,
     DateOnly BirthDate,
     bool IsBirthDateEstimated,
-    bool Gender,
+    bool? Gender,
     DateOnly EnrollmentDate,
     Guid AreaId,
     Guid NationalityId,
@@ -30,24 +32,20 @@ public sealed class RegisterBeneficiaryCommandValidator : AbstractValidator<Regi
 {
     public RegisterBeneficiaryCommandValidator()
     {
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100)
-            .Must(v => ArabicTextNormalizer.Normalize(v).Length > 0);
-        RuleFor(x => x.FatherName).NotEmpty().MaximumLength(100)
-            .Must(v => ArabicTextNormalizer.Normalize(v).Length > 0);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100)
-            .Must(v => ArabicTextNormalizer.Normalize(v).Length > 0);
-        RuleFor(x => x.MotherName).NotEmpty().MaximumLength(100)
-            .Must(v => ArabicTextNormalizer.Normalize(v).Length > 0);
+        RuleFor(x => x.FirstName).NotEmpty().PersonName("First name");
+        RuleFor(x => x.FatherName).NotEmpty().PersonName("Father name");
+        RuleFor(x => x.LastName).NotEmpty().PersonName("Last name");
+        RuleFor(x => x.MotherName).NotEmpty().PersonName("Mother name");
 
-        RuleFor(x => x).Must(x =>
-        {
-            var resolved = BeneficiaryBirthDate.Resolve(x.BirthDate, x.IsBirthDateEstimated);
-            return resolved.Year >= 1900 && resolved <= DateOnly.FromDateTime(DateTime.UtcNow);
-        }).WithMessage("Birth date is invalid.");
+        RuleFor(x => x.BirthDate)
+            .Must((x, date) => BeneficiaryFormRules.IsValidBirthDate(date, x.IsBirthDateEstimated))
+            .WithMessage("Birth date is invalid.");
 
         RuleFor(x => x.EnrollmentDate)
-            .Must(d => d <= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)))
-            .WithMessage("Enrollment date cannot be in the future.");
+            .Must((x, date) => BeneficiaryFormRules.IsValidEnrollmentDate(x.BirthDate, date, x.IsBirthDateEstimated))
+            .WithMessage("Enrollment date cannot be before the birth date or in the future.");
+
+        RuleFor(x => x.Gender).NotNull().WithMessage("Gender is required.");
 
         RuleFor(x => x.AreaId).NotEmpty();
         RuleFor(x => x.NationalityId).NotEmpty();
@@ -93,8 +91,21 @@ public sealed class RegisterBeneficiaryCommandHandler(
             ?? throw new DomainException("The selected identity type does not exist.");
 
         var identityValue = IdentityValueNormalizer.Normalize(request.IdentityValue);
-        if (!identityType.IsValidValue(identityValue))
+        if (identityType.Code == IdentityTypeCodes.Unregistered)
+        {
+            if (identityValue.Length > 0)
+                throw new DomainException("The identity value must be empty for the unregistered identity type.");
+        }
+        else if (identityValue.Length == 0)
+        {
+            throw new DomainException("The identity value is required for this identity type.");
+        }
+        else if (!identityType.IsValidValue(identityValue))
+        {
             throw new DomainException($"The identity value is not valid for the identity type {identityType.Code}.");
+        }
+
+        var gender = request.Gender ?? throw new DomainException("Gender is required.");
 
         var birthDate = BeneficiaryBirthDate.Resolve(request.BirthDate, request.IsBirthDateEstimated);
         var key = BeneficiaryIdentityKey.From(request.FirstName, request.FatherName, request.LastName,
@@ -128,7 +139,7 @@ public sealed class RegisterBeneficiaryCommandHandler(
 
             var beneficiary = new BeneficiaryEntity(
                 request.FirstName, request.FatherName, request.LastName, request.MotherName,
-                birthDate, request.IsBirthDateEstimated, request.Gender, request.EnrollmentDate,
+                birthDate, request.IsBirthDateEstimated, gender, request.EnrollmentDate,
                 request.AreaId, request.NationalityId,
                 code, fullCode, facilityId, disambiguator, reviewStatus);
 

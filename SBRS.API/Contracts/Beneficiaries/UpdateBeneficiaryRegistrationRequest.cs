@@ -8,8 +8,8 @@ public sealed record UpdateBeneficiaryRegistrationRequest(
     DateOnly BirthDate,
     bool IsBirthDateEstimated,
 
-    // true (1) = Male, false (0) = Female.
-    bool Gender,
+    // true (1) = Male, false (0) = Female; must be sent explicitly.
+    bool? Gender,
     Guid AreaId,
     Guid NationalityId,
     Guid IdentityTypeId,

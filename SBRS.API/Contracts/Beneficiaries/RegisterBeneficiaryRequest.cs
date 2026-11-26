@@ -10,8 +10,8 @@ public sealed record RegisterBeneficiaryRequest(
     DateOnly BirthDate,
     bool IsBirthDateEstimated,
 
-    /// <summary>true (1) = Male, false (0) = Female.</summary>
-    bool Gender,
+    // true (1) = Male, false (0) = Female.
+    bool? Gender,
     DateOnly EnrollmentDate,
     Guid AreaId,
     Guid NationalityId,

@@ -8,8 +8,8 @@ using SBRS.Infrastructure.Persistence.Seed;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-///testing the pipeline  2
-///testing the issuer and audience problem at production
+//testing the pipeline  2
+//testing the issuer and audience problem at production
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

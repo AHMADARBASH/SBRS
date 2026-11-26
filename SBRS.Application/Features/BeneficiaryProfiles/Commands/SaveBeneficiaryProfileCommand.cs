@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using SBRS.Application.Common.Exceptions;
 using SBRS.Application.Common.Interfaces;
+using SBRS.Application.Common.Validation;
 using SBRS.Application.Features.BeneficiaryProfiles.DTOs;
 using SBRS.Application.Features.BeneficiaryProfiles.Mappings;
 using SBRS.Domain.Constants;
@@ -34,23 +35,6 @@ public sealed record SaveBeneficiaryProfileCommand(
     short? WivesNumber,
     short? ChildrenNumber) : IRequest<SaveBeneficiaryProfileResult>;
 
-/// <summary>Arabic-Indic / Eastern-Arabic-Indic digits to ASCII, trim, empty is null (matches «phone» rules).</summary>
-public static class PhoneNumberNormalizer
-{
-    public static string? Normalize(string? value)
-    {
-        var trimmed = value?.Trim();
-        if (string.IsNullOrEmpty(trimmed)) return null;
-
-        return new string(trimmed.Select(c => c switch
-        {
-            >= '\u0660' and <= '\u0669' => (char)(c - '\u0660' + '0'),   // Arabic-Indic ٠..٩
-            >= '\u06F0' and <= '\u06F9' => (char)(c - '\u06F0' + '0'),   // Eastern ۰..۹
-            _ => c,
-        }).ToArray());
-    }
-}
-
 public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<SaveBeneficiaryProfileCommand>
 {
     public SaveBeneficiaryProfileCommandValidator()
@@ -66,45 +50,45 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
         RuleFor(x => x.EducationIssueId).NotEmpty()
             .When(x => x.EducationIssueId.HasValue);
 
-        // phones: optional, converted, format checked; phone 2 needs phone 1 and must differ
-        RuleFor(x => x.PhoneNumber1).MaximumLength(20)
-            .Must(v => v is null || MatchesPhonePattern(v))
-            .WithMessage("Phone number 1 is not valid.");
-        RuleFor(x => x.PhoneNumber2).MaximumLength(20)
-            .Must(v => v is null || MatchesPhonePattern(v))
-            .WithMessage("Phone number 2 is not valid.");
+        // phones: optional, canonical local format, phone 2 needs phone 1 and must differ after conversion
+        RuleFor(x => x.PhoneNumber1).SyrianPhone("Phone number 1");
+        RuleFor(x => x.PhoneNumber2).SyrianPhone("Phone number 2");
         RuleFor(x => x).Must(x => string.IsNullOrWhiteSpace(x.PhoneNumber2) ||
-                               !string.IsNullOrWhiteSpace(x.PhoneNumber1))
-            .WithMessage("Phone number 2 cannot be set without phone number 1.");
+                                  !string.IsNullOrWhiteSpace(x.PhoneNumber1))
+            .WithMessage("Phone number 2 cannot be set without phone number 1.")
+            .OverridePropertyName(nameof(SaveBeneficiaryProfileCommand.PhoneNumber2));
         RuleFor(x => x).Must(x =>
             {
                 var (p1, p2) = (PhoneNumberNormalizer.Normalize(x.PhoneNumber1),
                                 PhoneNumberNormalizer.Normalize(x.PhoneNumber2));
                 return p2 is null || p1 is null || p1 != p2;
             })
-            .WithMessage("Phone number 2 must differ from phone number 1.");
+            .WithMessage("Phone number 2 must differ from phone number 1.")
+            .OverridePropertyName(nameof(SaveBeneficiaryProfileCommand.PhoneNumber2));
 
-        // displacement: nothing may remain when not displaced; future date rejected
+        // displacement: nothing may remain when not displaced; both fields are required when displaced
         RuleFor(x => x.DisplacementDate).Null().When(x => !x.IsDisplaced)
             .WithMessage("A beneficiary that is not displaced cannot have a displacement date.");
         RuleFor(x => x.OldAreaId).Null().When(x => !x.IsDisplaced)
             .WithMessage("A beneficiary that is not displaced cannot have an old area.");
+        RuleFor(x => x.DisplacementDate).NotNull().When(x => x.IsDisplaced)
+            .WithMessage("Displacement date is required for a displaced beneficiary.");
         RuleFor(x => x.OldAreaId).NotEmpty().When(x => x.IsDisplaced)
             .WithMessage("Old area is required for a displaced beneficiary.");
         RuleFor(x => x.DisplacementDate)
-            .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow))
-            .When(x => x.IsDisplaced && x.DisplacementDate.HasValue)
+            .Must(d => BeneficiaryFormRules.IsValidDisplacementDate(d))
+            .When(x => x.DisplacementDate.HasValue)
             .WithMessage("Displacement date cannot be in the future.");
         // "not before the beneficiary's birth date" needs the beneficiary row: the handler checks it.
 
-        RuleFor(x => x.CurrentWork).MaximumLength(200);
-        RuleFor(x => x.PreviousWork).MaximumLength(200);
+        RuleFor(x => x.CurrentWork).WorkText("Current work");
+        RuleFor(x => x.PreviousWork).WorkText("Previous work");
 
         // counts: the marital-status and gender rules need the lookup code (handler);
         // only the ranges are structural
-        RuleFor(x => x.WivesNumber).InclusiveBetween((short)1, (short)4)
+        RuleFor(x => x.WivesNumber).InclusiveBetween((short)0, (short)4)
             .When(x => x.WivesNumber.HasValue)
-            .WithMessage("Wives number must be between 1 and 4.");
+            .WithMessage("Wives number must be between 0 and 4.");
         RuleFor(x => x.ChildrenNumber).InclusiveBetween((short)0, (short)30)
             .When(x => x.ChildrenNumber.HasValue)
             .WithMessage("Children number must be between 0 and 30.");
@@ -112,6 +96,8 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
         // disabilities: rows only while disabled, each with type and reason, no duplicate types
         RuleFor(x => x.Disabilities).NotEmpty().When(x => x.IsDisabled)
             .WithMessage("At least one disability is required when the beneficiary is disabled.");
+        RuleFor(x => x.Disabilities).Must(d => d is null || d.Count <= BeneficiaryFormRules.MaxDisabilities)
+            .WithMessage("At most 20 disabilities can be reported.");
         RuleForEach(x => x.Disabilities).ChildRules(d =>
         {
             d.RuleFor(i => i.DisabilityTypeId).NotEmpty();
@@ -123,17 +109,15 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
         RuleFor(x => x.Disabilities).Must(d => d is null || d.Count == 0).When(x => !x.IsDisabled)
             .WithMessage("Disabilities can only be reported for a disabled beneficiary.");
 
-        // chronic diseases: optional, ids distinct (existence is checked by the handler)
+        // chronic diseases: optional, no empty ids, distinct, capped (existence is checked by the handler)
+        RuleFor(x => x.ChronicDiseaseIds).Must(ids => ids is null || ids.All(id => id != Guid.Empty))
+            .WithMessage("Chronic disease ids cannot be empty.");
+        RuleFor(x => x.ChronicDiseaseIds)
+            .Must(ids => ids is null || ids.Count <= BeneficiaryFormRules.MaxChronicDiseases)
+            .WithMessage("At most 30 chronic diseases can be reported.");
         RuleFor(x => x.ChronicDiseaseIds).Must(ids => ids is null ||
                 ids.Distinct().Count() == ids.Count)
             .WithMessage("The same chronic disease cannot appear twice.");
-    }
-
-    private static bool MatchesPhonePattern(string value)
-    {
-        var normalized = PhoneNumberNormalizer.Normalize(value);
-        if (normalized is null) return true;   // empty resolves to null (the handler drops it)
-        return System.Text.RegularExpressions.Regex.IsMatch(normalized, @"^\+?[0-9]{7,15}$");
     }
 }
 
@@ -154,13 +138,6 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
     IUnitOfWork unitOfWork)
     : IRequestHandler<SaveBeneficiaryProfileCommand, SaveBeneficiaryProfileResult>
 {
-    /// <summary>
-    /// Marital statuses whose Code may report relationship counts. Extend this single place
-    /// (e.g. divorced) instead of adding new if-chains — the rules key on the stable Code.
-    /// </summary>
-    private static readonly HashSet<string> StatusesAllowingChildrenNumber = [MaritalStatusCodes.Married];
-    private static readonly HashSet<string> StatusesAllowingWivesNumber = [MaritalStatusCodes.Married];
-
     public async Task<SaveBeneficiaryProfileResult> Handle(SaveBeneficiaryProfileCommand command,
         CancellationToken cancellationToken)
     {
@@ -286,11 +263,12 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
 
         if (command.WivesNumber is not null)
         {
-            if (!StatusesAllowingWivesNumber.Contains(marital.Code) || !beneficiary.Gender)
+            if (!BeneficiaryFormRules.AllowsWivesNumber(marital.Code, beneficiary.Gender))
                 throw new DomainException("Wives number can only be set for a married male beneficiary.");
         }
 
-        if (command.ChildrenNumber is not null && !StatusesAllowingChildrenNumber.Contains(marital.Code))
+        if (command.ChildrenNumber is not null &&
+            !BeneficiaryFormRules.AllowsChildrenNumber(marital.Code))
             throw new DomainException("Children number can only be set for a married beneficiary.");
     }
 
