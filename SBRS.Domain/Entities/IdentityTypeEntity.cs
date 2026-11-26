@@ -10,15 +10,20 @@ public class IdentityTypeEntity : BaseEntity
 
     private IdentityTypeEntity() { }   // EF
 
-    public IdentityTypeEntity(string arName, string enName, string code, string valueRegex = "")
+    public IdentityTypeEntity(string arName, string enName, string code,
+        string valueRegex = "", int displayIndex = 0)
     {
         Set(arName, enName, code);
         if (!string.IsNullOrEmpty(valueRegex)) SetValueRegex(valueRegex);
+        DisplayIndex = displayIndex;
     }
 
     public string ArName { get; private set; } = default!;
     public string EnName { get; private set; } = default!;
     public string Code { get; private set; } = default!;
+
+    /// <summary>Display order used by clients; lower values come first.</summary>
+    public int DisplayIndex { get; private set; }
 
     /// <summary>.NET regex the identity value must match (after normalization).</summary>
     public string ValueRegex { get; private set; } = string.Empty;

@@ -21,8 +21,11 @@ public class IdentityTypeRepository(AppDbContext db) : IIdentityTypeRepository
     }
 
     public async Task<IReadOnlyList<IdentityTypeEntity>> GetAllAsync(CancellationToken ct) =>
+        // index 0 means "not ordered yet" (legacy rows), so seeded explicit indexes come first.
         await db.IdentityTypes.AsNoTracking()
-            .OrderBy(i => i.Code)
+            .OrderBy(i => i.DisplayIndex == 0 ? 1 : 0)
+            .ThenBy(i => i.DisplayIndex)
+            .ThenBy(i => i.Code)
             .ToListAsync(ct);
 
     public Task<bool> EnNameExistsAsync(string enName, Guid? excludeId, CancellationToken ct) =>

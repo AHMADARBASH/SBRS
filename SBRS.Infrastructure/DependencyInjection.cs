@@ -80,6 +80,7 @@ services.AddScoped<IFacilityCategoryRepository, FacilityCategoryRepository>();
         services.AddScoped<IEducationIssueRepository, EducationIssueRepository>();
         services.AddScoped<OrganizationSeeder>();
         services.AddScoped<ReferenceDataSeeder>();
+        services.AddScoped<IdentityTypeSeeder>();
         services.AddScoped<BranchSeeder>();
         services.AddScoped<IPartnerRepository, PartnerRepository>();
         services.AddScoped<IFacilityPartnerRepository, FacilityPartnerRepository>();

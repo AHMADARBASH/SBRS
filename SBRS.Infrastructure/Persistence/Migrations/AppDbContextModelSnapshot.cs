@@ -2205,6 +2205,10 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<int>("DisplayIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_index");
+
                     b.Property<string>("EnName")
                         .IsRequired()
                         .HasMaxLength(100)
