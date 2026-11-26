@@ -42,7 +42,7 @@ public class BeneficiariesController(ISender sender) : ControllerBase
 
     // Registration data is editable by DataEntry at their own facility; the code and match data
     // are never accepted from the client. Same response shape as Register.
-    [HttpPut("{id:guid}/Registration")]
+    [HttpPut("{id:guid}/UpdateRegistration")]
     [Authorize(Policy = Policies.UpdateBeneficiaryRegistration)]
     public async Task<ActionResult<RegisterBeneficiaryResultDto>> UpdateRegistration(
         Guid id, [FromBody] UpdateBeneficiaryRegistrationRequest request, CancellationToken ct) =>
