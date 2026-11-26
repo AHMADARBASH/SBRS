@@ -29,6 +29,10 @@ public static class Policies
     public const string UpdateVisits = "UpdateVisits";                 // DataEntry only
     public const string DeleteVisits = "DeleteVisits";                 // DataEntry only
     public const string ViewVisits = "ViewVisits";                     // DataEntry only
+    public const string RecordConsultations = "RecordConsultations";   // DataEntry only
+    public const string UpdateConsultations = "UpdateConsultations";   // DataEntry only
+    public const string DeleteConsultations = "DeleteConsultations";   // DataEntry only
+    public const string ViewConsultations = "ViewConsultations";       // DataEntry only
 
     public static void Configure(AuthorizationOptions options)
     {
@@ -92,6 +96,14 @@ public static class Policies
         options.AddPolicy(DeleteVisits, p => p.RequireRole(Roles.DataEntry));
 
         options.AddPolicy(ViewVisits, p => p.RequireRole(Roles.DataEntry));
+
+        options.AddPolicy(RecordConsultations, p => p.RequireRole(Roles.DataEntry));
+
+        options.AddPolicy(UpdateConsultations, p => p.RequireRole(Roles.DataEntry));
+
+        options.AddPolicy(DeleteConsultations, p => p.RequireRole(Roles.DataEntry));
+
+        options.AddPolicy(ViewConsultations, p => p.RequireRole(Roles.DataEntry));
 
         // More policies are added as modules are built, for example:
         // ManageUsers, ManageClinics, ManageMedicines, EnterPatientData, ViewReports

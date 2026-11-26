@@ -88,6 +88,7 @@ services.AddScoped<IFacilityCategoryRepository, FacilityCategoryRepository>();
         services.AddScoped<IDoctorRepository, DoctorRepository>();
         services.AddScoped<IClinicDoctorRepository, ClinicDoctorRepository>();
         services.AddScoped<IVisitRepository, VisitRepository>();
+        services.AddScoped<IBeneficiaryConsultationRepository, BeneficiaryConsultationRepository>();
         services.AddScoped<ClinicTypeSeeder>();
 
         return services;

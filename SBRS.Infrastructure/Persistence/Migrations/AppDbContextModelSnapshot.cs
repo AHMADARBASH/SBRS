@@ -619,6 +619,64 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                     b.ToTable("beneficiary_chronic_diseases", (string)null);
                 });
 
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryConsultationEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ClinicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clinic_id");
+
+                    b.Property<DateTime>("ConsultationDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("consultation_date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("doctor_id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VisitId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("visit_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_beneficiary_consultations");
+
+                    b.HasIndex("ClinicId")
+                        .HasDatabaseName("ix_beneficiary_consultations_clinic_id");
+
+                    b.HasIndex("DoctorId")
+                        .HasDatabaseName("ix_beneficiary_consultations_doctor_id");
+
+                    b.HasIndex("VisitId")
+                        .HasDatabaseName("ix_beneficiary_consultations_visit_id");
+
+                    b.ToTable("beneficiary_consultations", (string)null);
+                });
+
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryDisabilityEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2569,6 +2627,36 @@ namespace SBRS.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_beneficiary_chronic_diseases_chronic_diseases_chronic_disea");
+                });
+
+            modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryConsultationEntity", b =>
+                {
+                    b.HasOne("SBRS.Domain.Entities.ClinicEntity", "Clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_consultations_clinics_clinic_id");
+
+                    b.HasOne("SBRS.Domain.Entities.DoctorEntity", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_consultations_doctors_doctor_id");
+
+                    b.HasOne("SBRS.Domain.Entities.VisitEntity", "Visit")
+                        .WithMany()
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_beneficiary_consultations_visits_visit_id");
+
+                    b.Navigation("Clinic");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Visit");
                 });
 
             modelBuilder.Entity("SBRS.Domain.Entities.BeneficiaryDisabilityEntity", b =>

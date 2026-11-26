@@ -17,7 +17,10 @@ public sealed class DeleteVisitCommandValidator : AbstractValidator<DeleteVisitC
     }
 }
 
-public sealed class DeleteVisitCommandHandler(IVisitRepository visits, IUnitOfWork unitOfWork)
+public sealed class DeleteVisitCommandHandler(
+    IVisitRepository visits,
+    IBeneficiaryConsultationRepository consultations,
+    IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteVisitCommand>
 {
     public async Task Handle(DeleteVisitCommand c, CancellationToken ct)
@@ -26,6 +29,9 @@ public sealed class DeleteVisitCommandHandler(IVisitRepository visits, IUnitOfWo
                     ?? throw new NotFoundException(nameof(VisitEntity), c.Id);
 
         visit.Deactivate();
+        foreach (var consultation in await consultations.GetActiveByVisitIdAsync(c.Id, ct))
+            consultation.Deactivate();
+
         await unitOfWork.SaveChangesAsync(ct);
     }
 }
