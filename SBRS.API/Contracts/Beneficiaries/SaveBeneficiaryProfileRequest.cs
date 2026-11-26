@@ -21,7 +21,11 @@ public sealed record SaveBeneficiaryProfileRequest(
     Guid? EducationIssueId,
     Guid? MaritalStatusId,              // optional: null while the answer is not known yet
     short? WivesNumber,
-    short? ChildrenNumber);
+    short? ChildrenNumber,
+    IReadOnlyList<SaveBeneficiaryProfileNewIdentityRequest>? NewIdentities);   // additions only; omitted = no change
 
 /// <summary>One disability row: which type it is and the reason id (both required).</summary>
 public sealed record SaveBeneficiaryProfileDisabilityRequest(Guid DisabilityTypeId, Guid ReasonId);
+
+/// <summary>An identity to append; the type must be new for the beneficiary.</summary>
+public sealed record SaveBeneficiaryProfileNewIdentityRequest(Guid IdentityTypeId, string? IdentityValue);

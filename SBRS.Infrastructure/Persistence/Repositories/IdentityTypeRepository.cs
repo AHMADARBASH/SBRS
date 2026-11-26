@@ -9,6 +9,17 @@ public class IdentityTypeRepository(AppDbContext db) : IIdentityTypeRepository
     public Task<IdentityTypeEntity?> GetByIdAsync(Guid id, CancellationToken ct) =>
         db.IdentityTypes.FirstOrDefaultAsync(i => i.Id == id, ct);
 
+    public async Task<IReadOnlyList<IdentityTypeEntity>> GetByIdsAsync(IReadOnlyCollection<Guid> ids,
+        CancellationToken ct)
+    {
+        if (ids.Count == 0) return [];
+
+        var idList = ids.Distinct().ToList();
+        return await db.IdentityTypes.AsNoTracking()
+            .Where(i => idList.Contains(i.Id))
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<IdentityTypeEntity>> GetAllAsync(CancellationToken ct) =>
         await db.IdentityTypes.AsNoTracking()
             .OrderBy(i => i.Code)

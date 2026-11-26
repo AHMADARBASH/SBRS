@@ -5,6 +5,7 @@ using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Common.Validation;
 using SBRS.Application.Features.BeneficiaryProfiles.DTOs;
 using SBRS.Application.Features.BeneficiaryProfiles.Mappings;
+using SBRS.Domain.Common;
 using SBRS.Domain.Constants;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Exceptions;
@@ -13,6 +14,9 @@ using SBRS.Domain.Interfaces;
 namespace SBRS.Application.Features.BeneficiaryProfiles.Commands;
 
 public sealed record SaveBeneficiaryDisabilityItem(Guid DisabilityTypeId, Guid ReasonId);
+
+/// <summary>An identity to append to the beneficiary; existing rows are never touched.</summary>
+public sealed record SaveBeneficiaryNewIdentityItem(Guid IdentityTypeId, string? IdentityValue);
 
 /// <summary>Upsert of the sensitive profile: create when none exists, full replace otherwise.</summary>
 public sealed record SaveBeneficiaryProfileCommand(
@@ -33,7 +37,8 @@ public sealed record SaveBeneficiaryProfileCommand(
     Guid? EducationIssueId,
     Guid? MaritalStatusId,              // nullable: the answer may not be known at save time
     short? WivesNumber,
-    short? ChildrenNumber) : IRequest<SaveBeneficiaryProfileResult>;
+    short? ChildrenNumber,
+    IReadOnlyList<SaveBeneficiaryNewIdentityItem>? NewIdentities) : IRequest<SaveBeneficiaryProfileResult>;
 
 public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<SaveBeneficiaryProfileCommand>
 {
@@ -118,11 +123,27 @@ public sealed class SaveBeneficiaryProfileCommandValidator : AbstractValidator<S
         RuleFor(x => x.ChronicDiseaseIds).Must(ids => ids is null ||
                 ids.Distinct().Count() == ids.Count)
             .WithMessage("The same chronic disease cannot appear twice.");
+
+        // new identities: additions only, distinct types, capped (existence/type rules run in the handler)
+        RuleFor(x => x.NewIdentities)
+            .Must(items => items is null || items.Count <= 20)
+            .WithMessage("At most 20 identities can be added at once.");
+        RuleFor(x => x.NewIdentities)
+            .Must(items => items is null ||
+                    items.Select(i => i.IdentityTypeId).Distinct().Count() == items.Count)
+            .WithMessage("The same identity type cannot be added twice.");
+        RuleForEach(x => x.NewIdentities).ChildRules(item =>
+        {
+            item.RuleFor(i => i.IdentityTypeId).NotEmpty();
+            item.RuleFor(i => i.IdentityValue).MaximumLength(30);
+        });
     }
 }
 
 public sealed class SaveBeneficiaryProfileCommandHandler(
     IBeneficiaryRepository beneficiaries,
+    IBeneficiaryIdentityRepository identities,
+    IIdentityTypeRepository identityTypes,
     IBeneficiaryProfileRepository profiles,
     IFacilityBeneficiaryRepository enrollments,
     IGeographyRepository geography,
@@ -200,6 +221,9 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
         var chronicIds = (command.ChronicDiseaseIds ?? []).ToList();
         await EnsureChronicDiseasesExistAsync(chronicIds, cancellationToken);
 
+        // Additions only: every type must exist, be new for this beneficiary and have a valid value.
+        await AddNewIdentitiesAsync(beneficiary.Id, command.NewIdentities ?? [], cancellationToken);
+
         // Phones arrive converted/trimmed; the entity trims again and enforces the same rules.
         var phone1 = PhoneNumberNormalizer.Normalize(command.PhoneNumber1);
         var phone2 = PhoneNumberNormalizer.Normalize(command.PhoneNumber2);
@@ -270,6 +294,65 @@ public sealed class SaveBeneficiaryProfileCommandHandler(
         if (command.ChildrenNumber is not null &&
             !BeneficiaryFormRules.AllowsChildrenNumber(marital.Code))
             throw new DomainException("Children number can only be set for a married beneficiary.");
+    }
+
+    /// <summary>
+    /// Appends identity rows only: existing rows are never loaded for update, deleted or reordered.
+    /// A type the beneficiary already has rejects the whole request (409) before anything is staged.
+    /// </summary>
+    private async Task AddNewIdentitiesAsync(Guid beneficiaryId,
+        IReadOnlyList<SaveBeneficiaryNewIdentityItem> requested, CancellationToken ct)
+    {
+        if (requested.Count == 0) return;
+
+        var existing = await identities.GetByBeneficiaryIdAsync(beneficiaryId, ct);
+        var existingTypeIds = existing.Select(x => x.IdentityTypeId).ToHashSet();
+
+        var types = await identityTypes.GetByIdsAsync(requested.Select(x => x.IdentityTypeId).ToList(), ct);
+        var typesById = types.ToDictionary(x => x.Id);
+
+        if (requested.Any(x => !typesById.ContainsKey(x.IdentityTypeId)))
+            throw new DomainException("One of the selected identity types does not exist.");
+
+        var requestedTypes = requested.Select(x => typesById[x.IdentityTypeId]).ToList();
+
+        var alreadyRegistered = requestedTypes
+            .Where(t => existingTypeIds.Contains(t.Id))
+            .Select(t => t.Code)
+            .Distinct()
+            .ToList();
+        if (alreadyRegistered.Count > 0)
+            throw new ConflictException(
+                $"Identity type {string.Join(", ", alreadyRegistered)} is already registered for this beneficiary.");
+
+        var addsUnregistered = requestedTypes.Any(t => t.Code == IdentityTypeCodes.Unregistered);
+        if (addsUnregistered && requested.Count > 1)
+            throw new DomainException("The unregistered identity cannot be combined with another identity.");
+        if (addsUnregistered && existing.Count > 0)
+            throw new DomainException(
+                "The unregistered identity can only be added when the beneficiary has no identity.");
+
+        foreach (var (item, type) in requested.Zip(requestedTypes))
+        {
+            var value = IdentityValueNormalizer.Normalize(item.IdentityValue);
+            if (type.Code == IdentityTypeCodes.Unregistered)
+            {
+                if (value.Length > 0)
+                    throw new DomainException(
+                        "The identity value must be empty for the unregistered identity type.");
+            }
+            else if (value.Length == 0)
+            {
+                throw new DomainException("The identity value is required for this identity type.");
+            }
+            else if (!type.IsValidValue(value))
+            {
+                throw new DomainException(
+                    $"The identity value is not valid for the identity type {type.Code}.");
+            }
+
+            await identities.AddAsync(new BeneficiaryIdentityEntity(beneficiaryId, type, value), ct);
+        }
     }
 
     private async Task EnsureDisabilitiesExistAsync(IReadOnlyList<SaveBeneficiaryDisabilityItem> items,

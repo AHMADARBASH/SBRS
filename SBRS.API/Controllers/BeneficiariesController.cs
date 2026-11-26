@@ -124,7 +124,10 @@ public class BeneficiariesController(ISender sender) : ControllerBase
             request.ChronicDiseaseIds, request.BeneficiaryStatusId,
             request.CurrentWork, request.PreviousWork,
             request.EducationTypeId, request.EducationIssueId,
-            request.MaritalStatusId, request.WivesNumber, request.ChildrenNumber), ct);
+            request.MaritalStatusId, request.WivesNumber, request.ChildrenNumber,
+            request.NewIdentities?
+                .Select(i => new SaveBeneficiaryNewIdentityItem(i.IdentityTypeId, i.IdentityValue))
+                .ToList()), ct);
 
         return result.Created
             ? CreatedAtAction(nameof(GetProfile), new { beneficiaryId }, result.Profile)

@@ -178,5 +178,5 @@ public class BeneficiaryFormRulesTests
         short? wives = null, short? children = null) =>
         new(Guid.NewGuid(), phone1, phone2, isDisplaced, displacementDate, oldAreaId, null,
             isDisabled, disabilities ?? Array.Empty<SaveBeneficiaryDisabilityItem>(), null, null,
-            null, null, null, null, null, wives, children);
+            null, null, null, null, null, wives, children, null);
 }

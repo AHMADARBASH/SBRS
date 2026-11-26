@@ -42,6 +42,11 @@ public class UpdateBeneficiaryRegistrationCommandHandlerTests
         public Task<IdentityTypeEntity?> GetByIdAsync(Guid id, CancellationToken ct) =>
             Task.FromResult<IdentityTypeEntity?>(id == identityType.Id ? identityType : null);
 
+        public Task<IReadOnlyList<IdentityTypeEntity>> GetByIdsAsync(IReadOnlyCollection<Guid> ids,
+            CancellationToken ct) =>
+            Task.FromResult<IReadOnlyList<IdentityTypeEntity>>(
+                ids.Contains(identityType.Id) ? [identityType] : []);
+
         public Task<IReadOnlyList<IdentityTypeEntity>> GetAllAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<bool> EnNameExistsAsync(string enName, Guid? excludeId, CancellationToken ct) => throw new NotSupportedException();
         public Task<bool> CodeExistsAsync(string code, Guid? excludeId, CancellationToken ct) => throw new NotSupportedException();
