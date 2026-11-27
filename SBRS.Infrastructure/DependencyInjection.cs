@@ -70,6 +70,8 @@ services.AddScoped<IFacilityCategoryRepository, FacilityCategoryRepository>();
         services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
         services.AddScoped<IEducationTypeRepository, EducationTypeRepository>();
         services.AddScoped<IBeneficiaryRepository, BeneficiaryRepository>();
+        services.AddScoped<IEnrolledBeneficiarySearchRepository>(sp =>
+            (BeneficiaryRepository)sp.GetRequiredService<IBeneficiaryRepository>());
         services.AddScoped<IFacilityBeneficiaryRepository, FacilityBeneficiaryRepository>();
         services.AddScoped<IBeneficiaryIdentityRepository, BeneficiaryIdentityRepository>();
         services.AddScoped<IBeneficiaryProfileRepository, BeneficiaryProfileRepository>();

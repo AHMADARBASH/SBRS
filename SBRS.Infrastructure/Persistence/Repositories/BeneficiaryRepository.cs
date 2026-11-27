@@ -6,7 +6,7 @@ using SBRS.Domain.Interfaces;
 
 namespace SBRS.Infrastructure.Persistence.Repositories;
 
-public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
+public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository, IEnrolledBeneficiarySearchRepository
 {
     public Task<BeneficiaryEntity?> GetByIdAsync(Guid id, CancellationToken ct) =>
         db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == id, ct);
@@ -114,8 +114,7 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
     public Task<BeneficiaryEntity?> GetByFullCodeAsync(string fullCode, CancellationToken ct) =>
         db.Beneficiaries.AsNoTracking().FirstOrDefaultAsync(x => x.FullCode == fullCode, ct);
 
-    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchAsync(BeneficiarySearchCriteria criteria, int take,
-        CancellationToken ct)
+    private IQueryable<BeneficiaryEntity> SearchQuery(BeneficiarySearchCriteria criteria)
     {
         var query = db.Beneficiaries.AsNoTracking()
             .Where(x => x.MatchReviewStatus != BeneficiaryMatchReviewStatus.MergedIntoExisting);
@@ -144,13 +143,26 @@ public class BeneficiaryRepository(AppDbContext db) : IBeneficiaryRepository
         if (criteria.BirthDate is { } birthDate)
             query = query.Where(x => x.BirthDate == birthDate);
 
-        return await query
-            .OrderBy(x => x.NormalizedLastName)
-            .ThenBy(x => x.NormalizedFirstName)
-            .ThenBy(x => x.BirthDate)
+        return query;
+    }
+
+    private static IQueryable<BeneficiaryEntity> OrderSearch(IQueryable<BeneficiaryEntity> query) =>
+        query.OrderBy(x => x.NormalizedLastName)
+             .ThenBy(x => x.NormalizedFirstName)
+             .ThenBy(x => x.BirthDate);
+
+    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchAsync(BeneficiarySearchCriteria criteria, int take,
+        CancellationToken ct) =>
+        await OrderSearch(SearchQuery(criteria)).Take(take).ToListAsync(ct);
+
+    public async Task<IReadOnlyList<BeneficiaryEntity>> SearchEnrolledAsync(BeneficiarySearchCriteria criteria,
+        Guid facilityId, int take, CancellationToken ct) =>
+        await OrderSearch(SearchQuery(criteria)
+                // same active-roster rule as GetAll: active enrollment of this facility
+                .Where(x => x.IsActive && db.FacilityBeneficiaries.Any(e =>
+                    e.BeneficiaryId == x.Id && e.FacilityId == facilityId && e.IsActive)))
             .Take(take)
             .ToListAsync(ct);
-    }
 
     public async Task<(IReadOnlyList<BeneficiaryEntity> Items, int TotalCount)> GetPagedByFacilityAsync(
         Guid facilityId, int page, int pageSize, CancellationToken ct)

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SBRS.Application.Common.Interfaces;
 using SBRS.Application.Common.Models;
 using SBRS.Application.Features.Beneficiaries.Commands;
 using SBRS.Application.Features.Beneficiaries.DTOs;
@@ -15,7 +16,7 @@ namespace SBRS.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BeneficiariesController(ISender sender) : ControllerBase
+public class BeneficiariesController(ISender sender, ICurrentUser currentUser) : ControllerBase
 {
     // POST on purpose: names and birth dates must never appear in URLs or logs.
     /// <summary>
@@ -30,6 +31,18 @@ public class BeneficiariesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new SearchBeneficiaryQuery(
             request.FullCode, request.FirstName, request.FatherName, request.LastName,
             request.MotherName, request.BirthDate), ct));
+
+    [HttpPost]
+    [Route("SearchEnrolled")]
+    [Authorize(Policy = Policies.SearchBeneficiaries)]
+    public async Task<ActionResult<BeneficiarySearchResultDto>> SearchEnrolled(
+        SearchBeneficiaryRequest request, [FromQuery] Guid? facilityId, CancellationToken ct)
+    {
+        var targetFacilityId = currentUser.IsSystemAdmin ? facilityId : currentUser.FacilityId;
+        return Ok(await sender.Send(new SearchEnrolledBeneficiaryQuery(
+            targetFacilityId ?? Guid.Empty, request.FullCode, request.FirstName, request.FatherName,
+            request.LastName, request.MotherName, request.BirthDate), ct));
+    }
 
     [HttpPost]
     [Route("Register")]
