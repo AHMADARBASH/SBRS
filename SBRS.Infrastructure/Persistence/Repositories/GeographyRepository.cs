@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SBRS.Domain.Entities;
 using SBRS.Domain.Interfaces;
 
 namespace SBRS.Infrastructure.Persistence.Repositories
@@ -29,5 +30,32 @@ namespace SBRS.Infrastructure.Persistence.Repositories
 
         public Task<AreaEntity?> GetAreaByIdAsync(Guid id, CancellationToken ct = default)
          => db.Areas.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
+
+        public async Task<IReadOnlyDictionary<Guid, AreaChainRow>> GetAreaChainsAsync(
+            IReadOnlyCollection<Guid> areaIds, CancellationToken ct = default)
+        {
+            if (areaIds.Count == 0) return new Dictionary<Guid, AreaChainRow>();
+
+            var ids = areaIds.Distinct().ToList();
+            var rows = await (
+                from area in db.Areas.AsNoTracking()
+                where ids.Contains(area.Id)
+                join district in db.Districts.AsNoTracking()
+                    on area.DistrictId equals district.Id into districts
+                from district in districts.DefaultIfEmpty()
+                join region in db.Regions.AsNoTracking()
+                    on district.RegionId equals region.Id into regions
+                from region in regions.DefaultIfEmpty()
+                join city in db.Cities.AsNoTracking()
+                    on area.CityId equals city.Id into cities
+                from city in cities.DefaultIfEmpty()
+                join country in db.Countries.AsNoTracking()
+                    on city.CountryId equals country.Id into countries
+                from country in countries.DefaultIfEmpty()
+                select new AreaChainRow(area.Id, area, district, region, city, country)
+            ).ToListAsync(ct);
+
+            return rows.ToDictionary(r => r.AreaId);
+        }
     }
 }

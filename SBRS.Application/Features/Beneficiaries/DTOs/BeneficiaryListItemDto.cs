@@ -17,4 +17,5 @@ public sealed record BeneficiaryListItemDto(
     DateOnly EnrollmentDate,
     Guid AreaId,
     BeneficiaryMatchReviewStatus MatchReviewStatus,
-    BeneficiaryIdentityDto Identity);
+    IReadOnlyList<BeneficiaryIdentityDto> Identities,
+    BeneficiaryAreaDto? Area);

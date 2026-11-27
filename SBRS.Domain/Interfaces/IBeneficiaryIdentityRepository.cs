@@ -15,6 +15,10 @@ public interface IBeneficiaryIdentityRepository
     Task<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>> GetPrimaryByBeneficiaryIdsAsync(
         IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken cancellationToken);
 
+    /// <summary>All identities of every listed beneficiary (oldest first), with the type loaded.</summary>
+    Task<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>> GetByBeneficiaryIdsAsync(
+        IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken cancellationToken);
+
     Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken cancellationToken);
 
     // Tracked primary identity (the oldest row) of a beneficiary, so it can be updated in place.

@@ -1,4 +1,6 @@
-﻿namespace SBRS.Domain.Interfaces
+﻿using SBRS.Domain.Entities;
+
+namespace SBRS.Domain.Interfaces
 {
     public interface IGeographyRepository
     {
@@ -10,5 +12,7 @@
         Task<List<AreaEntity>> GetAreasByCityAsync(Guid cityId, CancellationToken ct = default);
         Task<CityEntity?> GetCityByIdAsync(Guid id, CancellationToken ct = default);
         Task<AreaEntity?> GetAreaByIdAsync(Guid id, CancellationToken ct = default);
+        Task<IReadOnlyDictionary<Guid, AreaChainRow>> GetAreaChainsAsync(
+            IReadOnlyCollection<Guid> areaIds, CancellationToken ct = default);
     }
 }

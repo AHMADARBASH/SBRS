@@ -25,6 +25,9 @@ public class UpdateBeneficiaryRegistrationCommandHandlerTests
         public Task<List<AreaEntity>> GetAreasByDistrictAsync(Guid districtId, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<List<AreaEntity>> GetAreasByCityAsync(Guid cityId, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<CityEntity?> GetCityByIdAsync(Guid id, CancellationToken ct = default) => throw new NotSupportedException();
+        public Task<IReadOnlyDictionary<Guid, AreaChainRow>> GetAreaChainsAsync(
+            IReadOnlyCollection<Guid> areaIds, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, AreaChainRow>>(new Dictionary<Guid, AreaChainRow>());
     }
 
     private sealed class FakeNationalityRepository(NationalityEntity nationality) : INationalityRepository

@@ -22,7 +22,10 @@ public sealed class GetBeneficiariesQueryValidator : AbstractValidator<GetBenefi
 }
 
 public sealed class GetBeneficiariesQueryHandler(
-    IBeneficiaryRepository repository, IBeneficiaryIdentityRepository identityRepository, ICurrentUser currentUser)
+    IBeneficiaryRepository repository,
+    IBeneficiaryIdentityRepository identityRepository,
+    IGeographyRepository geography,
+    ICurrentUser currentUser)
     : IRequestHandler<GetBeneficiariesQuery, PagedResult<BeneficiaryListItemDto>>
 {
     private const int PageSize = 30;
@@ -48,12 +51,16 @@ public sealed class GetBeneficiariesQueryHandler(
         var (items, totalCount) = await repository.GetPagedByFacilityAsync(
             facilityId, request.Page, PageSize, cancellationToken);
 
-        // one extra query for the whole page
-        var identities = await identityRepository.GetPrimaryByBeneficiaryIdsAsync(
-            items.Select(b => b.Id).ToList(), cancellationToken);
+        // two extra queries for the whole page: every identity and the full area chain
+        var beneficiaryIds = items.Select(b => b.Id).ToList();
+        var identities = await identityRepository.GetByBeneficiaryIdsAsync(beneficiaryIds, cancellationToken);
+        var areas = await geography.GetAreaChainsAsync(
+            items.Select(b => b.AreaId).ToList(), cancellationToken);
 
         return new PagedResult<BeneficiaryListItemDto>(
-            items.Select(b => b.ToListItemDto(identities.RequireIdentity(b))).ToList(),
+            items.Select(b => b.ToListItemDto(
+                identities.TryGetValue(b.Id, out var list) ? list : [],
+                areas.TryGetValue(b.AreaId, out var area) ? area : null)).ToList(),
             request.Page, PageSize, totalCount);
     }
 }

@@ -30,6 +30,23 @@ public class BeneficiaryIdentityRepository(AppDbContext db) : IBeneficiaryIdenti
             .ToDictionary(g => g.Key, g => g.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).First());
     }
 
+    public async Task<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>> GetByBeneficiaryIdsAsync(
+        IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken ct)
+    {
+        if (beneficiaryIds.Count == 0)
+            return new Dictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>();
+
+        var ids = beneficiaryIds.Distinct().ToList();
+        var rows = await db.BeneficiaryIdentities.AsNoTracking()
+            .Include(x => x.IdentityType)
+            .Where(x => ids.Contains(x.BeneficiaryId))
+            .OrderBy(x => x.BeneficiaryId).ThenBy(x => x.CreatedAt).ThenBy(x => x.Id)
+            .ToListAsync(ct);
+
+        return rows.GroupBy(x => x.BeneficiaryId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<BeneficiaryIdentityEntity>)g.ToList());
+    }
+
     public async Task AddAsync(BeneficiaryIdentityEntity identity, CancellationToken ct) =>
         await db.BeneficiaryIdentities.AddAsync(identity, ct);
 

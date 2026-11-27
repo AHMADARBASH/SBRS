@@ -74,6 +74,12 @@ internal sealed class FakeIdentityRepository : IBeneficiaryIdentityRepository
         Task.FromResult<IReadOnlyList<BeneficiaryIdentityEntity>>(
             _items.TryGetValue(beneficiaryId, out var identity) ? new[] { identity } : Array.Empty<BeneficiaryIdentityEntity>());
 
+    public Task<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>> GetByBeneficiaryIdsAsync(
+        IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>>(
+            beneficiaryIds.Where(_items.ContainsKey).ToDictionary(id => id,
+                id => (IReadOnlyList<BeneficiaryIdentityEntity>)new[] { _items[id] }));
+
     public Task<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>> GetPrimaryByBeneficiaryIdsAsync(
         IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>>(

@@ -53,6 +53,13 @@ public class SaveBeneficiaryProfileCommandHandlerTests
             Task.FromResult<IReadOnlyList<BeneficiaryIdentityEntity>>(
                 _rows.Where(x => x.BeneficiaryId == beneficiaryId).ToList());
 
+        public Task<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>> GetByBeneficiaryIdsAsync(
+            IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken ct) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<BeneficiaryIdentityEntity>>>(
+                _rows.Where(x => beneficiaryIds.Contains(x.BeneficiaryId))
+                    .GroupBy(x => x.BeneficiaryId)
+                    .ToDictionary(g => g.Key, g => (IReadOnlyList<BeneficiaryIdentityEntity>)g.ToList()));
+
         public Task<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>> GetPrimaryByBeneficiaryIdsAsync(
             IReadOnlyCollection<Guid> beneficiaryIds, CancellationToken ct) =>
             Task.FromResult<IReadOnlyDictionary<Guid, BeneficiaryIdentityEntity>>(
@@ -128,6 +135,9 @@ public class SaveBeneficiaryProfileCommandHandlerTests
         public Task<List<AreaEntity>> GetAreasByCityAsync(Guid cityId, CancellationToken ct = default) => Task.FromResult<List<AreaEntity>>([]);
         public Task<CityEntity?> GetCityByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<CityEntity?>(null);
         public Task<AreaEntity?> GetAreaByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<AreaEntity?>(null);
+        public Task<IReadOnlyDictionary<Guid, AreaChainRow>> GetAreaChainsAsync(
+            IReadOnlyCollection<Guid> areaIds, CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, AreaChainRow>>(new Dictionary<Guid, AreaChainRow>());
     }
 
     private sealed class FakeAccommodationTypeRepository : IAccommodationTypeRepository

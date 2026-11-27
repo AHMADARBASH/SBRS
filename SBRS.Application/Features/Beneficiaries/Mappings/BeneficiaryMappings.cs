@@ -1,5 +1,6 @@
 using SBRS.Application.Features.Beneficiaries.DTOs;
 using SBRS.Application.Features.Beneficiaries.Services;
+using SBRS.Application.Features.Geography.Mappings;
 using SBRS.Domain.Common;
 using SBRS.Domain.Entities;
 using SBRS.Domain.Exceptions;
@@ -51,8 +52,19 @@ public static class BeneficiaryMappings
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,
             b.BirthDate, b.IsBirthDateEstimated, b.Gender, b.EnrollmentDate, b.CreatedAt, identity.ToDto());
 
-    public static BeneficiaryListItemDto ToListItemDto(this BeneficiaryEntity b, BeneficiaryIdentityEntity identity) =>
+    public static BeneficiaryAreaDto? ToBeneficiaryAreaDto(this AreaChainRow? row) =>
+        row is null
+            ? null
+            : new BeneficiaryAreaDto(
+                row.Area.ToDto(),
+                row.District?.ToDto(),
+                row.Region?.ToDto(),
+                row.City?.ToDto(),
+                row.Country?.ToDto());
+
+    public static BeneficiaryListItemDto ToListItemDto(this BeneficiaryEntity b,
+        IReadOnlyList<BeneficiaryIdentityEntity> identities, AreaChainRow? area) =>
         new(b.Id, b.FullCode, b.FirstName, b.FatherName, b.LastName, b.MotherName,
             b.BirthDate, b.IsBirthDateEstimated, b.Gender, b.EnrollmentDate, b.AreaId, b.MatchReviewStatus,
-            identity.ToDto());
+            identities.Select(i => i.ToDto()).ToList(), area.ToBeneficiaryAreaDto());
 }
