@@ -51,6 +51,11 @@ public class BeneficiariesController(ISender sender) : ControllerBase
             request.IsBirthDateEstimated, request.Gender, request.AreaId, request.NationalityId,
             request.IdentityTypeId, request.IdentityValue), ct));
 
+    [HttpGet("GetRegistration/{id:guid}")]
+    [Authorize(Policy = Policies.ViewFacilityBeneficiaries)]
+    public async Task<ActionResult<BeneficiaryRegistrationDto>> GetRegistration(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetBeneficiaryRegistrationQuery(id), ct));
+
     // No body: the facility is always the caller's facility, never supplied by the client.
     [HttpPost("{id:guid}/EnrollHere")]
     [Authorize(Policy = Policies.EnrollBeneficiaries)]

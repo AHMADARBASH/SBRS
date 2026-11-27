@@ -18,6 +18,14 @@ public static class BeneficiaryMappings
             ? identity
             : throw new DomainException($"Beneficiary {beneficiary.FullCode} has no identity record.");
 
+    public static BeneficiaryRegistrationDto ToRegistrationDto(this BeneficiaryEntity b,
+        BeneficiaryIdentityEntity? identity) =>
+        new(b.Id, b.Code, b.FullCode,
+            b.FirstName, b.FatherName, b.LastName, b.MotherName,
+            b.BirthDate, b.IsBirthDateEstimated, b.Gender, b.EnrollmentDate,
+            b.AreaId, b.NationalityId, b.RegistrationFacilityId,
+            identity?.IdentityTypeId, identity?.IdentityType.Code, identity?.Value);
+
     public static BeneficiaryMatchDto ToDto(this BeneficiaryMatch m, BeneficiaryIdentityEntity identity) =>
         new(m.Beneficiary.Id,
             m.Beneficiary.FullCode,
